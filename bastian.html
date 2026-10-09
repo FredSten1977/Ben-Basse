@@ -327,12 +327,14 @@ if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = 
 function speak(text, onEnd){
   let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
   if(!('speechSynthesis' in window)){ setTimeout(finish, 300); return; }
-  if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  const busy = speechSynthesis.speaking || speechSynthesis.pending;
+  if(busy) speechSynthesis.cancel();
   if(!voice) pickVoice(); // iPad laster stemmene sent
   const u = new SpeechSynthesisUtterance(text);
   u.lang='nb-NO'; if(voice) u.voice=voice; u.rate=.85; u.pitch=1.1;
   u.onend=finish; u.onerror=finish;
-  window.__utt = u; speechSynthesis.speak(u);
+  window.__utt = u; try{ speechSynthesis.resume(); }catch(e){}
+  if(busy) setTimeout(()=>speechSynthesis.speak(u), 150); else speechSynthesis.speak(u);
   setTimeout(finish, 2400 + text.length*80);
 }
 
@@ -410,11 +412,9 @@ function audioUnlock(){
 document.addEventListener('pointerdown', audioUnlock, {passive:true});
 document.addEventListener('keydown', audioUnlock);
 try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; }catch(e){}
-let speechUnlocked = false;
 function iosUnlock(){
   audioUnlock();
   if(actx){ try{ const b = actx.createBuffer(1, 1, 22050), src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0); }catch(e){} }
-  if(!speechUnlocked && 'speechSynthesis' in window){ speechUnlocked = true; const u = new SpeechSynthesisUtterance(" "); u.volume = 0; window.__utt = u; window.__utt = u; speechSynthesis.speak(u); }
 }
 ['touchend','click'].forEach(ev=>document.addEventListener(ev, iosUnlock, {capture:true, passive:true}));
 function fanfare(){
