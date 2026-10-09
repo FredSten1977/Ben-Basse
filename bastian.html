@@ -263,7 +263,7 @@ h3{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0}
 // Navnet på gutten. Bytt her når vi vet hva han heter.
 const NAME = "Bastian";
 
-// Bilde (emoji), ord. Ordene er valgt så første bokstav høres tydelig (ingen stum h som i «hjerte»).
+// Bilde (emoji), ord. Med også ord der første bokstav ikke høres tydelig (hjerte, ski, kjeks), så han lærer dem.
 const WORDS = [
   ["🍎","Eple"],["🐟","Fisk"],["🐱","Katt"],["🐶","Hund"],["🏠","Hus"],["☀️","Sol"],["🌙","Måne"],["⭐","Stjerne"],
   ["🚗","Bil"],["⚽","Ball"],["🍌","Banan"],["🐄","Ku"],["🐑","Sau"],["🐷","Gris"],["🐴","Hest"],["🦊","Rev"],
@@ -296,6 +296,7 @@ const WORDS = [
   ["🎲","Terning"],["🌮","Taco"],["⛺","Telt"],["📞","Telefon"],["🚽","Toalett"],["🪥","Tannbørste"],
   ["🧵","Tråd"],["🛸","Ufo"],["🌋","Vulkan"],["🧇","Vaffel"],["🌬️","Vind"],["💧","Vann"],
   ["⏰","Vekkerklokke"],["🏐","Volleyball"],["🪓","Øks"],["🦅","Ørn"],["🏝️","Øy"],
+  ["⛷️","Ski"],["🥄","Skje"],["👕","Skjorte"],["🧔","Skjegg"],["👗","Kjole"],["🍪","Kjeks"],["🍒","Kirsebær"],["🍗","Kylling"],["⛪","Kirke"],["🎬","Kino"],["❤️","Hjerte"],["⛑️","Hjelm"],["🐋","Hval"],["🦒","Sjiraff"],["🍫","Sjokolade"],["🏴‍☠️","Sjørøver"],["🥝","Kiwi"],["🤠","Cowboy"],["💿","CD"],["🧘","Yoga"],["🌭","Wienerpølse"],["🌾","Åker"],
 ].filter((w,i,a)=>a.findIndex(x=>x[1]===w[1])===i).map(([pic,word])=>({pic, word, letter:word[0].toUpperCase()}));
 const ROUND = 10;
 // Rotasjon: bildene han ikke har sett på lengst kommer først. Husket per enhet i nettleseren.
