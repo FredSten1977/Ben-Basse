@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Benjamin FC">
+<link rel="apple-touch-icon" href="icon-benjamin.png">
+<style>[hidden]{display:none!important}</style>
+<title>Benjamin FC Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Lilita+One&family=Bungee&display=swap">
+<style>
+/* Layout: nattkamp på stadion. Lystavle øverst, gressbane med spørsmålskort, fire store svarknapper. Ett bevisst mørkt tema. */
+:root{
+  --night:#0b1f17;
+  --grass:#1f7a3f;
+  --grass-2:#1a6b37;
+  --chalk:#f4f7ef;
+  --ink:#10221a;
+  --led:#ffd23f;
+  --led-dim:#5c4a12;
+  --red:#e8443a;
+  --yellow:#ffc928;
+  --sky:#7fd3ff;
+  --font-display:"Lilita One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --font-read:"Andika","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  --font-board:"Bungee","Impact",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--chalk);font-family:var(--font-read);font-size:18px;
+  background-image:radial-gradient(ellipse at 50% -10%,rgba(255,255,220,.18),transparent 55%);}
+.wrap{max-width:720px;margin:0 auto;padding:16px;padding-block:12px 24px;display:flex;flex-direction:column;gap:14px;min-height:100%;box-sizing:border-box}
+
+/* Lystavle */
+.board{background:#050d09;border:3px solid #24392e;border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;box-shadow:0 0 30px rgba(255,210,63,.08)}
+.team{font-family:var(--font-display);font-size:clamp(15px,4vw,22px);line-height:1.1;min-width:0}
+.team.away{text-align:right;color:#ffb3ad}
+.team.home{color:var(--sky)}
+.score{font-family:var(--font-board);color:var(--led);font-size:clamp(30px,9vw,46px);letter-spacing:.06em;text-shadow:0 0 12px rgba(255,210,63,.55);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meta{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--font-board);font-size:12px;color:var(--led-dim);letter-spacing:.08em}
+.meta b{color:var(--led);font-weight:400}
+
+/* Bane */
+.pitch{position:relative;border-radius:16px;padding:18px 16px;background:repeating-linear-gradient(90deg,var(--grass) 0 48px,var(--grass-2) 48px 96px);border:3px solid rgba(244,247,239,.75);overflow:hidden}
+.pitch::before{content:"";position:absolute;left:50%;top:50%;width:140px;height:140px;border:3px solid rgba(244,247,239,.35);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.pitch::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:3px solid rgba(244,247,239,.35);pointer-events:none}
+
+.qcard{position:relative;z-index:1;background:var(--chalk);color:var(--ink);border-radius:14px;padding:16px 16px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.qtext{flex:1;min-width:0;font-size:clamp(20px,5vw,26px);line-height:1.35;font-weight:700;text-wrap:balance}
+.listen{flex:none;width:56px;height:56px;border-radius:50%;border:0;background:var(--ink);color:var(--led);display:grid;place-items:center;cursor:pointer}
+.listen svg{width:28px;height:28px}
+.listen.speaking{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,210,63,.35)}}
+
+.hint{position:relative;z-index:1;text-align:center;font-family:var(--font-display);font-size:18px;margin-top:14px;min-height:1.4em;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+
+.answers{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.ans{position:relative;overflow:hidden;font-family:var(--font-read);font-weight:700;font-size:clamp(22px,6vw,30px);color:var(--ink);background:#fff;border:0;border-radius:14px;min-height:88px;padding:12px 10px;cursor:pointer;box-shadow:0 5px 0 #b9c4b3;transition:transform .12s,opacity .3s,filter .3s;word-break:break-word;hyphens:auto}
+.ans:active{transform:translateY(3px);box-shadow:0 2px 0 #b9c4b3}
+.ans:focus-visible{outline:4px solid var(--led);outline-offset:3px}
+.ans[disabled]{cursor:default}
+.ans.hidden-text{color:transparent;text-shadow:none}
+.ans.hidden-text::before{content:"";position:absolute;inset:30% 18%;border-radius:8px;background:repeating-linear-gradient(90deg,#dfe6da 0 14px,transparent 14px 20px)}
+.ans .bar{position:absolute;left:0;bottom:0;height:6px;width:0;background:var(--led)}
+.ans.locked{filter:saturate(.6) brightness(.92)}
+.ans.wrong{background:#ffd9d6;color:#8a1f18;text-decoration:line-through;box-shadow:0 5px 0 #d79d97;opacity:.75}
+.ans.right{background:#c9f7c3;box-shadow:0 5px 0 #6cbf63;animation:pop .45s}
+@keyframes pop{40%{transform:scale(1.08)}}
+.ans .reading{border-radius:6px;transition:background .2s}
+.ans.say .reading{background:var(--led)}
+
+.next{align-self:center;font-family:var(--font-display);font-size:24px;background:var(--led);color:var(--ink);border:0;border-radius:999px;padding:14px 34px;cursor:pointer;box-shadow:0 5px 0 #a8861c}
+.next:focus-visible{outline:4px solid var(--chalk);outline-offset:3px}
+
+/* Overlegg: mål / kort */
+.flash{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5;background:rgba(5,13,9,.72);text-align:center;padding:16px}
+.flash[hidden]{display:none}
+.flash .msg{font-family:var(--font-display);font-size:clamp(54px,16vw,110px);color:var(--led);text-shadow:0 6px 0 #000,0 0 40px rgba(255,210,63,.6);animation:boom .9s ease-out both}
+.flash .card{width:110px;height:150px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:cardin .7s ease-out both}
+.flash .card.y{background:var(--yellow)}
+.flash .card.r{background:var(--red)}
+.flash .sub{font-family:var(--font-display);font-size:28px;margin-top:14px;text-align:center;text-shadow:0 3px 0 #000}
+.rimg{width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:4px}
+.rung.locked .rimg{filter:saturate(.7) brightness(.85)}
+.ringimg{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);border-radius:50%;object-fit:cover}
+.nextcard .ring span.pct-badge{position:absolute;bottom:-4px;right:-6px;background:var(--led);color:#10221a;font-size:14px;border-radius:99px;padding:2px 7px}
+.party-img{width:min(260px,70vw);max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:24px;border:5px solid var(--led);box-shadow:0 0 40px rgba(255,210,63,.8);animation:glow2 1.4s ease-in-out infinite}
+.pthumb{width:56px;height:56px;object-fit:cover;border-radius:10px}
+.imgbtn{font-size:15px;background:rgba(127,127,127,.2);border-radius:8px;padding:8px 12px;cursor:pointer}
+@keyframes boom{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+@keyframes cardin{0%{transform:translateY(60px) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
+
+/* Start / slutt */
+.screen{display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;padding-block:24px}
+.crest{width:120px;height:120px}
+h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64px);line-height:1;margin:0;color:var(--chalk);text-shadow:0 5px 0 var(--grass-2)}
+.rules{display:grid;gap:10px;max-width:440px;text-align:left;font-size:20px;line-height:1.4}
+.rule{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px}
+.rule i{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--font-board);font-size:15px;background:var(--led);color:var(--ink)}
+.final{font-family:var(--font-board);font-size:clamp(40px,12vw,64px);color:var(--led);text-shadow:0 0 18px rgba(255,210,63,.5)}
+.note{font-size:15px;opacity:.7;max-width:440px}
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:520px}
+.mode{font-family:var(--font-display);font-size:26px;color:var(--ink);background:var(--c);border:0;border-radius:16px;padding:18px 12px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.35)}
+.mode small{display:block;font-family:var(--font-read);font-size:14px;font-weight:700;opacity:.7;margin-top:2px}
+.mode:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.mode:focus-visible{outline:4px solid var(--chalk);outline-offset:3px}
+.pts{width:100%;max-width:520px;background:#050d09;border:3px solid #24392e;border-radius:12px;padding:12px;display:grid;gap:10px;box-sizing:border-box}
+.pts-total{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:22px}
+.pts-total b{font-family:var(--font-board);font-weight:400;font-size:40px;color:var(--led);text-shadow:0 0 12px rgba(255,210,63,.55)}
+.pts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.pts-row span{display:block;font-size:15px;opacity:.75}
+.pts-row b{font-family:var(--font-board);font-weight:400;font-size:24px}
+
+
+.fact{position:relative;z-index:1;margin-top:14px;background:rgba(5,13,9,.82);border-left:6px solid var(--led);border-radius:10px;padding:12px 14px;font-size:20px;line-height:1.45}
+.ladder{width:100%;max-width:520px;display:grid;gap:14px;text-align:left}
+.ladder h3{margin:0;text-align:center}
+.nextcard{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#123826,#0a1d14);border:2px solid rgba(255,210,63,.45);border-radius:18px;padding:14px 16px;box-shadow:0 0 30px rgba(255,210,63,.12)}
+.nextcard .ring{position:relative;flex:none;width:96px;height:96px;display:grid;place-items:center;color:var(--led)}
+.nextcard .ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
+.ring-fg{fill:none;stroke:var(--led);stroke-width:10;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(255,210,63,.7));transition:stroke-dashoffset 1.2s ease-out}
+.nextcard .ring span{font-family:var(--font-board);font-size:22px;color:var(--led)}
+.nextcard.done .ring svg{position:static;transform:none;width:60px;height:60px}
+.nc-text{display:grid;gap:2px;min-width:0}
+.nc-text small,.nextcard small{font-size:15px;opacity:.75;text-transform:uppercase;letter-spacing:.08em}
+.nc-text b,.nextcard b{font-family:var(--font-display);font-weight:400;font-size:26px;line-height:1.1;overflow-wrap:anywhere}
+.nc-text em{font-style:normal;color:var(--led);font-weight:700;font-size:18px}
+.track{display:grid}
+.rung{position:relative;display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding-block:7px}
+.rung::before,.rung::after{content:"";position:absolute;left:28px;width:8px;background:rgba(255,255,255,.12)}
+.rung::before{top:0;height:50%}.rung::after{top:50%;bottom:0}
+.rung.first::before,.rung.last::after{display:none}
+.rung.gt::before,.rung.gb::after{background:linear-gradient(180deg,#ffe27a,var(--led));box-shadow:0 0 10px rgba(255,210,63,.6)}
+.node{position:relative;z-index:1;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#1b2e24;border:3px solid rgba(255,255,255,.25);color:rgba(255,255,255,.55)}
+.node svg{width:32px;height:32px}
+.rung.open .node{background:radial-gradient(circle at 35% 30%,#fff3b0,var(--led) 55%,#c9971c);border-color:#fff3b0;color:#5c3d00;animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 26px rgba(255,210,63,.9)}}
+.rung.given .node{background:var(--grass);border-color:#7dd08f;color:#e9ffe9}
+.node.ball{background:none;border:0;width:64px;height:64px}
+.node.ball svg{width:46px;height:46px;animation:bounce 1.1s ease-in-out infinite;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+@keyframes bounce{50%{transform:translateY(-7px) rotate(25deg)}}
+.me-body b{font-family:var(--font-display);font-weight:400;font-size:24px;color:var(--sky);display:block}
+.me-body small{font-size:15px;opacity:.8}
+.rung-body{position:relative;background:rgba(255,255,255,.06);border-radius:14px;padding:10px 14px 10px 14px;display:grid;gap:2px;min-width:0}
+.rung-body b{font-size:21px;overflow-wrap:anywhere;padding-right:56px}
+.rung-body small{font-size:15px;opacity:.8}
+.pts-badge{position:absolute;z-index:2;right:16px;top:16px;font-family:var(--font-board);font-size:16px;background:rgba(10,20,15,.85);box-shadow:0 2px 8px rgba(0,0,0,.5);border-radius:99px;padding:2px 8px;color:var(--led)}
+.rung.open .rung-body{background:rgba(255,210,63,.16);outline:2px solid var(--led)}
+.rung.open small{color:var(--led);opacity:1;font-weight:700}
+.rung.given{opacity:.6}
+.party{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,rgba(22,48,32,.97),rgba(3,8,6,.98));padding:16px}
+.party canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.party-card{position:relative;display:grid;justify-items:center;gap:6px;text-align:center;max-width:420px;animation:boom .8s ease-out both}
+.party-trophy{width:120px;height:120px;color:var(--led);filter:drop-shadow(0 0 24px rgba(255,210,63,.9));animation:glow2 1.4s ease-in-out infinite}
+.party-trophy svg{width:100%;height:100%}
+@keyframes glow2{50%{transform:scale(1.08) rotate(-4deg)}}
+.party-card small{font-family:var(--font-display);font-size:24px;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.party-card b{font-family:var(--font-display);font-weight:400;font-size:clamp(36px,10vw,56px);line-height:1.05;color:var(--led);text-shadow:0 4px 0 #000;overflow-wrap:anywhere}
+.party-card p{font-size:20px;margin:6px 0 10px}
+.meter.thin{height:8px}
+.tasks{width:100%;max-width:520px;display:grid;gap:10px}
+.tasks h3{margin:0;text-align:center}
+.task{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;text-align:left;font:inherit;font-size:21px;font-weight:700;color:var(--ink);background:var(--chalk);border:0;border-radius:14px;padding:14px 16px;cursor:pointer;box-shadow:0 5px 0 #9fae99}
+.task b{font-family:var(--font-board);font-weight:400;font-size:24px;color:var(--grass-2)}
+.task small{grid-column:1/-1;font-size:15px;font-weight:700}
+.task:active{transform:translateY(3px);box-shadow:0 2px 0 #9fae99}
+.task:focus-visible{outline:4px solid var(--led);outline-offset:3px}
+.task.pending{background:#fff3c4;box-shadow:0 5px 0 #d9c376;cursor:default}
+.task.approved{background:#c9f7c3;box-shadow:0 5px 0 #6cbf63;cursor:default}
+.pts-bonus{display:flex;justify-content:space-between;border-top:1px solid #24392e;padding-top:8px;font-size:15px}
+.pts-bonus b{font-family:var(--font-board);font-weight:400;font-size:20px;color:var(--led)}
+.pill{display:inline-block;background:var(--red);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:6px}
+.acts button.ok{background:var(--grass)}
+.plus{color:#7dffa0}.minus{color:#ff8f87}
+.flash .sub.plus,.flash .sub.minus{font-size:34px;margin-top:6px}
+.flash .col{display:grid;justify-items:center}
+.flash .msg.mid{font-size:clamp(40px,11vw,72px)}
+.pts-btn{color:var(--chalk);font:inherit;text-align:left;cursor:pointer}
+.pts-btn:focus-visible{outline:4px solid var(--led);outline-offset:3px}
+.pts-next{font-size:17px;opacity:.9}
+.pts-next b{color:var(--led)}
+.screen.left{align-items:stretch;text-align:left;max-width:560px;margin:0 auto;width:100%}
+.screen h2{font-family:var(--font-display);font-weight:400;font-size:40px;margin:0}
+.screen h3{font-family:var(--font-display);font-weight:400;font-size:28px;margin:8px 0 0}
+.back{align-self:flex-start;background:none;border:0;color:var(--sky);font-family:var(--font-display);font-size:20px;cursor:pointer;padding:4px 0}
+.level{background:rgba(255,255,255,.06);border-radius:14px;padding:14px;display:grid;gap:10px}
+.level-top{display:flex;gap:12px;align-items:center}
+.level-top b{display:block;font-family:var(--font-display);font-weight:400;font-size:26px}
+.level-top small,.level>small{opacity:.75;font-size:15px}
+.badge{flex:none;width:52px;height:52px;border-radius:50%;background:var(--led);color:var(--ink);display:grid;place-items:center;font-family:var(--font-board);font-size:22px}
+.meter{height:14px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--grass),var(--led));border-radius:99px}
+.prizes{display:grid;gap:10px}
+.prize{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px}
+.prize .at{grid-row:span 2;font-family:var(--font-board);font-size:20px;color:var(--led);min-width:52px;text-align:center}
+.prize b{font-size:20px;min-width:0;overflow-wrap:anywhere}
+.prize small{font-size:15px;opacity:.8}
+.prize.open{background:rgba(255,210,63,.18);outline:2px solid var(--led)}
+.prize.open small{color:var(--led);opacity:1;font-weight:700}
+.prize.given{opacity:.6}
+.prize.locked b{opacity:.85}
+.prize .acts{grid-column:2}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.acts button{font:inherit;font-size:15px;background:rgba(255,255,255,.12);color:var(--chalk);border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.acts button.danger{background:var(--red)}
+.parent-link{align-self:center;margin-top:18px;background:none;border:1px solid rgba(255,255,255,.3);color:var(--chalk);opacity:.75;border-radius:999px;padding:8px 18px;font:inherit;font-size:15px;cursor:pointer}
+.form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.form input{font:inherit;font-size:22px;padding:10px 12px;border-radius:10px;border:2px solid #24392e;background:#050d09;color:var(--chalk);width:100%;box-sizing:border-box}
+.form label{display:grid;gap:4px;font-size:15px;width:110px}
+.form label.grow{flex:1;min-width:180px;width:auto}
+#pin{width:160px;letter-spacing:.4em;text-align:center}
+.err{color:#ff8f87;min-height:1.2em;margin:0}
+.delta{font-family:var(--font-display);font-size:26px;margin:0}
+.unlock{background:rgba(255,210,63,.18);border:2px solid var(--led);border-radius:12px;padding:10px 16px;font-size:20px;margin:0}
+.unlock b{color:var(--led)}
+/* Skriving */
+.typed{position:relative;z-index:1;margin-top:12px;background:#fff;color:var(--ink);border-radius:14px;min-height:72px;display:grid;place-items:center;font-weight:700;font-size:clamp(30px,9vw,44px);letter-spacing:.06em;box-shadow:0 5px 0 #b9c4b3;overflow-wrap:anywhere;padding:6px 12px}
+.typed .ph{opacity:.25}
+.typed.ok{background:#c9f7c3;box-shadow:0 5px 0 #6cbf63}
+.typed.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.attempts{position:relative;z-index:1;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;min-height:8px;margin-top:8px;font-size:22px}
+.attempts s{color:#ffd9d6;text-decoration-thickness:3px}
+.answer-word{display:inline-block;background:var(--chalk);color:var(--ink);border-radius:8px;padding:2px 12px;font-family:var(--font-read);font-weight:700;font-size:30px;letter-spacing:.05em}
+.kb{position:relative;z-index:1;display:grid;gap:6px;margin-top:12px}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.key{flex:1 1 0;max-width:52px;min-width:0;height:50px;border:0;border-radius:8px;background:var(--chalk);color:var(--ink);font-family:var(--font-read);font-weight:700;font-size:22px;cursor:pointer;box-shadow:0 3px 0 #9fae99;padding:0}
+.key:active{transform:translateY(2px);box-shadow:0 1px 0 #9fae99}
+.key.wide{max-width:76px;flex-grow:1.5;background:#dfe6da}
+.key.check{max-width:260px;flex:none;width:60%;background:var(--led);font-family:var(--font-display);font-weight:400;font-size:24px;box-shadow:0 4px 0 #a8861c}
+
+@media (max-width:360px){.answers{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="flash" id="flash" hidden></div>
+
+<script>
+/* Lagring for den frittstående nettsiden: Supabase via to databasefunksjoner (fq_get, fq_set).
+   Alle nøkler starter med en hemmelig familiekode som bare ligger i lenken (#k=...) og i nettleseren,
+   aldri i koden på GitHub. Uten kode lagres alt bare i nettleseren. */
+(function(){
+  const URL_ = "https://ljohtyrxlqgqmoqqrhov.supabase.co", KEY = "sb_publishable_GdMXAQUSCTdZ6LtyaBBsYw_at-kQJ-j";
+  let fam = null;
+  try{
+    const m = location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
+    if(m){ fam = m[1]; localStorage.setItem("familiekode", fam); }
+    else { fam = localStorage.getItem("familiekode"); if(fam) history.replaceState(null, "", "#k="+fam); }
+  }catch(e){}
+  async function rpc(fn, body){
+    const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, {method:"POST", headers:{"apikey":KEY, "Authorization":`Bearer ${KEY}`, "Content-Type":"application/json"}, body:JSON.stringify(body)});
+    if(!r.ok) throw {code:"unavailable", message:`HTTP ${r.status}`};
+    const t = await r.text(); return t ? JSON.parse(t) : null;
+  }
+  const k = path => `${fam}/${path}`;
+  const watchers = [];
+  const db = fam ? {
+    doc(path){
+      return {
+        set: data => rpc("fq_set", {k:k(path), d:data}),
+        onSnapshot(cb, err){
+          let last = null, stop = false;
+          const pull = async ()=>{
+            const d = await rpc("fq_get", {k:k(path)});
+            const s = JSON.stringify(d);
+            if(s !== last){
+              last = s;
+              // Premiebilder hentes før premielisten vises, så feiringen kan vise bildet.
+              const ids = (d && Array.isArray(d.list) ? d.list : []).map(p=>p && p.img).filter(id=>id && !cache[id]);
+              await Promise.all(ids.map(id=>loadImg(id)));
+              cb({exists: d!==null, data: ()=>d});
+            }
+          };
+          const tick = async ()=>{
+            if(stop) return;
+            try{ await pull(); }catch(e){}
+            setTimeout(tick, document.hidden ? 20000 : 3000);
+          };
+          watchers.push(pull);
+          tick();
+          return ()=>{ stop = true; };
+        },
+      };
+    },
+  } : null;
+  // Bilder lagres som egne dokumenter, så premielisten holder seg liten.
+  const cache = {}, loading = {};
+  const loadImg = id => loading[id] || (loading[id] = rpc("fq_get", {k:k("img/"+id)}).then(d=>{ if(d && d.src) cache[id] = d.src; return cache[id]; }).catch(()=>{ delete loading[id]; }));
+  const blobToDataURL = b => new Promise(r=>{ const fr = new FileReader(); fr.onload = ()=>r(fr.result); fr.readAsDataURL(b); });
+  const assets = fam ? {
+    async upload(blob){
+      const id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      const src = await blobToDataURL(blob);
+      await rpc("fq_set", {k:k("img/"+id), d:{src}});
+      cache[id] = src;
+      return {id, url:src};
+    },
+    async delete(id){ await rpc("fq_set", {k:k("img/"+id), d:null}); delete cache[id]; return {deleted:true}; },
+  } : null;
+
+  window.FQ = {
+    family: fam,
+    // Hent nyeste poeng med en gang, før foreldre godkjenner, så ingen poeng overskrives.
+    fresh: () => Promise.all(watchers.map(w=>w().catch(()=>{}))),
+    imgSrc(id, onLoaded){
+      if(cache[id]) return cache[id];
+      if(fam && !loading[id]) loadImg(id).then(src=>{ if(src && onLoaded) onLoaded(); });
+      return "";
+    },
+  };
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) FQ.fresh(); });
+  window.claude = {use: async name => name==="db" ? db : name==="assets" ? assets : null};
+})();
+</script>
+<script>
+// Spørsmålsbank. "a" er riktig svar. Feilsvarene ligner ofte (samme forbokstav) så man må lese hele ordet.
+const FOTBALL = [
+  {q:"Hvilket land spiller Erling Haaland for?", a:"Norge", w:["Nederland","Sverige","Danmark"]},
+  {q:"Hvor mange spillere har et lag på banen samtidig?", a:"Elleve", w:["Elleville","Tolv","Ti"]},
+  {q:"Hvilken farge har kortet når en spiller blir sendt av banen?", a:"Rødt", w:["Rosa","Gult","Grønt"]},
+  {q:"Hva kaller vi spilleren som står i mål?", a:"Keeper", w:["Kaptein","Kokk","Dommer"]},
+  {q:"Hvor mange minutter varer en vanlig fotballkamp?", a:"Nitti", w:["Nitten","Seksti","Førti"]},
+  {q:"Hvilken kroppsdel kan keeperen bruke, men ikke de andre spillerne?", a:"Hendene", w:["Hodet","Hælene","Knærne"]},
+  {q:"Hva heter det når ballen kastes inn fra sidelinjen?", a:"Innkast", w:["Innbrudd","Hjørne","Frispark"]},
+  {q:"Hvilket land kommer Lionel Messi fra?", a:"Argentina", w:["Amerika","Spania","Brasil"]},
+  {q:"Hvilket land kommer Cristiano Ronaldo fra?", a:"Portugal", w:["Polen","Spania","Italia"]},
+  {q:"Hva kaller vi det når én spiller scorer tre mål i samme kamp?", a:"Hattrick", w:["Halvtid","Hoppetau","Hakkespett"]},
+  {q:"Hva heter den store fotballarenaen i Oslo?", a:"Ullevaal", w:["Ullared","Wembley","Brann"]},
+  {q:"Hva får laget når motstanderen gjør feil inne i sekstenmeteren?", a:"Straffe", w:["Straff i skolen","Stafett","Innkast"]},
+  {q:"Hvem passer på at spillerne følger reglene?", a:"Dommeren", w:["Dronningen","Keeperen","Treneren"]},
+  {q:"Hvor mange mål er det på en fotballbane?", a:"To", w:["Tre","Tolv","En"]},
+  {q:"Hvilken klubb spiller Martin Ødegaard for?", a:"Arsenal", w:["Ajax","Liverpool","Barcelona"]},
+];
+// Benjamins favoritter: United, Ronaldo, Messi, Pelé, Lamine Yamal og Solskjær. Hver kamp får minst fem av disse.
+const FAVORITTER = [
+  {q:"Hva heter stadionet til Manchester United?", a:"Old Trafford", w:["Old Town","Anfield","Wembley"]},
+  {q:"Hva er kallenavnet til Manchester United?", a:"De røde djevlene", w:["De røde draugene","De blå djevlene","Kanarifuglene"]},
+  {q:"Hvilken farge har Manchester United på hjemmedrakten?", a:"Rød", w:["Rosa","Blå","Grønn"]},
+  {q:"Hvilket lag fra samme by er Uniteds store rival?", a:"City", w:["Chelsea","Celtic","Crystal Palace"]},
+  {q:"Hvem var manager i United i mange år og vant masse?", a:"Alex Ferguson", w:["Alex Fergus","Erling Haaland","Ole Brumm"]},
+  {q:"Hvilken by kommer Ole Gunnar Solskjær fra?", a:"Kristiansund", w:["Kristiansand","Kongsberg","Kirkenes"]},
+  {q:"Hvilken norsk klubb spilte Solskjær for før han kom til United?", a:"Molde", w:["Moss","Rosenborg","Brann"]},
+  {q:"Solskjær scoret vinnermålet i Champions League-finalen i 1999. Hvilket lag slo United?", a:"Bayern München", w:["Bayer Leverkusen","Barcelona","Benfica"]},
+  {q:"Solskjær har bursdag samme dag som Benjamin. Hvilken måned er det?", a:"Februar", w:["Januar","Desember","November"]},
+  {q:"Hvilket draktnummer er Cristiano Ronaldo mest kjent for?", a:"Sju", w:["Sjutten","Ti","Ni"]},
+  {q:"Hva roper Ronaldo når han jubler etter et mål?", a:"Siuuu", w:["Hurra","Jippi","Heia"]},
+  {q:"Hvilket land vant VM i 2022 med Messi som kaptein?", a:"Argentina", w:["Australia","Algerie","Brasil"]},
+  {q:"Hvilken klubb spilte Messi for i mange år?", a:"Barcelona", w:["Bayern","Benfica","Brann"]},
+  {q:"Hvilket land spilte Pelé for?", a:"Brasil", w:["Bulgaria","Belgia","Argentina"]},
+  {q:"Hvor mange VM vant Pelé?", a:"Tre", w:["Tolv","To","Ti"]},
+  {q:"Hvilket land spiller Lamine Yamal for?", a:"Spania", w:["Sverige","Serbia","Portugal"]},
+  {q:"Hvilken klubb spiller Lamine Yamal for?", a:"Barcelona", w:["Bayern München","Benfica","Brentford"]},
+];
+// Historie: allmennkunnskap, fra oldtiden til i dag. "f" er en kort forklaring som vises og leses opp etter svaret.
+const HISTORIE = [
+  // Oldtiden
+  {q:"Hva kaller vi den aller første tiden, da folk laget redskaper av stein?", a:"Steinalderen", w:["Steinbruddet","Jernalderen","Istiden"], f:"I steinalderen laget folk redskaper av stein, bein og tre. Den varte i mange tusen år."},
+  {q:"I hvilket land står de store pyramidene?", a:"Egypt", w:["England","Estland","Etiopia"], f:"Pyramidene i Egypt ble bygget for over 4500 år siden som graver for kongene."},
+  {q:"Hva ble kongene i det gamle Egypt kalt?", a:"Farao", w:["Fakir","Keiser","Sultan"], f:"Kongene i Egypt ble kalt faraoer. De ble begravet i pyramider og graver fulle av skatter."},
+  {q:"Hvilket folk fant på de olympiske lekene?", a:"Grekerne", w:["Gallerne","Romerne","Vikingene"], f:"De første olympiske lekene var i Hellas for nesten 2800 år siden."},
+  {q:"Hva var hovedstaden i Romerriket?", a:"Roma", w:["Rennes","Athen","Kairo"], f:"Romerriket var et enormt rike rundt Middelhavet, med Roma som hovedstad."},
+  {q:"Hvor sloss gladiatorene i Roma?", a:"Colosseum", w:["Colombia","Kreml","Louvre"], f:"Colosseum er en stor arena i Roma. Den står der fortsatt, nesten 2000 år senere."},
+  {q:"Hvilket land bygde en kjempelang mur for å holde fiender ute?", a:"Kina", w:["Kenya","Canada","Chile"], f:"Den kinesiske mur er flere tusen kilometer lang og ble bygget over mange hundre år."},
+  {q:"Vi teller årene fra fødselen til hvem?", a:"Jesus", w:["Julius Cæsar","Jonas","Josef"], f:"Vår tidsregning starter ved året man trodde Jesus ble født. Derfor sier vi før og etter Kristus."},
+  // Vikingtiden
+  {q:"Hva kaller vi krigerne og handelsfolkene fra Norden for over tusen år siden?", a:"Vikinger", w:["Vikarer","Riddere","Cowboyer"], f:"Vikingtiden var fra omtrent år 800 til 1066. Vikingene reiste, handlet og plyndret over store deler av Europa."},
+  {q:"Hva seilte vikingene med?", a:"Langskip", w:["Langrenn","Lastebil","Ubåt"], f:"Langskipene var raske og kunne seile både på havet og opp elver."},
+  {q:"Hva skrev vikingene med?", a:"Runer", w:["Ruller","Noter","Emojier"], f:"Vikingene skrev med runer. De risset dem ofte inn i stein eller tre."},
+  {q:"Hva het guden med hammeren, som vikingene trodde på?", a:"Tor", w:["Tog","Odin","Loke"], f:"Tor hadde hammeren Mjølner. Når det tordnet, trodde vikingene at det var Tor."},
+  {q:"Hva het gudenes hjem i norrøn tro?", a:"Åsgard", w:["Asker","Midgard","Narnia"], f:"Gudene bodde i Åsgard. Menneskene bodde i Midgard."},
+  {q:"Hvem samlet Norge til ett rike, ifølge sagaene?", a:"Harald Hårfagre", w:["Harald Hardråde","Kong Salomo","Askeladden"], f:"Ifølge sagaene samlet Harald Hårfagre Norge til ett kongerike for over 1100 år siden."},
+  {q:"Hvor døde Olav den hellige i et stort slag i år 1030?", a:"Stiklestad", w:["Stavanger","Steinkjer","Stjørdal"], f:"Olav Haraldsson døde på Stiklestad. Etterpå ble han kalt Olav den hellige, og Norge ble et kristent land."},
+  {q:"Hvem kom til Amerika rundt år 1000, lenge før Columbus?", a:"Leiv Eiriksson", w:["Lars Monsen","Erling Haaland","Roald Dahl"], f:"Leiv Eiriksson kom til Amerika nesten 500 år før Columbus. Han kalte landet Vinland."},
+  // Middelalderen
+  {q:"Hvor bodde kongene og ridderne i middelalderen?", a:"Borg", w:["Båt","Bod","Iglo"], f:"En borg hadde tykke murer og tårn, så den var lett å forsvare."},
+  {q:"Hva kalte vi krigerne med rustning og hest i middelalderen?", a:"Riddere", w:["Rødhetter","Cowboyer","Pirater"], f:"Riddere kjempet til hest med sverd, skjold og rustning av metall."},
+  {q:"Hvilken sykdom drepte svært mange i Norge i 1349?", a:"Svartedauden", w:["Svartahavet","Vannkopper","Forkjølelse"], f:"Svartedauden var pest. Kanskje halvparten av alle som bodde i Norge døde."},
+  {q:"Hva skrev folk med før blyanten fantes?", a:"Fjærpenn", w:["Fjernkontroll","Tusj","Mobil"], f:"Folk dyppet en fjær i blekk og skrev med den."},
+  {q:"Hvem fant opp en maskin som kunne trykke bøker raskt, rundt år 1450?", a:"Gutenberg", w:["Gulbrandsen","Gundersen","Edison"], f:"Johannes Gutenberg fant opp boktrykkerkunsten. Da kunne mange flere få bøker og lære å lese."},
+  // Oppdagelser
+  {q:"Hvem seilte over Atlanterhavet til Amerika i 1492?", a:"Columbus", w:["Columbia","Cook","Kaptein Sabeltann"], f:"Kristoffer Columbus trodde han hadde kommet til India. Derfor kalte han folket der indianere."},
+  {q:"Hvem malte Mona Lisa?", a:"Leonardo da Vinci", w:["Leonardo DiCaprio","Edvard Munch","Picasso"], f:"Leonardo da Vinci var både maler og oppfinner. Mona Lisa henger i Louvre i Paris."},
+  {q:"Hvem gikk over Grønland på ski i 1888?", a:"Nansen", w:["Hansen","Jensen","Larsen"], f:"Fridtjof Nansen krysset Grønland på ski. Senere fikk han Nobels fredspris for å hjelpe flyktninger."},
+  {q:"Hvem kom først til Sydpolen?", a:"Amundsen", w:["Armstrong","Andersen","Nansen"], f:"Roald Amundsen og fire andre nordmenn kom til Sydpolen 14. desember 1911, før briten Scott."},
+  {q:"Hva het polarskuta som Nansen og Amundsen brukte?", a:"Fram", w:["Fly","Fart","Frisk"], f:"Polarskuta Fram kan du se på Frammuseet i Oslo."},
+  {q:"Hvem var de første som fløy et fly med motor?", a:"Brødrene Wright", w:["Brødrene Dal","Brødrene Løvehjerte","Brødrene Grimm"], f:"Brødrene Wright fløy for første gang i 1903 i USA. Turen varte bare noen sekunder."},
+  {q:"Hvem fant opp telefonen?", a:"Bell", w:["Ball","Edison","Bill Gates"], f:"Alexander Graham Bell fikk patent på telefonen i 1876."},
+  {q:"Hvem gjorde lyspæren vanlig i hjemmene?", a:"Edison", w:["Einstein","Elvis","Ekeberg"], f:"Thomas Edison laget en lyspære som varte lenge, og strøm kom inn i husene."},
+  {q:"Hvem var det første mennesket i verdensrommet?", a:"Gagarin", w:["Garfield","Gandalf","Armstrong"], f:"Jurij Gagarin fra Sovjetunionen fløy rundt jorda i 1961."},
+  {q:"Hvem var den første som gikk på månen?", a:"Armstrong", w:["Amundsen","Andersen","Gagarin"], f:"Neil Armstrong fra USA gikk på månen i 1969."},
+  // Norges historie
+  {q:"Hvilket land var Norge i union med i over 400 år før 1814?", a:"Danmark", w:["Dubai","Tyskland","Polen"], f:"Norge og Danmark var ett rike i over 400 år, til 1814."},
+  {q:"Hvor ble Norges grunnlov skrevet i 1814?", a:"Eidsvoll", w:["Elverum","Egersund","Eidfjord"], f:"Grunnloven ble skrevet på Eidsvoll og underskrevet 17. mai 1814."},
+  {q:"Hvorfor feirer vi 17. mai?", a:"Grunnloven", w:["Grunnskolen","Julenissen","Påskeharen"], f:"17. mai 1814 fikk Norge sin egen grunnlov. Det feirer vi med tog og is."},
+  {q:"Hvilket land var Norge i union med fram til 1905?", a:"Sverige", w:["Spania","Skottland","Serbia"], f:"I 1905 gikk Norge ut av unionen med Sverige og fikk sin egen konge, Haakon den sjuende."},
+  {q:"Hvilket land okkuperte Norge under andre verdenskrig?", a:"Tyskland", w:["Thailand","Tyrkia","Sverige"], f:"Tyskland okkuperte Norge fra 1940 til 1945."},
+  {q:"Hvem var konge i Norge under andre verdenskrig?", a:"Haakon", w:["Harald","Henrik","Hugo"], f:"Kong Haakon den sjuende sa nei til tyskerne og ledet Norge fra London under krigen."},
+  {q:"Hvilken dag ble Norge fritt etter andre verdenskrig?", a:"Åttende mai", w:["Syttende mai","Første mai","Julaften"], f:"8. mai 1945 var krigen over i Norge. Det kalles frigjøringsdagen."},
+  {q:"Hva fant Norge i Nordsjøen i 1969, som gjorde landet rikt?", a:"Olje", w:["Ost","Gull","Is"], f:"Oljen i Nordsjøen ble funnet i 1969 og har gjort Norge til et rikt land."},
+  {q:"Hvor var vinter-OL i Norge i 1994?", a:"Lillehammer", w:["Lillesand","Lindesnes","Lyngdal"], f:"OL på Lillehammer i 1994 regnes som et av de beste vinter-OL noensinne."},
+  {q:"Hva heter hovedstaden i Norge?", a:"Oslo", w:["Odda","Bergen","Bodø"], f:"Oslo het Christiania i nesten 300 år, men fikk navnet Oslo igjen i 1925."},
+  {q:"Hvem malte det berømte bildet Skrik?", a:"Munch", w:["Monet","Mozart","Messi"], f:"Edvard Munch malte Skrik i 1893. Det er et av verdens mest kjente malerier."},
+  {q:"Hvem skrev skuespillet Peer Gynt?", a:"Ibsen", w:["Ibrahim","Grieg","Hamsun"], f:"Henrik Ibsen er en av verdens mest kjente forfattere av skuespill."},
+  {q:"Hvem laget musikken I Dovregubbens hall?", a:"Grieg", w:["Greve","Ibsen","Mozart"], f:"Edvard Grieg laget musikken til Peer Gynt. I Dovregubbens hall er kjent over hele verden."},
+  // Verden i nyere tid
+  {q:"Hvilket land ble USA selvstendig fra i 1776?", a:"Storbritannia", w:["Spania","Sverige","Frankrike"], f:"USA feirer selvstendighetsdagen 4. juli, fordi de ble selvstendige fra Storbritannia i 1776."},
+  {q:"Hvilket land var Napoleon keiser over?", a:"Frankrike", w:["Finland","Fiji","Norge"], f:"Napoleon var keiser i Frankrike og vant mange kriger, til han tapte ved Waterloo i 1815."},
+  {q:"Hvilket land ga Frihetsgudinnen til USA?", a:"Frankrike", w:["Finland","Færøyene","England"], f:"Frihetsgudinnen står i New York. Den var en gave fra Frankrike i 1886."},
+  {q:"Hvilket kjent skip sank etter å ha truffet et isfjell i 1912?", a:"Titanic", w:["Titan","Atlantis","Fram"], f:"Titanic skulle være skipet som ikke kunne synke, men det sank på sin første tur."},
+  {q:"Hvem ledet Tyskland under andre verdenskrig?", a:"Hitler", w:["Hilmar","Holmer","Churchill"], f:"Adolf Hitler og nazistene startet krigen. Andre verdenskrig varte fra 1939 til 1945."},
+  {q:"Hvem var statsminister i Storbritannia under andre verdenskrig?", a:"Churchill", w:["Chaplin","Charles","Hitler"], f:"Winston Churchill ledet Storbritannia mot Tyskland og ga aldri opp."},
+  {q:"Hvilken organisasjon ble startet i 1945 for å skape fred mellom landene?", a:"FN", w:["EU","NAV","NRK"], f:"FN betyr De forente nasjoner. Nesten alle land i verden er med."},
+  {q:"Hvilken by var delt i to av en mur fram til 1989?", a:"Berlin", w:["Bergen","Bern","Paris"], f:"Berlinmuren delte byen i øst og vest. Den falt i 1989."},
+  {q:"Hvem sa «I have a dream» og kjempet for svartes rettigheter i USA?", a:"Martin Luther King", w:["Martin Ødegaard","Mikke Mus","Michael Jackson"], f:"Martin Luther King kjempet uten vold for at svarte og hvite skulle ha like rettigheter."},
+  {q:"Hvem satt 27 år i fengsel og ble så president i Sør-Afrika?", a:"Mandela", w:["Mandala","Obama","Messi"], f:"Nelson Mandela kjempet mot apartheid og ble Sør-Afrikas første svarte president i 1994."},
+  {q:"Hvem var USAs første svarte president?", a:"Obama", w:["Omaha","Lincoln","Trump"], f:"Barack Obama var president i USA fra 2009 til 2017."},
+  {q:"Hvem var dronning i Storbritannia i over 70 år?", a:"Elizabeth", w:["Elsa","Maud","Ella"], f:"Dronning Elizabeth den andre var dronning fra 1952 til hun døde i 2022."},
+  {q:"Hvilken fredspris deles ut i Oslo hvert år?", a:"Nobels fredspris", w:["Fredagspizza","Gullballen","Oscar"], f:"Nobels fredspris deles ut i Oslo rådhus 10. desember hvert år."},
+  {q:"Hva brukte folk til lys før de hadde strøm?", a:"Stearinlys", w:["Lyspære","Lommelykt","Mobil"], f:"Før strømmen kom, brukte folk stearinlys, tranlamper og parafinlamper."},
+];
+// Norsk: rettskriving. Ordet blir bare sagt, aldri vist, og han skriver det selv.
+const sp = a => ({q:"Skriv ordet du hører", say:`Skriv ordet ${a.toLowerCase()}.`, a, type:true});
+const NORSK = ["Hjem","Gjerne","Kjøkken","Sjokolade","Kjole","Fotball","Gutt","Bord","Land","Skole","Hvit","Hvor","Mål",
+  "Spiller","Dommer","Straffe","Gjennom","Ikke","Også","Venn","Sykkel","Hjelpe","Gjest","Kjenne","Skjorte","Hund","Katt",
+  "Takk","Mamma","Pappa","Seier","Keeper","Ball","Lag","Søster","Bror","Hoppe","Kjempe","Hjerte","Hvem"].map(sp);
+
+// Matte: tallene står i spørsmålet, men svarene er skrevet med bokstaver, så han må lese tallordet.
+const ONES = ["null","en","to","tre","fire","fem","seks","sju","åtte","ni","ti","elleve","tolv","tretten","fjorten","femten","seksten","sytten","atten","nitten"];
+const TENS = ["","","tjue","tretti","førti","femti","seksti","sytti","åtti","nitti"];
+function numWord(n){
+  if(n<20) return ONES[n];
+  if(n===100) return "hundre";
+  const t=Math.floor(n/10), o=n%10;
+  return TENS[t] + (o ? ONES[o] : "");
+}
+const cap = s => s[0].toUpperCase()+s.slice(1);
+const rnd = (a,b) => a+Math.floor(Math.random()*(b-a+1));
+function mathQuestion(){
+  let a,b,n,sign,word;
+  const kind = rnd(0,2);
+  if(kind===0){ a=rnd(2,12); b=rnd(2,9); n=a+b; sign="+"; word="pluss"; }
+  else if(kind===1){ a=rnd(6,20); b=rnd(1,a-1); n=a-b; sign="−"; word="minus"; }
+  else { a=[2,5,10][rnd(0,2)]; b=rnd(1,10); if(Math.random()<.5)[a,b]=[b,a]; n=a*b; sign="·"; word="ganger"; }
+  const near = shuffle([n+1,n-1,n+2,n-2,n+10,n-10].filter(x=>x>=0 && x<=100 && x!==n));
+  return {q:`Hva er ${a} ${sign} ${b}?`, say:`Hva er ${a} ${word} ${b}?`, a:cap(numWord(n)), w:near.slice(0,3).map(x=>cap(numWord(x)))};
+}
+
+const MATCH_LEN = 8;
+const MODES = {
+  fotball:  {name:"Fotball",  color:"#7fd3ff", right:2, make:()=>shuffle([...shuffle(FAVORITTER).slice(0,5), ...shuffle(FOTBALL).slice(0,MATCH_LEN-5)])},
+  matte:    {name:"Matte",    color:"#ffd23f", right:2, make:()=>Array.from({length:MATCH_LEN}, mathQuestion)},
+  historie: {name:"Historie", color:"#ffb3ad", right:4, make:()=>{ const L=new Set(PROG.learned||[]); return [...shuffle(HISTORIE.filter(x=>!L.has(x.q))), ...shuffle(HISTORIE.filter(x=>L.has(x.q)))]; }},
+  norsk:    {name:"Norsk",    color:"#a8f0a0", right:4, make:()=>shuffle(NORSK)},
+};
+
+/* ---------- Poengregler ----------
+   Riktig på første forsøk: +4 i norsk og historie, +2 i fotball og matte. Hvert feil svar: −1 (og Gjettelaget scorer).
+   Å gjette blindt blant fire svar gir i snitt minus, å lese gir pluss. */
+const WRONG = -1;
+const RIGHT_OF = () => MODES[S.mode].right;
+const LEVELS = [
+  [0,"Ballgutt"],[20,"Rekrutt"],[50,"Juniorspiller"],[100,"Innbytter"],[175,"A-lagsspiller"],
+  [275,"Kaptein"],[400,"Landslagsspiller"],[600,"Verdensstjerne"],
+];
+function levelOf(n){ let i=0; LEVELS.forEach((l,k)=>{ if(n>=l[0]) i=k; }); return i; }
+
+/* ---------- Lagring ----------
+   Fremgang og premier lagres på nettet når siden kjører som artifact (samme tall på alle enheter),
+   ellers bare i denne nettleseren. */
+const zero = () => Object.fromEntries(Object.keys(MODES).map(k=>[k,0]));
+let PROG = {pts:zero(), best:0, right:0, wrong:0, matches:0, learned:[], bonus:0, claims:[]};
+// Hjemme-oppdrag: Benjamin trykker, pappa godkjenner i foreldresonen før poengene kommer. Maks én av hver per dag.
+const TASKS = {
+  lekser: {label:"Jeg har gjort lekser", pts:30},
+  sove:   {label:"Jeg var flink til å legge meg", pts:10},
+};
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const claimToday = kind => (PROG.claims||[]).find(c=>c.kind===kind && c.day===today() && c.status!=='rejected');
+const pendingClaims = () => (PROG.claims||[]).filter(c=>c.status==='pending');
+function claimTask(kind){
+  if(claimToday(kind)) return;
+  PROG.claims = [...(PROG.claims||[]), {id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), kind, day:today(), status:'pending'}].slice(-60);
+  save("prog");
+}
+function decideClaim(id, ok){
+  const c = (PROG.claims||[]).find(x=>x.id===id);
+  if(!c || c.status!=='pending') return;
+  PROG.claims = PROG.claims.map(x=>x.id===id?{...x,status: ok?'approved':'rejected'}:x);
+  if(ok){ PROG.bonus = (PROG.bonus||0) + TASKS[c.kind].pts; PROG.best = Math.max(PROG.best, total(PROG)); }
+  save("prog");
+}
+let PRIZES = {pin:"", list:[]};
+const LS = "benjaminfc-v2";
+try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.assign(PROG,c.prog); PROG.pts=Object.assign(zero(),PROG.pts); PRIZES=Object.assign(PRIZES,c.prizes); } }catch(e){}
+let db = null;
+const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0);
+function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
+async function save(which){
+  cacheLocal();
+  if(!db) return;
+  try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
+  catch(e){ if(e && e.code==="unavailable"){ setTimeout(()=>save(which), 800+Math.random()*800); } }
+}
+function changePts(mode, d){
+  PROG.pts[mode] = Math.max(0, (PROG.pts[mode]||0) + d);
+  if(d>0) PROG.right++; else PROG.wrong++;
+  PROG.best = Math.max(PROG.best, total(PROG));
+  save("prog");
+}
+(async()=>{
+  try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
+  if(!db) return;
+  db.doc("benjamin/progress").onSnapshot(s=>{
+    if(s.exists){ const d=s.data(); PROG = {...PROG, ...JSON.parse(JSON.stringify(d)), pts:Object.assign(zero(), d.pts||{})}; cacheLocal(); refreshIdle(); }
+  }, ()=>{});
+  db.doc("benjamin/prizes").onSnapshot(s=>{
+    if(s.exists){ PRIZES = {pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); }
+  }, ()=>{});
+})();
+// Tegn startsiden/fremgangssiden på nytt når nye tall kommer, men aldri midt i en kamp eller i foreldresonen.
+let screen = "start";
+function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); else if(screen==="progress") progressScreen(); }
+
+const SPEAKER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+const app = document.getElementById('app');
+const flash = document.getElementById('flash');
+let S = null;   // kampstatus
+let token = 0;  // stopper gamle timere når vi går videre
+
+/* ---------- Tale ---------- */
+let voice = null;
+function pickVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>/^nb|^no|^nn/i.test(v.lang)) || vs.find(v=>/norsk|norw/i.test(v.name)) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, onEnd){
+  const fallbackMs = 900 + text.length*70;
+  let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
+  if(!('speechSynthesis' in window)){ setTimeout(finish, 400); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = .92; u.pitch = 1.05;
+  u.onend = finish; u.onerror = finish;
+  speechSynthesis.speak(u);
+  setTimeout(finish, fallbackMs + 1500); // noen nettlesere glemmer onend
+}
+
+/* ---------- Hjelpere ---------- */
+const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Lesetid: knappene låses en kort stund etter at svarene dukker opp, lengre for lange ord.
+const readMs = opts => Math.min(4500, 1200 + opts.join('').length*90);
+const sortedPrizes = () => [...PRIZES.list].sort((a,b)=>a.at-b.at);
+const nextPrize = () => sortedPrizes().find(p=>PROG.best < p.at);
+
+function showFlash(html, ms=1300){
+  flash.innerHTML = html; flash.hidden = false;
+  return new Promise(r=>setTimeout(()=>{flash.hidden=true; r();}, ms));
+}
+const ptsTag = d => `<div class="sub ${d>0?'plus':'minus'}">${d>0?'+':'−'}${Math.abs(d)} poeng</div>`;
+
+/* ---------- Premieveien ----------
+   Premiene vises som trofeer langs en gulllinje. Linjen er gull så langt rekorden hans rekker, og en ball viser hvor han er. */
+const TROPHY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.4A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1A5 5 0 0 1 8.4 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1.1 1.8A5 5 0 0 1 7 9zm10 0v2c0 .3 0 .5-.1.8A2 2 0 0 0 18 8V7z"/><rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/></svg>';
+const LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V8a3 3 0 0 0-6 0z"/></svg>';
+const BALL = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#f4f7ef" stroke="#10221a" stroke-width="2"/><path d="M20 12l7 5-3 8h-8l-3-8z" fill="#10221a"/><path d="M20 12V3M27 17l9-3M24 25l5 8M16 25l-5 8M13 17l-9-3" stroke="#10221a" stroke-width="2"/></svg>';
+
+function nextCardHTML(){
+  const list = sortedPrizes();
+  if(!list.length) return '';
+  const np = list.find(p=>PROG.best < p.at);
+  if(!np) return `<div class="nextcard done"><div class="ring">${TROPHY}</div><div><small>Premieveien</small><b>Alle premiene er vunnet!</b></div></div>`;
+  const prevAt = [...list].reverse().find(p=>p.at<=PROG.best)?.at || 0;
+  const pct = Math.max(0, Math.min(1, (PROG.best-prevAt)/(np.at-prevAt)));
+  const C = 2*Math.PI*44;
+  return `<div class="nextcard">
+    <div class="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="ring-bg"/><circle cx="50" cy="50" r="44" class="ring-fg" style="stroke-dasharray:${C};stroke-dashoffset:${C*(1-pct)}"/></svg>${imgSrc(np)?`<img class="ringimg" src="${imgSrc(np)}" alt="">`:''}<span class="${imgSrc(np)?'pct-badge':''}">${Math.round(pct*100)}%</span></div>
+    <div class="nc-text"><small>Neste premie</small><b>${esc(np.text)}</b><em>${np.at-PROG.best} poeng igjen</em></div>
+  </div>`;
+}
+
+function ladderHTML(compact){
+  let list = sortedPrizes();
+  if(!list.length) return compact ? '' : '<p class="note">Ingen premier ennå. Pappa kan legge inn premier i foreldresonen.</p>';
+  if(compact){
+    // Forsiden: vunne premier som ikke er mottatt, pluss de tre neste.
+    const open = list.filter(p=>!p.given && PROG.best>=p.at), next = list.filter(p=>PROG.best<p.at).slice(0,3);
+    list = [...open, ...next];
+    if(!list.length) return '';
+  }
+  const best = PROG.best;
+  const items = [...list.filter(p=>p.at<=best), {me:true, at:best}, ...list.filter(p=>p.at>best)];
+  const rows = items.map((it,i)=>{
+    const top = i>0 && it.at<=best, bot = i<items.length-1 && items[i+1].at<=best;
+    const cls = `${top?'gt':''} ${bot?'gb':''} ${i===0?'first':''} ${i===items.length-1?'last':''}`;
+    if(it.me) return `<div class="rung me ${cls}"><span class="node ball">${BALL}</span><div class="me-body"><b>Du er her</b><small>${best} poeng</small></div></div>`;
+    const st = it.given ? 'given' : best>=it.at ? 'open' : 'locked';
+    const label = st==='given' ? 'Mottatt' : st==='open' ? 'Vunnet! Vis til pappa' : `${it.at-best} poeng igjen`;
+    return `<div class="rung ${st} ${cls}"><span class="node">${st==='locked'?LOCK:TROPHY}</span><div class="rung-body"><span class="pts-badge">${it.at}</span>${imgTag(it,'rimg')}<b>${esc(it.text)}</b><small>${label}</small></div></div>`;
+  }).join('');
+  return `<div class="ladder">${compact?'<h3>Premieveien</h3>':''}${nextCardHTML()}<div class="track">${rows}</div></div>`;
+}
+
+/* ---------- Feiring: fanfare og fyrverkeri ---------- */
+let actx = null;
+function audioUnlock(){
+  try{ if(!actx){ const AC = window.AudioContext||window.webkitAudioContext; if(AC) actx = new AC(); } if(actx && actx.state==='suspended') actx.resume(); }catch(e){}
+}
+document.addEventListener('pointerdown', audioUnlock, {passive:true});
+document.addEventListener('keydown', audioUnlock);
+function fanfare(){
+  audioUnlock();
+  if(!actx) return;
+  const t0 = actx.currentTime + .05;
+  const out = actx.createGain(); out.gain.value = .22;
+  const lp = actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 2600;
+  lp.connect(out); out.connect(actx.destination);
+  // Ta-ta-ta-taaa, ta-ta-TAAA: G C E G, E G (C-dur-akkord til slutt)
+  const N = {G4:392, C5:523.25, E5:659.25, G5:783.99, C6:1046.5};
+  const seq = [[N.G4,0,.14],[N.C5,.16,.14],[N.E5,.32,.14],[N.G5,.48,.42],[N.E5,.95,.16],[N.G5,1.13,1.3],[N.C5,1.13,1.3],[N.E5,1.13,1.3],[N.C6,1.13,1.3]];
+  seq.forEach(([f,at,dur])=>{
+    ['sawtooth','square'].forEach((type,k)=>{
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f*(k?1.003:1);
+      const s = t0+at;
+      g.gain.setValueAtTime(0, s);
+      g.gain.linearRampToValueAtTime(k?.12:.25, s+.03);
+      g.gain.setValueAtTime(k?.10:.2, s+dur*.7);
+      g.gain.exponentialRampToValueAtTime(.001, s+dur);
+      o.connect(g); g.connect(lp); o.start(s); o.stop(s+dur+.05);
+    });
+  });
+}
+function fireworks(canvas, ms){
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  const resize = ()=>{ canvas.width = innerWidth*dpr; canvas.height = innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
+  resize();
+  const COLORS = ['#ffd23f','#7fd3ff','#ff5d73','#a8f0a0','#ffffff','#ffb347'];
+  const rockets = [], sparks = [];
+  let last = performance.now(), end = last + ms, nextLaunch = 0, alive = true;
+  function launch(){
+    rockets.push({x: innerWidth*(.15+Math.random()*.7), y: innerHeight, vx:(Math.random()-.5)*1.5, vy: -(innerHeight/95 + Math.random()*3), c: COLORS[Math.floor(Math.random()*COLORS.length)]});
+  }
+  function burst(r){
+    const n = 70;
+    for(let i=0;i<n;i++){
+      const a = Math.PI*2*i/n, sp = 2+Math.random()*4.5;
+      sparks.push({x:r.x, y:r.y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1, c: Math.random()<.25 ? '#ffffff' : r.c});
+    }
+  }
+  function frame(now){
+    if(!alive) return;
+    const dt = Math.min(2, (now-last)/16.7); last = now;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(0,0,innerWidth,innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+    if(now < end && now > nextLaunch){ launch(); if(Math.random()<.4) launch(); nextLaunch = now + 350 + Math.random()*450; }
+    for(let i=rockets.length-1;i>=0;i--){
+      const r = rockets[i]; r.x += r.vx*dt; r.y += r.vy*dt; r.vy += .12*dt;
+      ctx.fillStyle = r.c; ctx.beginPath(); ctx.arc(r.x, r.y, 2.5, 0, Math.PI*2); ctx.fill();
+      if(r.vy >= -1){ burst(r); rockets.splice(i,1); }
+    }
+    for(let i=sparks.length-1;i>=0;i--){
+      const s = sparks[i]; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += .06*dt; s.vx *= .985; s.vy *= .985; s.life -= .012*dt;
+      if(s.life<=0){ sparks.splice(i,1); continue; }
+      ctx.globalAlpha = s.life; ctx.fillStyle = s.c; ctx.beginPath(); ctx.arc(s.x, s.y, 2.2, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+    if(now < end || rockets.length || sparks.length) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return ()=>{ alive = false; };
+}
+let partyOn = false;
+function celebrate(prizes){
+  if(partyOn || !prizes.length) return;
+  partyOn = true;
+  const el = document.createElement('div');
+  el.className = 'party';
+  el.innerHTML = `<canvas aria-hidden="true"></canvas>
+    <div class="party-card" role="alertdialog" aria-label="Du har vunnet en premie">
+      ${prizes.some(p=>imgSrc(p)) ? `<img class="party-img" src="${imgSrc(prizes.find(p=>imgSrc(p)))}" alt="">` : `<div class="party-trophy">${TROPHY}</div>`}
+      <small>Du har vunnet</small>
+      ${prizes.map(p=>`<b>${esc(p.text)}</b>`).join('')}
+      <p>Vis denne skjermen til pappa!</p>
+      <button class="next" id="partyOk">Jippi!</button>
+    </div>`;
+  document.body.appendChild(el);
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stop = reduce ? ()=>{} : fireworks(el.querySelector('canvas'), 7000);
+  fanfare();
+  setTimeout(()=>speak(`Gratulerer! Du har vunnet ${prizes.map(p=>p.text).join(' og ')}!`), 2600);
+  el.querySelector('#partyOk').onclick = ()=>{ stop(); el.remove(); partyOn = false; };
+}
+// Husk på denne enheten hvilke premier som er feiret, så feiringen kommer én gang, også når pappa godkjenner fra en annen telefon.
+const FEST = "benjaminfc-feiret";
+function checkCelebrate(){
+  const won = sortedPrizes().filter(p=>PROG.best>=p.at);
+  let seen = null;
+  try{ seen = JSON.parse(localStorage.getItem(FEST)||"null"); }catch(e){}
+  if(!Array.isArray(seen)){ try{ localStorage.setItem(FEST, JSON.stringify(won.map(p=>p.id))); }catch(e){} return; }
+  const fresh = won.filter(p=>!seen.includes(p.id) && !p.given);
+  if(!fresh.length) return;
+  try{ localStorage.setItem(FEST, JSON.stringify([...seen, ...fresh.map(p=>p.id)])); }catch(e){}
+  celebrate(fresh);
+}
+
+
+/* ---------- Lydeffekter, laget i nettleseren (ingen lydfiler) ---------- */
+function noiseBuf(sec){
+  const b = actx.createBuffer(1, Math.floor(actx.sampleRate*sec), actx.sampleRate), d = b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return b;
+}
+// Riktig svar: et raskt «power-up»-arpeggio med glitter, pluss et lite publikumsbrus.
+function sfxRight(crowd){
+  audioUnlock(); if(!actx) return;
+  const t0 = actx.currentTime + .02;
+  const out = actx.createGain(); out.gain.value = .5; out.connect(actx.destination);
+  [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = 'square'; o.frequency.value = f;
+    const s = t0 + i*.06;
+    g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(.12,s+.01); g.gain.exponentialRampToValueAtTime(.001,s+(i===4?.5:.14));
+    o.connect(g); g.connect(out); o.start(s); o.stop(s+.55);
+  });
+  [2093,2637,3136].forEach((f,i)=>{
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f;
+    const s = t0 + .3 + i*.05;
+    g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(.08,s+.01); g.gain.exponentialRampToValueAtTime(.001,s+.35);
+    o.connect(g); g.connect(out); o.start(s); o.stop(s+.4);
+  });
+  if(crowd){
+    const n = actx.createBufferSource(); n.buffer = noiseBuf(2);
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = .7;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.35,t0+.35); g.gain.exponentialRampToValueAtTime(.001,t0+1.9);
+    n.connect(bp); bp.connect(g); g.connect(out); n.start(t0); n.stop(t0+2);
+  }
+}
+// Feil svar: en skikkelig prompelyd. Lav, ujevn tone som blafrer og synker, med litt luft i.
+function sfxFart(){
+  audioUnlock(); if(!actx) return;
+  const t0 = actx.currentTime + .02, dur = .55 + Math.random()*.35;
+  const out = actx.createGain(); out.gain.value = .9; out.connect(actx.destination);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.Q.value = 6; lp.connect(out);
+  const o = actx.createOscillator(); o.type = 'sawtooth';
+  const base = 85 + Math.random()*30;
+  const steps = 24, curve = new Float32Array(steps);
+  for(let i=0;i<steps;i++) curve[i] = base*(1 - .45*i/steps)*(1 + (Math.random()-.5)*.35);
+  o.frequency.setValueCurveAtTime(curve, t0, dur);
+  // Blafring: amplituden hakker opp og ned
+  const flap = actx.createOscillator(); flap.type = 'square'; flap.frequency.setValueAtTime(18+Math.random()*10, t0); flap.frequency.linearRampToValueAtTime(9, t0+dur);
+  const flapG = actx.createGain(); flapG.gain.value = .5;
+  const amp = actx.createGain(); amp.gain.value = .5;
+  flap.connect(flapG); flapG.connect(amp.gain);
+  const env = actx.createGain();
+  env.gain.setValueAtTime(0,t0); env.gain.linearRampToValueAtTime(.7,t0+.03); env.gain.setValueAtTime(.6,t0+dur*.6); env.gain.exponentialRampToValueAtTime(.001,t0+dur);
+  o.connect(amp); amp.connect(env); env.connect(lp);
+  const n = actx.createBufferSource(); n.buffer = noiseBuf(dur+.1);
+  const nf = actx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 400;
+  const ng = actx.createGain(); ng.gain.setValueAtTime(.25,t0); ng.gain.exponentialRampToValueAtTime(.001,t0+dur);
+  n.connect(nf); nf.connect(ng); ng.connect(amp);
+  o.start(t0); flap.start(t0); n.start(t0);
+  o.stop(t0+dur+.05); flap.stop(t0+dur+.05); n.stop(t0+dur+.1);
+}
+
+
+/* ---------- Bilder av premiene ----------
+   Pappa laster opp et bilde i foreldresonen. Bildet krympes i nettleseren og lagres i appens bildelager,
+   og premien husker bare bilde-id-en. */
+let assetsNs = null;
+(async()=>{ try{ assetsNs = window.claude && window.claude.use ? await window.claude.use("assets") : null; }catch(e){ assetsNs = null; } })();
+function shrinkImage(file, max){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = ()=>{
+      const k = Math.min(1, max/Math.max(im.width, im.height));
+      const c = document.createElement('canvas'); c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=> b ? resolve(b) : reject(new Error('toBlob')), 'image/jpeg', .82);
+    };
+    im.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Bildet kunne ikke leses')); };
+    im.src = url;
+  });
+}
+const blobToDataURL = b => new Promise(r=>{ const fr = new FileReader(); fr.onload = ()=>r(fr.result); fr.readAsDataURL(b); });
+async function uploadPrizeImage(file){
+  if(assetsNs){
+    const blob = await shrinkImage(file, 900);
+    try{ return {img:(await assetsNs.upload(blob, {contentType:'image/jpeg'})).id}; }
+    catch(e){
+      if(e && e.code==='store_unavailable'){ await new Promise(r=>setTimeout(r, 800)); return {img:(await assetsNs.upload(blob, {contentType:'image/jpeg'})).id}; }
+      throw e;
+    }
+  }
+  // Uten bildelager (for eksempel en lokal kopi): lagre et lite bilde direkte i premien.
+  return {imgData: await blobToDataURL(await shrinkImage(file, 320))};
+}
+function dropPrizeImage(p){ if(p && p.img && assetsNs) assetsNs.delete(p.img).catch(()=>{}); }
+// På nettsiden hentes bildene fra databasen og vises når de er lastet.
+function imgLoaded(){ refreshIdle(); }
+const imgSrc = p => p && p.img ? FQ.imgSrc(p.img, imgLoaded) : (p && p.imgData) || "";
+const imgTag = (p, cls) => imgSrc(p) ? `<img class="${cls}" src="${imgSrc(p)}" alt="${esc(p.text)}">` : '';
+// Felles opplastingsknapp per premie i foreldresonen.
+function wireImageButtons(rerender){
+  app.querySelectorAll('[data-img]').forEach(inp=>inp.onchange = async ()=>{
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const id = inp.dataset.img, lab = inp.closest('label'); if(lab) lab.firstChild.textContent = 'Laster opp …';
+    try{
+      const res = await uploadPrizeImage(f);
+      const old = PRIZES.list.find(p=>p.id===id);
+      PRIZES.list = PRIZES.list.map(p=>p.id===id ? {...p, img:undefined, imgData:undefined, ...res} : p);
+      save("prizes"); dropPrizeImage(old);
+    }catch(e){ const er = document.getElementById('imgErr'); if(er) er.textContent = 'Bildet ble ikke lastet opp. Prøv et annet bilde.'; if(lab) lab.firstChild.textContent = 'Prøv igjen'; return; }
+    rerender();
+  });
+}
+
+/* ---------- Startside ---------- */
+function startScreen(){
+  token++; screen = "start"; keyHandler = null;
+  const np = nextPrize();
+  app.innerHTML = `
+  <div class="screen">
+    <svg class="crest" viewBox="0 0 120 120" aria-hidden="true">
+      <path d="M60 6 104 20v38c0 28-20 46-44 56C36 104 16 86 16 58V20z" fill="#1f7a3f" stroke="#f4f7ef" stroke-width="5"/>
+      <circle cx="60" cy="58" r="24" fill="#f4f7ef"/>
+      <path d="M60 44l9 6-3 11h-12l-3-11z" fill="#10221a"/>
+      <path d="M60 44v-9M69 50l9-4M66 61l6 8M54 61l-6 8M51 50l-9-4" stroke="#10221a" stroke-width="3"/>
+      <text x="60" y="100" text-anchor="middle" font-family="Bungee,Impact" font-size="13" fill="#ffd23f">BFC</text>
+    </svg>
+    <h1>Benjamin FC</h1>
+    <div class="rules">
+      <div class="rule"><i>1</i><span>Hør på spørsmålet.</span></div>
+      <div class="rule"><i>2</i><span>Les svarene selv. I norsk skriver du ordet selv.</span></div>
+      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer.</span></div>
+    </div>
+    <button class="pts pts-btn" id="prog">
+      <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
+      <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
+    </button>
+    <div class="modes">
+      ${Object.entries(MODES).map(([k,m])=>`<button class="mode" data-m="${k}" style="--c:${m.color}">${m.name}<small>+${m.right} per riktig</small></button>`).join('')}
+    </div>
+    <div class="tasks">
+      <h3>Hjemme-oppdrag</h3>
+      ${Object.entries(TASKS).map(([k,t])=>{
+        const c = claimToday(k);
+        const st = !c ? '' : c.status==='pending' ? 'Venter på at pappa godkjenner' : 'Godkjent i dag!';
+        return `<button class="task ${c?c.status:''}" data-t="${k}" ${c?'disabled':''}><span>${t.label}</span><b>+${t.pts}</b>${st?`<small>${st}</small>`:''}</button>`;
+      }).join('')}
+    </div>
+    ${ladderHTML(true)}
+    <p class="note">Skru på lyden. Hver kamp har ${MATCH_LEN} spørsmål.</p>
+  </div>`;
+  app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>newMatch(b.dataset.m));
+  document.getElementById('prog').onclick = progressScreen;
+  checkCelebrate();
+  app.querySelectorAll('.task[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Sendt til pappa for godkjenning'); startScreen(); });
+}
+
+/* ---------- Fremgang og premier ---------- */
+function progressScreen(){
+  token++; screen = "progress"; keyHandler = null;
+  const t = total(PROG), li = levelOf(PROG.best);
+  const nextL = LEVELS[li+1];
+  const pct = nextL ? Math.round((PROG.best-LEVELS[li][0])/(nextL[0]-LEVELS[li][0])*100) : 100;
+  const prizes = sortedPrizes();
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Min fremgang</h2>
+    <div class="pts">
+      <div class="pts-total"><span>Poeng nå</span><b>${t}</b></div>
+      <div class="pts-row">${Object.entries(MODES).map(([k,m])=>`<div><span>${m.name}</span><b style="color:${m.color}">${PROG.pts[k]}</b></div>`).join('')}</div>
+      <div class="pts-bonus"><span>Hjemme-oppdrag</span><b>${PROG.bonus||0}</b></div>
+    </div>
+    <div class="level">
+      <div class="level-top"><span class="badge">${li+1}</span><div><b>${LEVELS[li][1]}</b><small>${nextL ? `${nextL[0]-PROG.best} poeng til ${nextL[1]}` : 'Høyeste nivå!'}</small></div></div>
+      <div class="meter"><span style="width:${pct}%"></span></div>
+      <small>Historie lært: ${HISTORIE.filter(x=>(PROG.learned||[]).includes(x.q)).length} av ${HISTORIE.length}</small>
+      <small>Rekord: ${PROG.best} poeng · ${PROG.right} riktige · ${PROG.wrong} feil</small>
+    </div>
+    <h3>Ting du kan vinne</h3>
+    ${ladderHTML(false)}
+    <button class="parent-link" id="parent">Foreldresone${pendingClaims().length?` <span class="pill">${pendingClaims().length} venter</span>`:''}</button>
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  document.getElementById('parent').onclick = parentLogin;
+}
+
+/* ---------- Foreldresone (PIN) ---------- */
+function parentLogin(){
+  token++; screen = "parent"; keyHandler = null;
+  const first = !PRIZES.pin;
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Foreldresone</h2>
+    <p>${first ? 'Lag en PIN-kode med fire tall. Den trengs for å endre premier.' : 'Skriv PIN-koden.'}</p>
+    <form id="pinf" class="form">
+      <input id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" placeholder="••••" aria-label="PIN-kode">
+      <button class="next" type="submit">${first ? 'Lagre PIN' : 'Åpne'}</button>
+    </form>
+    <p class="err" id="err"></p>
+  </div>`;
+  document.getElementById('back').onclick = progressScreen;
+  document.getElementById('pinf').onsubmit = e => {
+    e.preventDefault();
+    const v = document.getElementById('pin').value.trim();
+    if(!/^\d{4}$/.test(v)){ document.getElementById('err').textContent = 'PIN-koden må være fire tall.'; return; }
+    if(first){ PRIZES.pin = v; save("prizes"); parentScreen(); }
+    else if(v===PRIZES.pin) parentScreen();
+    else document.getElementById('err').textContent = 'Feil PIN-kode.';
+  };
+}
+
+function parentScreen(confirmReset){
+  token++; screen = "parent";
+  const prizes = sortedPrizes();
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Ferdig</button>
+    ${pendingClaims().length ? `<h2>Venter på godkjenning</h2>
+    <div class="prizes">${pendingClaims().map(c=>`<div class="prize open"><span class="at">+${TASKS[c.kind].pts}</span><b>${esc(TASKS[c.kind].label)}</b>
+      <small>${c.day===today()?'I dag':esc(c.day)}</small>
+      <div class="acts"><button class="ok" data-ok="${c.id}">Godkjenn</button><button data-no="${c.id}">Avslå</button></div></div>`).join('')}</div>` : ''}
+    <h2>Premier</h2>
+    <p class="note">Premiene vises for Benjamin som en stige på forsiden og under Min fremgang. Han vinner en premie når rekorden hans når poenggrensen. Rekorden går aldri ned, selv om han mister poeng for feil svar.</p>
+    <form id="addf" class="form add">
+      <label>Poeng<input id="pat" type="number" inputmode="numeric" min="1" max="9999" required placeholder="50"></label>
+      <label class="grow">Premie<input id="ptx" type="text" maxlength="60" required placeholder="Is på butikken"></label>
+      <label class="grow">Bilde (valgfritt)<input id="pimgNew" type="file" accept="image/*"></label>
+      <button class="next" type="submit">Legg til</button>
+    </form>
+    <p class="err" id="imgErr"></p>
+    <div class="prizes">
+      ${prizes.map(p=>`<div class="prize ${p.given?'given':PROG.best>=p.at?'open':'locked'}">
+        <span class="at">${p.at}</span><b>${esc(p.text)}</b>
+        ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div>
+      </div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
+    </div>
+    <h3>Poeng</h3>
+    <p class="note">Nå: ${total(PROG)} poeng. Rekord: ${PROG.best}.</p>
+    ${confirmReset
+      ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>`
+      : `<div class="acts"><button id="reset">Nullstill poengene</button></div>`}
+  </div>`;
+  document.getElementById('back').onclick = progressScreen;
+  document.getElementById('addf').onsubmit = async e => {
+    e.preventDefault();
+    const at = parseInt(document.getElementById('pat').value,10), text = document.getElementById('ptx').value.trim();
+    if(!at || at<1 || !text) return;
+    const f = document.getElementById('pimgNew').files[0];
+    let extra = {};
+    if(f){ e.target.querySelector('[type=submit]').textContent = 'Laster opp …'; try{ extra = await uploadPrizeImage(f); }catch(err){ document.getElementById('imgErr').textContent = 'Bildet ble ikke lastet opp, men premien er lagret.'; } }
+    PRIZES.list = [...PRIZES.list, {id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), at, text, given:false, ...extra}];
+    save("prizes"); parentScreen();
+  };
+  app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ PRIZES.list = PRIZES.list.map(p=>p.id===b.dataset.g?{...p,given:!p.given}:p); save("prizes"); parentScreen(); });
+  app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ dropPrizeImage(PRIZES.list.find(p=>p.id===b.dataset.d)); PRIZES.list = PRIZES.list.filter(p=>p.id!==b.dataset.d); save("prizes"); parentScreen(); });
+  app.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.ok, true); parentScreen(); }); });
+  app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
+  wireImageButtons(()=>parentScreen());
+  const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
+  const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={pts:zero(),best:0,right:0,wrong:0,matches:0,learned:[],bonus:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
+  const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
+}
+
+/* ---------- Kamp ---------- */
+function newMatch(mode){
+  S = {mode, qs: MODES[mode].make().slice(0, MATCH_LEN), i:0, home:0, away:0, bestBefore:PROG.best, delta:0};
+  question();
+}
+
+function boardHTML(){
+  const minute = Math.round((S.i)/MATCH_LEN*90);
+  return `<div class="board" role="status" aria-label="Stilling">
+    <div class="team home">Benjamin FC</div>
+    <div class="score">${S.home}–${S.away}</div>
+    <div class="team away">Gjettelaget</div>
+    <div class="meta"><span>${MODES[S.mode].name.toUpperCase()} · <b>${S.i+1}</b>/${MATCH_LEN}</span><span><b>${minute}'</b></span></div>
+  </div>`;
+}
+function scoreWrong(){ S.away++; S.delta+=WRONG; changePts(S.mode, WRONG); app.querySelector('.board').outerHTML = boardHTML(); }
+function scoreRight(){ S.home++; S.delta+=RIGHT_OF(); const q=S.cur.item.q; if(S.mode==='historie' && !(PROG.learned||[]).includes(q)) PROG.learned=[...(PROG.learned||[]), q]; changePts(S.mode, RIGHT_OF()); }
+
+function question(){
+  const my = ++token; screen = "match"; keyHandler = null;
+  const item = S.qs[S.i];
+  S.cur = {item, tries:0, opts: item.type ? [] : shuffle([item.a, ...item.w])};
+  app.innerHTML = `${boardHTML()}
+  <div class="pitch">
+    <div class="qcard">
+      <div class="qtext" id="qt">${esc(item.q)}</div>
+      <button class="listen" id="listen" aria-label="Hør igjen">${SPEAKER}</button>
+    </div>
+    <div class="hint" id="hint">Hør godt etter …</div>
+    <div id="area"></div>
+  </div>
+  <div id="after"></div>`;
+  const listen = document.getElementById('listen');
+  const spoken = item.say || item.q;
+  listen.onclick = () => { listen.classList.add('speaking'); speak(spoken, ()=>listen.classList.remove('speaking')); };
+  listen.classList.add('speaking');
+  if(item.type){
+    typingArea(my);
+    speak(spoken, ()=>listen.classList.remove('speaking'));
+  } else {
+    document.getElementById('area').innerHTML = '<div class="answers" id="answers"></div>';
+    renderAnswers(true);
+    speak(spoken, ()=>{ listen.classList.remove('speaking'); if(my===token) reveal(my); });
+  }
+}
+
+/* ----- Flervalg ----- */
+function renderAnswers(hidden){
+  const box = document.getElementById('answers');
+  box.innerHTML = S.cur.opts.map((o,k)=>{
+    const isWrong = S.cur.wrongPicked===o;
+    return `<button class="ans ${hidden?'hidden-text':''} ${isWrong?'wrong':''}" data-o="${esc(o)}" ${hidden||isWrong?'disabled':''} id="ans${k}"><span class="reading">${esc(o)}</span><span class="bar"></span></button>`;
+  }).join('');
+  box.querySelectorAll('.ans').forEach(b=>b.onclick=()=>pick(b));
+}
+// Viser svarene, men låser dem til lesestolpen er full.
+function reveal(my){
+  if(my!==token || S.cur.revealed) return;
+  S.cur.revealed = true;
+  lockAndRead(my, 'Les svarene!');
+}
+function lockAndRead(my, text){
+  renderAnswers(false);
+  const hint = document.getElementById('hint');
+  hint.textContent = text;
+  const btns = [...document.querySelectorAll('.ans:not(.wrong)')];
+  const ms = readMs(S.cur.opts);
+  btns.forEach(b=>{ b.disabled=true; b.classList.add('locked'); const bar=b.querySelector('.bar'); bar.style.transition=`width ${ms}ms linear`; requestAnimationFrame(()=>requestAnimationFrame(()=>bar.style.width='100%')); });
+  setTimeout(()=>{
+    if(my!==token) return;
+    btns.forEach(b=>{ b.disabled=false; b.classList.remove('locked'); b.querySelector('.bar').style.opacity=0; });
+    hint.textContent = 'Trykk på riktig svar';
+  }, ms);
+}
+async function pick(btn){
+  const my = token;
+  const o = btn.dataset.o, item = S.cur.item;
+  document.querySelectorAll('.ans').forEach(b=>b.disabled=true);
+  S.cur.tries++;
+  if(o===item.a){
+    btn.classList.add('right');
+    if(S.cur.tries===1){ scoreRight(); sfxRight(true); await showFlash(`<div><div class="msg">MÅÅÅL!</div>${ptsTag(RIGHT_OF())}</div>`, 1400); }
+    else { sfxRight(false); await showFlash('<div><div class="msg mid">Riktig!</div><div class="sub">Men ingen mål denne gangen</div></div>', 1400); }
+    finishChoice(my, true);
+  } else {
+    btn.classList.add('wrong');
+    scoreWrong(); sfxFart();
+    if(S.cur.tries===1){
+      S.cur.wrongPicked = o;
+      await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div>${ptsTag(WRONG)}</div>`, 1800);
+      if(my!==token) return;
+      // Bytt plass på svarene så han må lese igjen, ikke bare trykke på knappen ved siden av.
+      S.cur.opts = shuffle(S.cur.opts);
+      lockAndRead(my, 'Prøv igjen. Les nøye!');
+    } else {
+      await showFlash(`<div class="col"><div class="card r"></div><div class="sub">Rødt kort! Gjettelaget scoret igjen.</div>${ptsTag(WRONG)}</div>`, 1800);
+      finishChoice(my, false);
+    }
+  }
+}
+// Viser og leser opp riktig svar til slutt, så han hører ordet han nettopp har sett.
+function finishChoice(my, won){
+  if(my!==token) return;
+  const item = S.cur.item;
+  app.querySelector('.board').outerHTML = boardHTML();
+  const right = [...document.querySelectorAll('.ans')].find(b=>b.dataset.o===item.a);
+  document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true; if(b!==right && !b.classList.contains('wrong')) b.style.opacity=.35; });
+  right.classList.add('right','say');
+  document.getElementById('hint').textContent = won ? 'Bra lest!' : 'Det riktige svaret var:';
+  if(item.f) document.getElementById('area').insertAdjacentHTML('beforeend', `<div class="fact">${esc(item.f)}</div>`);
+  speak(item.f ? `${item.a}. ${item.f}` : item.a, ()=>right.classList.remove('say'));
+  nextButton();
+}
+function nextButton(){
+  const last = S.i === MATCH_LEN-1;
+  document.getElementById('after').innerHTML = `<div style="display:flex;justify-content:center"><button class="next" id="nx">${last?'Se resultatet':'Neste spørsmål'}</button></div>`;
+  const nx = document.getElementById('nx');
+  nx.onclick = ()=>{ if(last) endScreen(); else { S.i++; question(); } };
+  keyHandler = k => { if(k==="Enter") nx.click(); };
+}
+
+/* ----- Skriving (norsk) ----- */
+// Eget tastatur på skjermen, så nettbrettets autokorrektur og ordforslag ikke kan skrive ordet for ham.
+const ROWS = ["qwertyuiopå","asdfghjkløæ","zxcvbnm"];
+let keyHandler = null;
+document.addEventListener('keydown', e=>{
+  if(!keyHandler || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
+  if(/^[a-zæøå]$/.test(k) || k==="Backspace" || k==="Enter"){ e.preventDefault(); keyHandler(k); }
+});
+function typingArea(my){
+  S.cur.typed = ""; S.cur.copy = false;
+  document.getElementById('area').innerHTML = `
+    <div class="typed" id="typed" aria-live="polite"></div>
+    <div class="attempts" id="attempts"></div>
+    <div class="kb" id="kb">
+      ${ROWS.map((r,i)=>`<div class="kb-row">${[...r].map(c=>`<button class="key" data-k="${c}">${c}</button>`).join('')}${i===2?'<button class="key wide" data-k="Backspace" aria-label="Slett">⌫</button>':''}</div>`).join('')}
+      <div class="kb-row"><button class="key check" data-k="Enter">Sjekk</button></div>
+    </div>`;
+  document.getElementById('hint').textContent = 'Skriv ordet du hørte';
+  document.getElementById('kb').querySelectorAll('.key').forEach(b=>b.onclick=()=>keyHandler && keyHandler(b.dataset.k));
+  keyHandler = k => typeKey(my, k);
+  drawTyped();
+}
+function drawTyped(){
+  const el = document.getElementById('typed');
+  el.innerHTML = S.cur.typed ? esc(S.cur.typed) : '<span class="ph">…</span>';
+}
+function typeKey(my, k){
+  if(my!==token) return;
+  if(k==="Backspace") S.cur.typed = S.cur.typed.slice(0,-1);
+  else if(k==="Enter") return checkTyped(my);
+  else if(S.cur.typed.length < 16) S.cur.typed += k;
+  drawTyped();
+}
+async function checkTyped(my){
+  const item = S.cur.item, guess = S.cur.typed.trim().toLowerCase(), ok = guess===item.a.toLowerCase();
+  if(!guess) return;
+  const typedEl = document.getElementById('typed');
+  if(S.cur.copy){
+    // Etter rødt kort skriver han av det riktige ordet før han går videre. Gir ingen poeng.
+    if(ok){ keyHandler=null; typedEl.classList.add('ok'); speak(item.a); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
+    else { typedEl.classList.remove('shake'); void typedEl.offsetWidth; typedEl.classList.add('shake'); }
+    return;
+  }
+  keyHandler = null;
+  S.cur.tries++;
+  if(ok){
+    typedEl.classList.add('ok');
+    if(S.cur.tries===1){ scoreRight(); sfxRight(true); await showFlash(`<div><div class="msg">MÅÅÅL!</div>${ptsTag(RIGHT_OF())}</div>`, 1400); }
+    else { sfxRight(false); await showFlash('<div><div class="msg mid">Riktig!</div><div class="sub">Men ingen mål denne gangen</div></div>', 1400); }
+    if(my!==token) return;
+    app.querySelector('.board').outerHTML = boardHTML();
+    document.getElementById('hint').textContent = 'Riktig skrevet!';
+    speak(item.a);
+    nextButton();
+    return;
+  }
+  scoreWrong(); sfxFart();
+  document.getElementById('attempts').innerHTML += `<s>${esc(guess)}</s>`;
+  if(S.cur.tries===1){
+    await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div>${ptsTag(WRONG)}</div>`, 1800);
+    if(my!==token) return;
+    S.cur.typed = ""; drawTyped();
+    document.getElementById('hint').textContent = 'Nesten! Hør en gang til og prøv igjen.';
+    keyHandler = k => typeKey(my, k);
+    speak(item.say);
+  } else {
+    await showFlash(`<div class="col"><div class="card r"></div><div class="sub">Rødt kort! Gjettelaget scoret igjen.</div>${ptsTag(WRONG)}</div>`, 1800);
+    if(my!==token) return;
+    S.cur.copy = true; S.cur.typed = ""; drawTyped();
+    document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${esc(item.a.toLowerCase())}</span><br>Skriv det av.`;
+    speak(item.a);
+    keyHandler = k => typeKey(my, k);
+  }
+}
+
+/* ---------- Slutt på kampen ---------- */
+function endScreen(){
+  token++; screen = "end"; keyHandler = null;
+  PROG.matches++; save("prog");
+  const won = S.home>S.away, draw = S.home===S.away;
+  const title = won ? 'Du vant kampen!' : draw ? 'Uavgjort!' : 'Gjettelaget vant';
+  const line = won ? 'Du leste godt. Det er sånn mesterne gjør det.' : draw ? 'Jevn kamp. Klarer du å vinne neste?' : 'Les alle svarene før du trykker, så slår du dem neste gang.';
+  const unlocked = sortedPrizes().filter(p=>S.bestBefore < p.at && PROG.best >= p.at);
+  const lvlUp = levelOf(PROG.best) > levelOf(S.bestBefore);
+  app.innerHTML = `
+  <div class="screen">
+    <h1>${title}</h1>
+    <div class="board" style="width:100%;max-width:440px"><div class="team home">Benjamin FC</div><div class="score">${S.home}–${S.away}</div><div class="team away">Gjettelaget</div><div class="meta"><span>FULLTID</span><span><b>90'</b></span></div></div>
+    <p class="delta ${S.delta>=0?'plus':'minus'}">${S.delta>=0?'+':'−'}${Math.abs(S.delta)} poeng i denne kampen</p>
+    ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
+    ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
+    <p style="font-size:22px;max-width:440px;margin:0">${line}</p>
+    <div class="modes">
+      <button class="mode" id="again" style="--c:${MODES[S.mode].color}">Ny kamp i ${MODES[S.mode].name.toLowerCase()}</button>
+      <button class="mode" id="menu" style="--c:#f4f7ef">Til start</button>
+    </div>
+  </div>`;
+  if(unlocked.length) checkCelebrate();
+  else if(won) showFlash('<div class="msg">SEIER!</div>', 1500);
+  if(!unlocked.length) speak(title);
+  const mode = S.mode;
+  document.getElementById('again').onclick = ()=>newMatch(mode);
+  document.getElementById('menu').onclick = startScreen;
+}
+
+startScreen();
+</script>
+
+</html>

@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bokstavjakten">
+<link rel="apple-touch-icon" href="icon-bastian.png">
+<style>[hidden]{display:none!important}</style>
+<title>Bokstavjakten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;700&family=Bungee&display=swap">
+<style>
+/* Layout: lys dag-himmel for en 6-åring. Stort bilde i midten, store bokstavtaster i alfabetisk rekkefølge.
+   Stjerneveien (premiene) ligger på et mørkt nattehimmel-panel. Ett bevisst lyst tema. */
+:root{
+  --day:#bfe9ff;
+  --day-2:#e9f8ff;
+  --sun:#ffcc33;
+  --ink:#1d2b4f;
+  --coral:#ff6b6b;
+  --leaf:#4cbf6b;
+  --chalk:#ffffff;
+  --navy:#16224a;
+  /* navn som premieveien og feiringen bruker */
+  --led:#ffd23f;
+  --sky:#8fd8ff;
+  --grass:#2f9e57;
+  --font-display:"Fredoka","Arial Rounded MT Bold",system-ui,sans-serif;
+  --font-read:"Andika","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  --font-board:"Bungee","Impact",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:linear-gradient(180deg,var(--day) 0%,var(--day-2) 70%,#d9f5d0 100%);background-attachment:fixed;color:var(--ink);font-family:var(--font-read);font-size:18px}
+.wrap{max-width:640px;margin:0 auto;padding:16px;padding-block:12px 28px;display:flex;flex-direction:column;gap:14px;min-height:100%;box-sizing:border-box}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(40px,11vw,60px);line-height:1;margin:0;color:var(--ink);text-shadow:0 4px 0 var(--sun)}
+h2{font-family:var(--font-display);font-weight:700;font-size:36px;margin:0}
+h3{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0}
+.screen{display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center;padding-block:16px}
+.screen.left{align-items:stretch;text-align:left}
+.note{font-size:15px;opacity:.75;max-width:460px;margin:0}
+.btn{font-family:var(--font-display);font-weight:700;font-size:26px;background:var(--sun);color:var(--ink);border:0;border-radius:999px;padding:14px 34px;cursor:pointer;box-shadow:0 6px 0 #d9a514}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #d9a514}
+.btn:focus-visible,.key:focus-visible,.back:focus-visible{outline:4px solid var(--coral);outline-offset:3px}
+.back{align-self:flex-start;background:none;border:0;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:20px;cursor:pointer;padding:4px 0}
+.sunbadge{width:110px;height:110px}
+
+/* Stjerneteller */
+.stars{display:flex;align-items:center;gap:10px;background:var(--chalk);border-radius:999px;padding:8px 18px 8px 10px;box-shadow:0 4px 0 rgba(29,43,79,.15);font-family:var(--font-display);font-weight:700;font-size:28px;border:0;color:var(--ink);cursor:pointer}
+.stars svg{width:38px;height:38px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dots i{width:14px;height:14px;border-radius:50%;background:rgba(29,43,79,.15)}
+.dots i.ok{background:var(--leaf)}.dots i.miss{background:var(--coral)}.dots i.now{background:var(--sun);box-shadow:0 0 0 3px rgba(255,204,51,.45)}
+
+/* Bildekort */
+.card{background:var(--chalk);border-radius:28px;box-shadow:0 8px 0 rgba(29,43,79,.12);padding:18px 16px;display:grid;justify-items:center;gap:6px;position:relative}
+.pic{font-size:clamp(110px,34vw,170px);line-height:1.1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.15));animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.listen{position:absolute;right:14px;top:14px;width:58px;height:58px;border-radius:50%;border:0;background:var(--ink);color:var(--sun);display:grid;place-items:center;cursor:pointer}
+.listen svg{width:30px;height:30px}
+.listen.speaking{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(255,204,51,.45)}}
+.word{font-family:var(--font-read);font-weight:700;font-size:44px;letter-spacing:.06em;min-height:56px}
+.word .first{color:var(--coral);font-size:64px}
+.slot{width:86px;height:86px;border-radius:20px;border:4px dashed rgba(29,43,79,.3);display:grid;place-items:center;font-family:var(--font-read);font-weight:700;font-size:60px}
+.slot.ok{border:4px solid var(--leaf);background:#dcf7e2;color:var(--leaf)}
+.slot.bad{border:4px solid var(--coral);background:#ffe1e1;color:var(--coral);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.hint{font-family:var(--font-display);font-weight:700;font-size:22px;min-height:1.3em;text-align:center}
+
+/* Tastatur, alfabetisk */
+.kb{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.key{height:60px;border:0;border-radius:14px;background:var(--chalk);color:var(--ink);font-family:var(--font-read);font-weight:700;font-size:30px;cursor:pointer;box-shadow:0 4px 0 rgba(29,43,79,.18);padding:0}
+.key:nth-child(6n+1){background:#fff4c7}.key:nth-child(6n+3){background:#ffe3e3}.key:nth-child(6n+5){background:#dff3ff}
+.key:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(29,43,79,.18)}
+.key[disabled]{opacity:.35;cursor:default}
+.kb.locked .key{opacity:.45;pointer-events:none}
+
+/* Natthimmelpanel rundt stjerneveien */
+.night{width:100%;max-width:560px;box-sizing:border-box;background:radial-gradient(ellipse at 30% 0%,#2a3b7a,var(--navy) 70%);color:var(--chalk);border-radius:24px;padding:18px 14px;text-align:left}
+.night .note{color:var(--chalk)}
+
+/* Foreldresone */
+.form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.form input{font:inherit;font-size:22px;padding:10px 12px;border-radius:12px;border:2px solid rgba(29,43,79,.25);background:#fff;color:var(--ink);width:100%;box-sizing:border-box}
+.form label{display:grid;gap:4px;font-size:15px;width:110px}
+.form label.grow{flex:1;min-width:180px;width:auto}
+#pin{width:160px;letter-spacing:.4em;text-align:center}
+.err{color:#c62828;min-height:1.2em;margin:0}
+.plist{display:grid;gap:10px}
+.prow{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;background:#fff;border-radius:14px;padding:10px 14px}
+.prow .at{grid-row:span 2;font-family:var(--font-board);font-size:18px;color:#b58100;min-width:48px;text-align:center}
+.prow b{font-size:20px;overflow-wrap:anywhere;min-width:0}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.acts button{font:inherit;font-size:15px;background:rgba(29,43,79,.08);color:var(--ink);border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.acts button.danger{background:var(--coral);color:#fff}
+.parent-link{align-self:center;background:none;border:1px solid rgba(29,43,79,.3);color:var(--ink);opacity:.7;border-radius:999px;padding:8px 18px;font:inherit;font-size:15px;cursor:pointer}
+
+/* Stjerne som flyr til telleren */
+.fly{position:fixed;z-index:15;width:60px;height:60px;pointer-events:none;transition:transform .8s cubic-bezier(.5,-0.3,.6,1),opacity .8s}
+.fly svg{width:100%;height:100%}
+.ladder{width:100%;max-width:520px;display:grid;gap:14px;text-align:left}
+.ladder h3{margin:0;text-align:center}
+.nextcard{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#123826,#0a1d14);border:2px solid rgba(255,210,63,.45);border-radius:18px;padding:14px 16px;box-shadow:0 0 30px rgba(255,210,63,.12)}
+.nextcard .ring{position:relative;flex:none;width:96px;height:96px;display:grid;place-items:center;color:var(--led)}
+.nextcard .ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
+.ring-fg{fill:none;stroke:var(--led);stroke-width:10;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(255,210,63,.7));transition:stroke-dashoffset 1.2s ease-out}
+.nextcard .ring span{font-family:var(--font-board);font-size:22px;color:var(--led)}
+.nextcard.done .ring svg{position:static;transform:none;width:60px;height:60px}
+.nc-text{display:grid;gap:2px;min-width:0}
+.nc-text small,.nextcard small{font-size:15px;opacity:.75;text-transform:uppercase;letter-spacing:.08em}
+.nc-text b,.nextcard b{font-family:var(--font-display);font-weight:400;font-size:26px;line-height:1.1;overflow-wrap:anywhere}
+.nc-text em{font-style:normal;color:var(--led);font-weight:700;font-size:18px}
+.track{display:grid}
+.rung{position:relative;display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding-block:7px}
+.rung::before,.rung::after{content:"";position:absolute;left:28px;width:8px;background:rgba(255,255,255,.12)}
+.rung::before{top:0;height:50%}.rung::after{top:50%;bottom:0}
+.rung.first::before,.rung.last::after{display:none}
+.rung.gt::before,.rung.gb::after{background:linear-gradient(180deg,#ffe27a,var(--led));box-shadow:0 0 10px rgba(255,210,63,.6)}
+.node{position:relative;z-index:1;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#1b2e24;border:3px solid rgba(255,255,255,.25);color:rgba(255,255,255,.55)}
+.node svg{width:32px;height:32px}
+.rung.open .node{background:radial-gradient(circle at 35% 30%,#fff3b0,var(--led) 55%,#c9971c);border-color:#fff3b0;color:#5c3d00;animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 26px rgba(255,210,63,.9)}}
+.rung.given .node{background:var(--grass);border-color:#7dd08f;color:#e9ffe9}
+.node.ball{background:none;border:0;width:64px;height:64px}
+.node.ball svg{width:46px;height:46px;animation:bounce 1.1s ease-in-out infinite;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+@keyframes bounce{50%{transform:translateY(-7px) rotate(25deg)}}
+.me-body b{font-family:var(--font-display);font-weight:400;font-size:24px;color:var(--sky);display:block}
+.me-body small{font-size:15px;opacity:.8}
+.rung-body{position:relative;background:rgba(255,255,255,.06);border-radius:14px;padding:10px 14px 10px 14px;display:grid;gap:2px;min-width:0}
+.rung-body b{font-size:21px;overflow-wrap:anywhere;padding-right:56px}
+.rung-body small{font-size:15px;opacity:.8}
+.pts-badge{position:absolute;z-index:2;right:16px;top:16px;font-family:var(--font-board);font-size:16px;background:rgba(10,20,15,.85);box-shadow:0 2px 8px rgba(0,0,0,.5);border-radius:99px;padding:2px 8px;color:var(--led)}
+.rung.open .rung-body{background:rgba(255,210,63,.16);outline:2px solid var(--led)}
+.rung.open small{color:var(--led);opacity:1;font-weight:700}
+.rung.given{opacity:.6}
+.party{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,rgba(22,48,32,.97),rgba(3,8,6,.98));padding:16px}
+.party canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.party-card{position:relative;display:grid;justify-items:center;gap:6px;text-align:center;max-width:420px;animation:boom .8s ease-out both}
+.party-trophy{width:120px;height:120px;color:var(--led);filter:drop-shadow(0 0 24px rgba(255,210,63,.9));animation:glow2 1.4s ease-in-out infinite}
+.party-trophy svg{width:100%;height:100%}
+@keyframes glow2{50%{transform:scale(1.08) rotate(-4deg)}}
+.party-card small{font-family:var(--font-display);font-size:24px;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.party-card b{font-family:var(--font-display);font-weight:400;font-size:clamp(36px,10vw,56px);line-height:1.05;color:var(--led);text-shadow:0 4px 0 #000;overflow-wrap:anywhere}
+.party-card p{font-size:20px;margin:6px 0 10px}
+.rimg{width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:4px}
+.rung.locked .rimg{filter:saturate(.7) brightness(.85)}
+.ringimg{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);border-radius:50%;object-fit:cover}
+.nextcard .ring span.pct-badge{position:absolute;bottom:-4px;right:-6px;background:var(--led);color:#10221a;font-size:14px;border-radius:99px;padding:2px 7px}
+.party-img{width:min(260px,70vw);max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:24px;border:5px solid var(--led);box-shadow:0 0 40px rgba(255,210,63,.8);animation:glow2 1.4s ease-in-out infinite}
+.pthumb{width:56px;height:56px;object-fit:cover;border-radius:10px}
+.imgbtn{font-size:15px;background:rgba(127,127,127,.2);border-radius:8px;padding:8px 12px;cursor:pointer}
+.bed{display:flex;align-items:center;gap:14px;width:100%;max-width:460px;text-align:left;font:inherit;color:#fff;background:linear-gradient(135deg,#3b4fa8,#1d2b6b);border:0;border-radius:24px;padding:14px 18px;cursor:pointer;box-shadow:0 6px 0 #121c4a}
+.bed:active{transform:translateY(3px);box-shadow:0 3px 0 #121c4a}
+.bed:focus-visible{outline:4px solid var(--coral);outline-offset:3px}
+.bed-pic{position:relative;font-size:64px;line-height:1;flex:none}
+.zzz{position:absolute;right:-14px;top:-18px;font-family:var(--font-display);font-weight:700;color:#cfe3ff;display:flex}
+.zzz i{font-style:normal;display:inline-block;animation:zz 2.4s ease-in-out infinite;opacity:0}
+.zzz i:nth-child(1){font-size:18px;animation-delay:0s}.zzz i:nth-child(2){font-size:24px;animation-delay:.6s;margin-top:-10px}.zzz i:nth-child(3){font-size:30px;animation-delay:1.2s;margin-top:-22px}
+@keyframes zz{0%{opacity:0;transform:translate(0,6px)}30%{opacity:1}100%{opacity:0;transform:translate(6px,-12px)}}
+.bed-text{display:grid;gap:2px;min-width:0}
+.bed-text b{font-family:var(--font-display);font-size:22px;line-height:1.15}
+.bed-text small{font-size:18px;font-weight:700;color:var(--sun)}
+.bed.pending{background:linear-gradient(135deg,#7a6a2a,#4d4216);box-shadow:0 6px 0 #2f280c;cursor:default}
+.bed.approved{background:linear-gradient(135deg,#2f9e57,#1c6e3a);box-shadow:0 6px 0 #124a26;cursor:default}
+.bed.approved small,.bed.pending small{color:#fff}
+.pill{display:inline-block;background:var(--coral);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:6px}
+.acts button.ok{background:var(--leaf);color:#fff}
+@keyframes boom{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="wrap" id="app"></div>
+<script>
+/* Lagring for den frittstående nettsiden: Supabase via to databasefunksjoner (fq_get, fq_set).
+   Alle nøkler starter med en hemmelig familiekode som bare ligger i lenken (#k=...) og i nettleseren,
+   aldri i koden på GitHub. Uten kode lagres alt bare i nettleseren. */
+(function(){
+  const URL_ = "https://ljohtyrxlqgqmoqqrhov.supabase.co", KEY = "sb_publishable_GdMXAQUSCTdZ6LtyaBBsYw_at-kQJ-j";
+  let fam = null;
+  try{
+    const m = location.hash.match(/k=([A-Za-z0-9_-]{16,})/);
+    if(m){ fam = m[1]; localStorage.setItem("familiekode", fam); }
+    else { fam = localStorage.getItem("familiekode"); if(fam) history.replaceState(null, "", "#k="+fam); }
+  }catch(e){}
+  async function rpc(fn, body){
+    const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, {method:"POST", headers:{"apikey":KEY, "Authorization":`Bearer ${KEY}`, "Content-Type":"application/json"}, body:JSON.stringify(body)});
+    if(!r.ok) throw {code:"unavailable", message:`HTTP ${r.status}`};
+    const t = await r.text(); return t ? JSON.parse(t) : null;
+  }
+  const k = path => `${fam}/${path}`;
+  const watchers = [];
+  const db = fam ? {
+    doc(path){
+      return {
+        set: data => rpc("fq_set", {k:k(path), d:data}),
+        onSnapshot(cb, err){
+          let last = null, stop = false;
+          const pull = async ()=>{
+            const d = await rpc("fq_get", {k:k(path)});
+            const s = JSON.stringify(d);
+            if(s !== last){
+              last = s;
+              // Premiebilder hentes før premielisten vises, så feiringen kan vise bildet.
+              const ids = (d && Array.isArray(d.list) ? d.list : []).map(p=>p && p.img).filter(id=>id && !cache[id]);
+              await Promise.all(ids.map(id=>loadImg(id)));
+              cb({exists: d!==null, data: ()=>d});
+            }
+          };
+          const tick = async ()=>{
+            if(stop) return;
+            try{ await pull(); }catch(e){}
+            setTimeout(tick, document.hidden ? 20000 : 3000);
+          };
+          watchers.push(pull);
+          tick();
+          return ()=>{ stop = true; };
+        },
+      };
+    },
+  } : null;
+  // Bilder lagres som egne dokumenter, så premielisten holder seg liten.
+  const cache = {}, loading = {};
+  const loadImg = id => loading[id] || (loading[id] = rpc("fq_get", {k:k("img/"+id)}).then(d=>{ if(d && d.src) cache[id] = d.src; return cache[id]; }).catch(()=>{ delete loading[id]; }));
+  const blobToDataURL = b => new Promise(r=>{ const fr = new FileReader(); fr.onload = ()=>r(fr.result); fr.readAsDataURL(b); });
+  const assets = fam ? {
+    async upload(blob){
+      const id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      const src = await blobToDataURL(blob);
+      await rpc("fq_set", {k:k("img/"+id), d:{src}});
+      cache[id] = src;
+      return {id, url:src};
+    },
+    async delete(id){ await rpc("fq_set", {k:k("img/"+id), d:null}); delete cache[id]; return {deleted:true}; },
+  } : null;
+
+  window.FQ = {
+    family: fam,
+    // Hent nyeste poeng med en gang, før foreldre godkjenner, så ingen poeng overskrives.
+    fresh: () => Promise.all(watchers.map(w=>w().catch(()=>{}))),
+    imgSrc(id, onLoaded){
+      if(cache[id]) return cache[id];
+      if(fam && !loading[id]) loadImg(id).then(src=>{ if(src && onLoaded) onLoaded(); });
+      return "";
+    },
+  };
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) FQ.fresh(); });
+  window.claude = {use: async name => name==="db" ? db : name==="assets" ? assets : null};
+})();
+</script>
+<script>
+// Navnet på gutten. Bytt her når vi vet hva han heter.
+const NAME = "Bastian";
+
+// Bilde (emoji), ord. Ordene er valgt så første bokstav høres tydelig (ingen stum h som i «hjerte»).
+const WORDS = [
+  ["🍎","Eple"],["🐟","Fisk"],["🐱","Katt"],["🐶","Hund"],["🏠","Hus"],["☀️","Sol"],["🌙","Måne"],["⭐","Stjerne"],
+  ["🚗","Bil"],["⚽","Ball"],["🍌","Banan"],["🐄","Ku"],["🐑","Sau"],["🐷","Gris"],["🐴","Hest"],["🦊","Rev"],
+  ["🐻","Bjørn"],["🐭","Mus"],["🦉","Ugle"],["🐘","Elefant"],["🦁","Løve"],["🐯","Tiger"],["🐸","Frosk"],["🐢","Skilpadde"],
+  ["🦆","And"],["🐝","Bie"],["🌳","Tre"],["🌸","Blomst"],["🍓","Jordbær"],["🧀","Ost"],["🥕","Gulrot"],["🍕","Pizza"],
+  ["🍦","Is"],["🎂","Kake"],["🥚","Egg"],["🍞","Brød"],["🚂","Tog"],["✈️","Fly"],["⛵","Båt"],["🚲","Sykkel"],
+  ["🚀","Rakett"],["👑","Krone"],["🎁","Gave"],["🎈","Ballong"],["🔑","Nøkkel"],["📖","Bok"],["🦷","Tann"],["👁️","Øye"],
+  ["👂","Øre"],["🦶","Fot"],["🌈","Regnbue"],["❄️","Snø"],["🐒","Ape"],["🐍","Slange"],["🐌","Snegle"],["🦋","Sommerfugl"],
+  ["🍇","Druer"],["🍐","Pære"],["🥛","Melk"],["🎸","Gitar"],["🥁","Tromme"],["🐉","Drage"],["🧸","Bamse"],["🐧","Pingvin"],
+  ["🦀","Krabbe"],["🐺","Ulv"],["🌽","Mais"],["🍅","Tomat"],["🍋","Sitron"],["🧦","Sokk"],["🎩","Hatt"],["🐓","Hane"],
+  ["🦄","Enhjørning"],["🍉","Vannmelon"],["🐊","Krokodille"],["🕷️","Edderkopp"],["🔥","Ild"],["🪁","Drage"],["🦈","Hai"],["🐐","Geit"],
+].filter((w,i,a)=>a.findIndex(x=>x[1]===w[1])===i).map(([pic,word])=>({pic, word, letter:word[0].toUpperCase()}));
+const ROUND = 10;
+const LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"];
+
+/* Poeng: riktig på første forsøk gir 2 stjerner, på andre forsøk 1.
+   Feil bokstav gir ingen stjerne og låser tastaturet et par sekunder, så det ikke lønner seg å trykke vilt. */
+const FIRST = 2, SECOND = 1, LOCK_MS = 2500;
+
+/* ---------- Lagring (felles på alle enheter når den kjører som artifact) ---------- */
+let PROG = {stars:0, best:0, right:0, wrong:0, rounds:0, claims:[]};
+// Leggetid: Bastian trykker på senga, pappa godkjenner i foreldresonen før stjernene kommer. Én gang per dag.
+const BED_STARS = 5;
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const bedToday = () => (PROG.claims||[]).find(c=>c.day===today() && c.status!=='rejected');
+const pendingClaims = () => (PROG.claims||[]).filter(c=>c.status==='pending');
+function claimBed(){
+  if(bedToday()) return;
+  PROG.claims = [...(PROG.claims||[]), {id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), kind:'sove', day:today(), status:'pending'}].slice(-60);
+  save("prog");
+}
+function decideClaim(id, ok){
+  const c = (PROG.claims||[]).find(x=>x.id===id);
+  if(!c || c.status!=='pending') return;
+  PROG.claims = PROG.claims.map(x=>x.id===id?{...x,status: ok?'approved':'rejected'}:x);
+  if(ok){ PROG.stars += BED_STARS; PROG.best = Math.max(PROG.best, PROG.stars); }
+  save("prog");
+}
+let PRIZES = {pin:"", list:[]};
+const LS = "bokstavjakten-v1";
+try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.assign(PROG,c.prog); PRIZES=Object.assign(PRIZES,c.prizes); } }catch(e){}
+let db = null;
+function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
+async function save(which){
+  cacheLocal();
+  if(!db) return;
+  try{ await db.doc(which==="prog"?"lillebror/progress":"lillebror/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
+  catch(e){ if(e && e.code==="unavailable") setTimeout(()=>save(which), 800+Math.random()*800); }
+}
+function addStars(n){ PROG.stars += n; PROG.best = Math.max(PROG.best, PROG.stars); save("prog"); }
+let screen = "start";
+function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); }
+(async()=>{
+  try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
+  if(!db) return;
+  db.doc("lillebror/progress").onSnapshot(s=>{ if(s.exists){ PROG={...PROG, ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
+  db.doc("lillebror/prizes").onSnapshot(s=>{ if(s.exists){ PRIZES={pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
+})();
+
+/* ---------- Tale ---------- */
+let voice = null;
+function pickVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>/^nb|^no|^nn/i.test(v.lang)) || vs.find(v=>/norsk|norw/i.test(v.name)) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, onEnd){
+  let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
+  if(!('speechSynthesis' in window)){ setTimeout(finish, 300); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='nb-NO'; if(voice) u.voice=voice; u.rate=.85; u.pitch=1.1;
+  u.onend=finish; u.onerror=finish;
+  speechSynthesis.speak(u);
+  setTimeout(finish, 2400 + text.length*80);
+}
+
+/* ---------- Hjelpere ---------- */
+const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sortedPrizes = () => [...PRIZES.list].sort((a,b)=>a.at-b.at);
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#ffcc33" stroke="#d99a00" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+const SPEAKER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const app = document.getElementById('app');
+let token = 0, R = null, keyHandler = null;
+document.addEventListener('keydown', e=>{
+  if(!keyHandler || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.length===1 ? e.key.toUpperCase() : '';
+  if(LETTERS.includes(k)){ e.preventDefault(); keyHandler(k); }
+});
+// Små lyder: pling ved riktig, dump tone ved feil.
+function tone(freqs, type, dur, vol){
+  audioUnlock(); if(!actx) return;
+  const t0 = actx.currentTime + .02;
+  freqs.forEach((f,i)=>{ const o=actx.createOscillator(), g=actx.createGain(); o.type=type; o.frequency.value=f; const s=t0+i*.09;
+    g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(vol,s+.02); g.gain.exponentialRampToValueAtTime(.001,s+dur);
+    o.connect(g); g.connect(actx.destination); o.start(s); o.stop(s+dur+.05); });
+}
+const ding = () => sfxRight(false);
+const bonk = () => sfxFart();
+
+/* ---------- Premieveien ----------
+   Premiene vises som trofeer langs en gulllinje. Linjen er gull så langt rekorden hans rekker, og en ball viser hvor han er. */
+const TROPHY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.4A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1A5 5 0 0 1 8.4 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1.1 1.8A5 5 0 0 1 7 9zm10 0v2c0 .3 0 .5-.1.8A2 2 0 0 0 18 8V7z"/><rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/></svg>';
+const LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V8a3 3 0 0 0-6 0z"/></svg>';
+const BALL = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#f4f7ef" stroke="#10221a" stroke-width="2"/><path d="M20 12l7 5-3 8h-8l-3-8z" fill="#10221a"/><path d="M20 12V3M27 17l9-3M24 25l5 8M16 25l-5 8M13 17l-9-3" stroke="#10221a" stroke-width="2"/></svg>';
+
+function nextCardHTML(){
+  const list = sortedPrizes();
+  if(!list.length) return '';
+  const np = list.find(p=>PROG.best < p.at);
+  if(!np) return `<div class="nextcard done"><div class="ring">${TROPHY}</div><div><small>Stjerneveien</small><b>Alle premiene er vunnet!</b></div></div>`;
+  const prevAt = [...list].reverse().find(p=>p.at<=PROG.best)?.at || 0;
+  const pct = Math.max(0, Math.min(1, (PROG.best-prevAt)/(np.at-prevAt)));
+  const C = 2*Math.PI*44;
+  return `<div class="nextcard">
+    <div class="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="ring-bg"/><circle cx="50" cy="50" r="44" class="ring-fg" style="stroke-dasharray:${C};stroke-dashoffset:${C*(1-pct)}"/></svg>${imgSrc(np)?`<img class="ringimg" src="${imgSrc(np)}" alt="">`:''}<span class="${imgSrc(np)?'pct-badge':''}">${Math.round(pct*100)}%</span></div>
+    <div class="nc-text"><small>Neste premie</small><b>${esc(np.text)}</b><em>${np.at-PROG.best} stjerner igjen</em></div>
+  </div>`;
+}
+
+function ladderHTML(compact){
+  let list = sortedPrizes();
+  if(!list.length) return compact ? '' : '<p class="note">Ingen premier ennå. Pappa kan legge inn premier i foreldresonen.</p>';
+  if(compact){
+    // Forsiden: vunne premier som ikke er mottatt, pluss de tre neste.
+    const open = list.filter(p=>!p.given && PROG.best>=p.at), next = list.filter(p=>PROG.best<p.at).slice(0,3);
+    list = [...open, ...next];
+    if(!list.length) return '';
+  }
+  const best = PROG.best;
+  const items = [...list.filter(p=>p.at<=best), {me:true, at:best}, ...list.filter(p=>p.at>best)];
+  const rows = items.map((it,i)=>{
+    const top = i>0 && it.at<=best, bot = i<items.length-1 && items[i+1].at<=best;
+    const cls = `${top?'gt':''} ${bot?'gb':''} ${i===0?'first':''} ${i===items.length-1?'last':''}`;
+    if(it.me) return `<div class="rung me ${cls}"><span class="node ball">${BALL}</span><div class="me-body"><b>Du er her</b><small>${best} stjerner</small></div></div>`;
+    const st = it.given ? 'given' : best>=it.at ? 'open' : 'locked';
+    const label = st==='given' ? 'Mottatt' : st==='open' ? 'Vunnet! Vis til pappa' : `${it.at-best} stjerner igjen`;
+    return `<div class="rung ${st} ${cls}"><span class="node">${st==='locked'?LOCK:TROPHY}</span><div class="rung-body"><span class="pts-badge">${it.at}</span>${imgTag(it,'rimg')}<b>${esc(it.text)}</b><small>${label}</small></div></div>`;
+  }).join('');
+  return `<div class="ladder">${compact?'<h3>Stjerneveien</h3>':''}${nextCardHTML()}<div class="track">${rows}</div></div>`;
+}
+
+/* ---------- Feiring: fanfare og fyrverkeri ---------- */
+let actx = null;
+function audioUnlock(){
+  try{ if(!actx){ const AC = window.AudioContext||window.webkitAudioContext; if(AC) actx = new AC(); } if(actx && actx.state==='suspended') actx.resume(); }catch(e){}
+}
+document.addEventListener('pointerdown', audioUnlock, {passive:true});
+document.addEventListener('keydown', audioUnlock);
+function fanfare(){
+  audioUnlock();
+  if(!actx) return;
+  const t0 = actx.currentTime + .05;
+  const out = actx.createGain(); out.gain.value = .22;
+  const lp = actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 2600;
+  lp.connect(out); out.connect(actx.destination);
+  // Ta-ta-ta-taaa, ta-ta-TAAA: G C E G, E G (C-dur-akkord til slutt)
+  const N = {G4:392, C5:523.25, E5:659.25, G5:783.99, C6:1046.5};
+  const seq = [[N.G4,0,.14],[N.C5,.16,.14],[N.E5,.32,.14],[N.G5,.48,.42],[N.E5,.95,.16],[N.G5,1.13,1.3],[N.C5,1.13,1.3],[N.E5,1.13,1.3],[N.C6,1.13,1.3]];
+  seq.forEach(([f,at,dur])=>{
+    ['sawtooth','square'].forEach((type,k)=>{
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f*(k?1.003:1);
+      const s = t0+at;
+      g.gain.setValueAtTime(0, s);
+      g.gain.linearRampToValueAtTime(k?.12:.25, s+.03);
+      g.gain.setValueAtTime(k?.10:.2, s+dur*.7);
+      g.gain.exponentialRampToValueAtTime(.001, s+dur);
+      o.connect(g); g.connect(lp); o.start(s); o.stop(s+dur+.05);
+    });
+  });
+}
+function fireworks(canvas, ms){
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  const resize = ()=>{ canvas.width = innerWidth*dpr; canvas.height = innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
+  resize();
+  const COLORS = ['#ffd23f','#7fd3ff','#ff5d73','#a8f0a0','#ffffff','#ffb347'];
+  const rockets = [], sparks = [];
+  let last = performance.now(), end = last + ms, nextLaunch = 0, alive = true;
+  function launch(){
+    rockets.push({x: innerWidth*(.15+Math.random()*.7), y: innerHeight, vx:(Math.random()-.5)*1.5, vy: -(innerHeight/95 + Math.random()*3), c: COLORS[Math.floor(Math.random()*COLORS.length)]});
+  }
+  function burst(r){
+    const n = 70;
+    for(let i=0;i<n;i++){
+      const a = Math.PI*2*i/n, sp = 2+Math.random()*4.5;
+      sparks.push({x:r.x, y:r.y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1, c: Math.random()<.25 ? '#ffffff' : r.c});
+    }
+  }
+  function frame(now){
+    if(!alive) return;
+    const dt = Math.min(2, (now-last)/16.7); last = now;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(0,0,innerWidth,innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+    if(now < end && now > nextLaunch){ launch(); if(Math.random()<.4) launch(); nextLaunch = now + 350 + Math.random()*450; }
+    for(let i=rockets.length-1;i>=0;i--){
+      const r = rockets[i]; r.x += r.vx*dt; r.y += r.vy*dt; r.vy += .12*dt;
+      ctx.fillStyle = r.c; ctx.beginPath(); ctx.arc(r.x, r.y, 2.5, 0, Math.PI*2); ctx.fill();
+      if(r.vy >= -1){ burst(r); rockets.splice(i,1); }
+    }
+    for(let i=sparks.length-1;i>=0;i--){
+      const s = sparks[i]; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += .06*dt; s.vx *= .985; s.vy *= .985; s.life -= .012*dt;
+      if(s.life<=0){ sparks.splice(i,1); continue; }
+      ctx.globalAlpha = s.life; ctx.fillStyle = s.c; ctx.beginPath(); ctx.arc(s.x, s.y, 2.2, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+    if(now < end || rockets.length || sparks.length) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return ()=>{ alive = false; };
+}
+let partyOn = false;
+function celebrate(prizes){
+  if(partyOn || !prizes.length) return;
+  partyOn = true;
+  const el = document.createElement('div');
+  el.className = 'party';
+  el.innerHTML = `<canvas aria-hidden="true"></canvas>
+    <div class="party-card" role="alertdialog" aria-label="Du har vunnet en premie">
+      ${prizes.some(p=>imgSrc(p)) ? `<img class="party-img" src="${imgSrc(prizes.find(p=>imgSrc(p)))}" alt="">` : `<div class="party-trophy">${TROPHY}</div>`}
+      <small>Du har vunnet</small>
+      ${prizes.map(p=>`<b>${esc(p.text)}</b>`).join('')}
+      <p>Vis denne skjermen til pappa!</p>
+      <button class="next" id="partyOk">Jippi!</button>
+    </div>`;
+  document.body.appendChild(el);
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stop = reduce ? ()=>{} : fireworks(el.querySelector('canvas'), 7000);
+  fanfare();
+  setTimeout(()=>speak(`Gratulerer! Du har vunnet ${prizes.map(p=>p.text).join(' og ')}!`), 2600);
+  el.querySelector('#partyOk').onclick = ()=>{ stop(); el.remove(); partyOn = false; };
+}
+// Husk på denne enheten hvilke premier som er feiret, så feiringen kommer én gang, også når pappa godkjenner fra en annen telefon.
+const FEST = "bokstavjakten-feiret";
+function checkCelebrate(){
+  const won = sortedPrizes().filter(p=>PROG.best>=p.at);
+  let seen = null;
+  try{ seen = JSON.parse(localStorage.getItem(FEST)||"null"); }catch(e){}
+  if(!Array.isArray(seen)){ try{ localStorage.setItem(FEST, JSON.stringify(won.map(p=>p.id))); }catch(e){} return; }
+  const fresh = won.filter(p=>!seen.includes(p.id));
+  if(!fresh.length) return;
+  try{ localStorage.setItem(FEST, JSON.stringify([...seen, ...fresh.map(p=>p.id)])); }catch(e){}
+  celebrate(fresh);
+}
+
+
+
+/* ---------- Lydeffekter, laget i nettleseren (ingen lydfiler) ---------- */
+function noiseBuf(sec){
+  const b = actx.createBuffer(1, Math.floor(actx.sampleRate*sec), actx.sampleRate), d = b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return b;
+}
+// Riktig svar: et raskt «power-up»-arpeggio med glitter, pluss et lite publikumsbrus.
+function sfxRight(crowd){
+  audioUnlock(); if(!actx) return;
+  const t0 = actx.currentTime + .02;
+  const out = actx.createGain(); out.gain.value = .5; out.connect(actx.destination);
+  [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = 'square'; o.frequency.value = f;
+    const s = t0 + i*.06;
+    g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(.12,s+.01); g.gain.exponentialRampToValueAtTime(.001,s+(i===4?.5:.14));
+    o.connect(g); g.connect(out); o.start(s); o.stop(s+.55);
+  });
+  [2093,2637,3136].forEach((f,i)=>{
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f;
+    const s = t0 + .3 + i*.05;
+    g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(.08,s+.01); g.gain.exponentialRampToValueAtTime(.001,s+.35);
+    o.connect(g); g.connect(out); o.start(s); o.stop(s+.4);
+  });
+  if(crowd){
+    const n = actx.createBufferSource(); n.buffer = noiseBuf(2);
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = .7;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.35,t0+.35); g.gain.exponentialRampToValueAtTime(.001,t0+1.9);
+    n.connect(bp); bp.connect(g); g.connect(out); n.start(t0); n.stop(t0+2);
+  }
+}
+// Feil svar: en skikkelig prompelyd. Lav, ujevn tone som blafrer og synker, med litt luft i.
+function sfxFart(){
+  audioUnlock(); if(!actx) return;
+  const t0 = actx.currentTime + .02, dur = .55 + Math.random()*.35;
+  const out = actx.createGain(); out.gain.value = .9; out.connect(actx.destination);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.Q.value = 6; lp.connect(out);
+  const o = actx.createOscillator(); o.type = 'sawtooth';
+  const base = 85 + Math.random()*30;
+  const steps = 24, curve = new Float32Array(steps);
+  for(let i=0;i<steps;i++) curve[i] = base*(1 - .45*i/steps)*(1 + (Math.random()-.5)*.35);
+  o.frequency.setValueCurveAtTime(curve, t0, dur);
+  // Blafring: amplituden hakker opp og ned
+  const flap = actx.createOscillator(); flap.type = 'square'; flap.frequency.setValueAtTime(18+Math.random()*10, t0); flap.frequency.linearRampToValueAtTime(9, t0+dur);
+  const flapG = actx.createGain(); flapG.gain.value = .5;
+  const amp = actx.createGain(); amp.gain.value = .5;
+  flap.connect(flapG); flapG.connect(amp.gain);
+  const env = actx.createGain();
+  env.gain.setValueAtTime(0,t0); env.gain.linearRampToValueAtTime(.7,t0+.03); env.gain.setValueAtTime(.6,t0+dur*.6); env.gain.exponentialRampToValueAtTime(.001,t0+dur);
+  o.connect(amp); amp.connect(env); env.connect(lp);
+  const n = actx.createBufferSource(); n.buffer = noiseBuf(dur+.1);
+  const nf = actx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 400;
+  const ng = actx.createGain(); ng.gain.setValueAtTime(.25,t0); ng.gain.exponentialRampToValueAtTime(.001,t0+dur);
+  n.connect(nf); nf.connect(ng); ng.connect(amp);
+  o.start(t0); flap.start(t0); n.start(t0);
+  o.stop(t0+dur+.05); flap.stop(t0+dur+.05); n.stop(t0+dur+.1);
+}
+
+
+/* ---------- Bilder av premiene ----------
+   Pappa laster opp et bilde i foreldresonen. Bildet krympes i nettleseren og lagres i appens bildelager,
+   og premien husker bare bilde-id-en. */
+let assetsNs = null;
+(async()=>{ try{ assetsNs = window.claude && window.claude.use ? await window.claude.use("assets") : null; }catch(e){ assetsNs = null; } })();
+function shrinkImage(file, max){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = ()=>{
+      const k = Math.min(1, max/Math.max(im.width, im.height));
+      const c = document.createElement('canvas'); c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=> b ? resolve(b) : reject(new Error('toBlob')), 'image/jpeg', .82);
+    };
+    im.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Bildet kunne ikke leses')); };
+    im.src = url;
+  });
+}
+const blobToDataURL = b => new Promise(r=>{ const fr = new FileReader(); fr.onload = ()=>r(fr.result); fr.readAsDataURL(b); });
+async function uploadPrizeImage(file){
+  if(assetsNs){
+    const blob = await shrinkImage(file, 900);
+    try{ return {img:(await assetsNs.upload(blob, {contentType:'image/jpeg'})).id}; }
+    catch(e){
+      if(e && e.code==='store_unavailable'){ await new Promise(r=>setTimeout(r, 800)); return {img:(await assetsNs.upload(blob, {contentType:'image/jpeg'})).id}; }
+      throw e;
+    }
+  }
+  // Uten bildelager (for eksempel en lokal kopi): lagre et lite bilde direkte i premien.
+  return {imgData: await blobToDataURL(await shrinkImage(file, 320))};
+}
+function dropPrizeImage(p){ if(p && p.img && assetsNs) assetsNs.delete(p.img).catch(()=>{}); }
+// På nettsiden hentes bildene fra databasen og vises når de er lastet.
+function imgLoaded(){ refreshIdle(); }
+const imgSrc = p => p && p.img ? FQ.imgSrc(p.img, imgLoaded) : (p && p.imgData) || "";
+const imgTag = (p, cls) => imgSrc(p) ? `<img class="${cls}" src="${imgSrc(p)}" alt="${esc(p.text)}">` : '';
+// Felles opplastingsknapp per premie i foreldresonen.
+function wireImageButtons(rerender){
+  app.querySelectorAll('[data-img]').forEach(inp=>inp.onchange = async ()=>{
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const id = inp.dataset.img, lab = inp.closest('label'); if(lab) lab.firstChild.textContent = 'Laster opp …';
+    try{
+      const res = await uploadPrizeImage(f);
+      const old = PRIZES.list.find(p=>p.id===id);
+      PRIZES.list = PRIZES.list.map(p=>p.id===id ? {...p, img:undefined, imgData:undefined, ...res} : p);
+      save("prizes"); dropPrizeImage(old);
+    }catch(e){ const er = document.getElementById('imgErr'); if(er) er.textContent = 'Bildet ble ikke lastet opp. Prøv et annet bilde.'; if(lab) lab.firstChild.textContent = 'Prøv igjen'; return; }
+    rerender();
+  });
+}
+
+/* ---------- Startside ---------- */
+function startScreen(){
+  token++; screen="start"; keyHandler=null;
+  app.innerHTML = `
+  <div class="screen">
+    <svg class="sunbadge" viewBox="0 0 120 120" aria-hidden="true">
+      <g stroke="#ffb703" stroke-width="7" stroke-linecap="round">${Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return `<line x1="${60+Math.cos(a)*44}" y1="${60+Math.sin(a)*44}" x2="${60+Math.cos(a)*56}" y2="${60+Math.sin(a)*56}"/>`}).join('')}</g>
+      <circle cx="60" cy="60" r="36" fill="#ffcc33"/>
+      <text x="60" y="73" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="38" fill="#1d2b4f">Aa</text>
+    </svg>
+    <h1>Bokstavjakten</h1>
+    <p style="font-size:22px;margin:0">Hei, ${esc(NAME)}! Se på bildet og finn bokstaven ordet begynner på.</p>
+    <button class="stars" id="starsBtn" aria-label="Stjernene dine">${STAR}<span>${PROG.stars}</span></button>
+    <button class="btn" id="go">Spill</button>
+    ${(()=>{ const c = bedToday(); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
+      return `<button class="bed ${st}" id="bed" ${c?'disabled':''} aria-label="Jeg var flink til å legge meg">
+        <span class="bed-pic">🛏️<span class="zzz"><i>z</i><i>z</i><i>z</i></span></span>
+        <span class="bed-text"><b>Jeg var flink til å legge meg</b><small>${!c ? `+${BED_STARS} stjerner` : c.status==='pending' ? '⏳ Venter på pappa' : '✅ Pappa sa ja!'}</small></span>
+      </button>`; })()}
+    <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
+    <button class="parent-link" id="parent">Foreldresone${pendingClaims().length?` <span class="pill">${pendingClaims().length} venter</span>`:''}</button>
+  </div>`;
+  document.getElementById('go').onclick = newRound;
+  document.getElementById('bed').onclick = ()=>{ claimBed(); speak('Bra! Nå sjekker pappa.'); startScreen(); };
+  document.getElementById('starsBtn').onclick = ()=>speak(`Du har ${PROG.stars} stjerner`);
+  document.getElementById('parent').onclick = parentLogin;
+  checkCelebrate();
+}
+
+/* ---------- Spill ---------- */
+function newRound(){
+  R = {items: shuffle(WORDS).slice(0, ROUND), i:0, res:[], got:0};
+  showPicture();
+}
+function dotsHTML(){
+  return `<div class="dots" aria-label="Bilde ${R.i+1} av ${ROUND}">${R.items.map((_,k)=>`<i class="${R.res[k]===true?'ok':R.res[k]===false?'miss':k===R.i?'now':''}"></i>`).join('')}</div>`;
+}
+function showPicture(){
+  const my = ++token; screen="play";
+  const it = R.items[R.i];
+  R.tries = 0;
+  app.innerHTML = `
+  <div class="topbar">${dotsHTML()}<div class="stars" aria-label="Stjerner">${STAR}<span id="starCount">${PROG.stars}</span></div></div>
+  <div class="card">
+    <button class="listen" id="listen" aria-label="Hør ordet">${SPEAKER}</button>
+    <div class="pic" role="img" aria-label="Bilde">${it.pic}</div>
+    <div class="slot" id="slot"></div>
+    <div class="word" id="word"></div>
+  </div>
+  <div class="hint" id="hint">Hvilken bokstav begynner det på?</div>
+  <div id="after" style="display:flex;justify-content:center"></div>
+  <div class="kb" id="kb">${LETTERS.map(l=>`<button class="key" data-k="${l}">${l}</button>`).join('')}</div>`;
+  const listen = document.getElementById('listen');
+  const say = () => { listen.classList.add('speaking'); speak(`${it.word}. Hvilken bokstav begynner ${it.word.toLowerCase()} på?`, ()=>listen.classList.remove('speaking')); };
+  listen.onclick = say;
+  say();
+  document.querySelectorAll('.key').forEach(b=>b.onclick=()=>keyHandler && keyHandler(b.dataset.k));
+  keyHandler = k => guess(my, k);
+}
+function guess(my, k){
+  if(my!==token) return;
+  const it = R.items[R.i];
+  const slot = document.getElementById('slot'), hint = document.getElementById('hint'), kb = document.getElementById('kb');
+  R.tries++;
+  slot.textContent = k;
+  if(k===it.letter){
+    keyHandler = null;
+    slot.className = 'slot ok';
+    const n = R.tries===1 ? FIRST : SECOND;
+    R.res[R.i] = true; R.got += n; PROG.right++;
+    addStars(n);
+    ding(); flyStars(n, slot);
+    hint.textContent = n===FIRST ? 'Riktig! To stjerner!' : 'Riktig! En stjerne.';
+    showWord(it);
+    nextButton();
+  } else {
+    slot.className = 'slot bad';
+    PROG.wrong++; save("prog");
+    bonk();
+    document.querySelector(`.key[data-k="${k}"]`).disabled = true;
+    if(R.tries>=2){
+      keyHandler = null;
+      R.res[R.i] = false;
+      hint.textContent = `Det var ${it.letter}.`;
+      setTimeout(()=>{ if(my!==token) return; slot.className='slot ok'; slot.textContent=it.letter; showWord(it); }, 700);
+      nextButton();
+    } else {
+      // Lås tastaturet litt, så det ikke lønner seg å trykke vilt.
+      hint.textContent = 'Nesten! Hør en gang til.';
+      kb.classList.add('locked'); keyHandler = null;
+      speak(it.word);
+      setTimeout(()=>{ if(my!==token) return; kb.classList.remove('locked'); slot.className='slot'; slot.textContent=''; hint.textContent='Prøv igjen!'; keyHandler = kk => guess(my, kk); }, LOCK_MS);
+    }
+  }
+  const sc = document.getElementById('starCount'); if(sc) sc.textContent = PROG.stars;
+}
+function showWord(it){
+  document.getElementById('word').innerHTML = `<span class="first">${esc(it.word[0])}</span>${esc(it.word.slice(1))}`;
+  speak(`${it.letter} for ${it.word.toLowerCase()}`);
+}
+function nextButton(){
+  const last = R.i === ROUND-1;
+  document.getElementById('after').innerHTML = `<button class="btn" id="nx">${last?'Ferdig!':'Neste bilde'}</button>`;
+  const nx = document.getElementById('nx');
+  nx.onclick = ()=>{ if(last) endScreen(); else { R.i++; showPicture(); } };
+  keyHandler = null;
+  setTimeout(()=>{ if(document.activeElement===document.body) nx.focus({preventScroll:true}); }, 50);
+}
+function flyStars(n, from){
+  const target = document.getElementById('starCount');
+  if(!target) return;
+  const a = from.getBoundingClientRect(), b = target.getBoundingClientRect();
+  for(let i=0;i<n;i++){
+    const s = document.createElement('div'); s.className='fly'; s.innerHTML=STAR;
+    s.style.left = (a.left + a.width/2 - 30 + i*24) + 'px'; s.style.top = (a.top + a.height/2 - 30) + 'px';
+    document.body.appendChild(s);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ s.style.transform = `translate(${b.left - a.left - a.width/2 + 10 - i*24}px, ${b.top - a.top - a.height/2 + 10}px) scale(.5)`; s.style.opacity = '.2'; }));
+    setTimeout(()=>s.remove(), 900);
+  }
+}
+function endScreen(){
+  token++; screen="end"; keyHandler=null;
+  PROG.rounds++; save("prog");
+  const right = R.res.filter(x=>x).length;
+  app.innerHTML = `
+  <div class="screen">
+    <h1>Bra jobba!</h1>
+    <p style="font-size:24px;margin:0">Du fant <b>${right}</b> av ${ROUND} bokstaver.</p>
+    <div class="stars" style="cursor:default">${STAR}<span>+${R.got}</span></div>
+    <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">Spill igjen</button><button class="btn" id="home" style="background:#fff;box-shadow:0 6px 0 rgba(29,43,79,.18)">Til start</button></div>
+  </div>`;
+  speak(`Bra jobba, ${NAME}! Du fikk ${R.got} stjerner.`);
+  document.getElementById('again').onclick = newRound;
+  document.getElementById('home').onclick = startScreen;
+  checkCelebrate();
+}
+
+/* ---------- Foreldresone ---------- */
+function parentLogin(){
+  token++; screen="parent"; keyHandler=null;
+  const first = !PRIZES.pin;
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Foreldresone</h2>
+    <p>${first ? 'Lag en PIN-kode med fire tall. Den trengs for å endre premier.' : 'Skriv PIN-koden.'}</p>
+    <form id="pinf" class="form">
+      <input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-label="PIN-kode">
+      <button class="btn" type="submit">${first ? 'Lagre PIN' : 'Åpne'}</button>
+    </form>
+    <p class="err" id="err"></p>
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  document.getElementById('pinf').onsubmit = e => {
+    e.preventDefault();
+    const v = document.getElementById('pin').value.trim();
+    if(!/^\d{4}$/.test(v)){ document.getElementById('err').textContent='PIN-koden må være fire tall.'; return; }
+    if(first){ PRIZES.pin=v; save("prizes"); parentScreen(); }
+    else if(v===PRIZES.pin) parentScreen();
+    else document.getElementById('err').textContent='Feil PIN-kode.';
+  };
+}
+function parentScreen(confirmReset){
+  token++; screen="parent";
+  const prizes = sortedPrizes();
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Ferdig</button>
+    ${pendingClaims().length ? `<h2>Venter på godkjenning</h2>
+    <div class="plist">${pendingClaims().map(c=>`<div class="prow"><span class="at">+${BED_STARS}</span><b>🛏️ Flink til å legge seg</b>
+      <div class="acts"><span class="note">${c.day===today()?'I dag':esc(c.day)}</span><button class="ok" data-ok="${c.id}">Godkjenn</button><button data-no="${c.id}">Avslå</button></div></div>`).join('')}</div>` : ''}
+    <h2>Premier</h2>
+    <p class="note">${esc(NAME)} vinner en premie når rekorden hans når antall stjerner du skriver. Han får 2 stjerner for riktig bokstav på første forsøk og 1 på andre. En runde har ${ROUND} bilder, så en god runde gir rundt 15 stjerner.</p>
+    <form id="addf" class="form">
+      <label>Stjerner<input id="pat" type="number" inputmode="numeric" min="1" max="9999" required placeholder="30"></label>
+      <label class="grow">Premie<input id="ptx" type="text" maxlength="60" required placeholder="Is på butikken"></label>
+      <label class="grow">Bilde (valgfritt)<input id="pimgNew" type="file" accept="image/*"></label>
+      <button class="btn" type="submit">Legg til</button>
+    </form>
+    <p class="err" id="imgErr"></p>
+    <div class="plist">
+      ${prizes.map(p=>`<div class="prow"><span class="at">${p.at}</span><b>${esc(p.text)}</b>
+        ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div></div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
+    </div>
+    <h3>Stjerner</h3>
+    <p class="note">Nå: ${PROG.stars}. Riktige: ${PROG.right}. Feil: ${PROG.wrong}. Runder: ${PROG.rounds}.</p>
+    ${confirmReset ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>` : `<div class="acts"><button id="reset">Nullstill stjernene</button></div>`}
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  document.getElementById('addf').onsubmit = async e => {
+    e.preventDefault();
+    const at = parseInt(document.getElementById('pat').value,10), text = document.getElementById('ptx').value.trim();
+    if(!at || at<1 || !text) return;
+    const f = document.getElementById('pimgNew').files[0];
+    let extra = {};
+    if(f){ e.target.querySelector('[type=submit]').textContent = 'Laster opp …'; try{ extra = await uploadPrizeImage(f); }catch(err){ document.getElementById('imgErr').textContent = 'Bildet ble ikke lastet opp, men premien er lagret.'; } }
+    PRIZES.list = [...PRIZES.list, {id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), at, text, given:false, ...extra}];
+    save("prizes"); parentScreen();
+  };
+  app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ PRIZES.list=PRIZES.list.map(p=>p.id===b.dataset.g?{...p,given:!p.given}:p); save("prizes"); parentScreen(); });
+  app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ dropPrizeImage(PRIZES.list.find(p=>p.id===b.dataset.d)); PRIZES.list = PRIZES.list.filter(p=>p.id!==b.dataset.d); save("prizes"); parentScreen(); });
+  wireImageButtons(()=>parentScreen());
+  app.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.ok, true); parentScreen(); }); });
+  app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
+  const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
+  const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={stars:0,best:0,right:0,wrong:0,rounds:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
+  const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
+}
+
+startScreen();
+</script>
+
+</html>
