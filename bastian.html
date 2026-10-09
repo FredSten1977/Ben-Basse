@@ -171,6 +171,7 @@ h3{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0}
 .bed.pending{background:linear-gradient(135deg,#7a6a2a,#4d4216);box-shadow:0 6px 0 #2f280c;cursor:default}
 .bed.approved{background:linear-gradient(135deg,#2f9e57,#1c6e3a);box-shadow:0 6px 0 #124a26;cursor:default}
 .bed.approved small,.bed.pending small{color:#fff}
+.bed.orden:not(.pending):not(.approved){background:linear-gradient(135deg,#ff8a5c,#e0533b);box-shadow:0 6px 0 #9c3322}
 .pill{display:inline-block;background:var(--coral);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:6px}
 .acts button.ok{background:var(--leaf);color:#fff}
 @keyframes boom{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
@@ -284,21 +285,24 @@ const FIRST = 2, SECOND = 1, LOCK_MS = 2500;
 
 /* ---------- Lagring (felles på alle enheter når den kjører som artifact) ---------- */
 let PROG = {stars:0, best:0, right:0, wrong:0, rounds:0, claims:[]};
-// Leggetid: Bastian trykker på senga, pappa godkjenner i foreldresonen før stjernene kommer. Én gang per dag.
-const BED_STARS = 5;
+// Hjemme-oppdrag: Bastian trykker, pappa godkjenner i foreldresonen før stjernene kommer. Én av hver per dag.
+const TASKS = {
+  sove:  {label:"Jeg var flink til å legge meg", short:"Flink til å legge seg", pic:"🛏️", zzz:true, stars:5},
+  orden: {label:"Jeg har holdt orden", short:"Holdt orden", pic:"🧹", zzz:false, stars:5},
+};
 const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
-const bedToday = () => (PROG.claims||[]).find(c=>c.day===today() && c.status!=='rejected');
+const claimToday = kind => (PROG.claims||[]).find(c=>c.kind===kind && c.day===today() && c.status!=='rejected');
 const pendingClaims = () => (PROG.claims||[]).filter(c=>c.status==='pending');
-function claimBed(){
-  if(bedToday()) return;
-  PROG.claims = [...(PROG.claims||[]), {id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), kind:'sove', day:today(), status:'pending'}].slice(-60);
+function claimTask(kind){
+  if(claimToday(kind)) return;
+  PROG.claims = [...(PROG.claims||[]), {id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), kind, day:today(), status:'pending'}].slice(-60);
   save("prog");
 }
 function decideClaim(id, ok){
   const c = (PROG.claims||[]).find(x=>x.id===id);
   if(!c || c.status!=='pending') return;
   PROG.claims = PROG.claims.map(x=>x.id===id?{...x,status: ok?'approved':'rejected'}:x);
-  if(ok){ PROG.stars += BED_STARS; PROG.best = Math.max(PROG.best, PROG.stars); }
+  if(ok){ PROG.stars += (TASKS[c.kind]||TASKS.sove).stars; PROG.best = Math.max(PROG.best, PROG.stars); }
   save("prog");
 }
 let PRIZES = {pin:"", list:[]};
@@ -649,16 +653,16 @@ function startScreen(){
     <p style="font-size:22px;margin:0">Hei, ${esc(NAME)}! Se på bildet og finn bokstaven ordet begynner på.</p>
     <button class="stars" id="starsBtn" aria-label="Stjernene dine">${STAR}<span>${PROG.stars}</span></button>
     <button class="btn" id="go">Spill</button>
-    ${(()=>{ const c = bedToday(); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
-      return `<button class="bed ${st}" id="bed" ${c?'disabled':''} aria-label="Jeg var flink til å legge meg">
-        <span class="bed-pic">🛏️<span class="zzz"><i>z</i><i>z</i><i>z</i></span></span>
-        <span class="bed-text"><b>Jeg var flink til å legge meg</b><small>${!c ? `+${BED_STARS} stjerner` : c.status==='pending' ? '⏳ Venter på pappa' : '✅ Pappa sa ja!'}</small></span>
-      </button>`; })()}
+    ${Object.entries(TASKS).map(([k,t])=>{ const c = claimToday(k); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
+      return `<button class="bed ${k} ${st}" data-t="${k}" ${c?'disabled':''} aria-label="${t.label}">
+        <span class="bed-pic">${t.pic}${t.zzz?'<span class="zzz"><i>z</i><i>z</i><i>z</i></span>':''}</span>
+        <span class="bed-text"><b>${t.label}</b><small>${!c ? `+${t.stars} stjerner` : c.status==='pending' ? '⏳ Venter på pappa' : '✅ Pappa sa ja!'}</small></span>
+      </button>`; }).join('')}
     <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
     <button class="parent-link" id="parent">Foreldresone${pendingClaims().length?` <span class="pill">${pendingClaims().length} venter</span>`:''}</button>
   </div>`;
   document.getElementById('go').onclick = newRound;
-  document.getElementById('bed').onclick = ()=>{ claimBed(); speak('Bra! Nå sjekker pappa.'); startScreen(); };
+  app.querySelectorAll('.bed[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Bra! Nå sjekker pappa.'); startScreen(); });
   document.getElementById('starsBtn').onclick = ()=>speak(`Du har ${PROG.stars} stjerner`);
   document.getElementById('parent').onclick = parentLogin;
   checkCelebrate();
@@ -805,7 +809,7 @@ function parentScreen(confirmReset){
   <div class="screen left">
     <button class="back" id="back">‹ Ferdig</button>
     ${pendingClaims().length ? `<h2>Venter på godkjenning</h2>
-    <div class="plist">${pendingClaims().map(c=>`<div class="prow"><span class="at">+${BED_STARS}</span><b>🛏️ Flink til å legge seg</b>
+    <div class="plist">${pendingClaims().map(c=>`<div class="prow"><span class="at">+${(TASKS[c.kind]||TASKS.sove).stars}</span><b>${(TASKS[c.kind]||TASKS.sove).pic} ${(TASKS[c.kind]||TASKS.sove).short}</b>
       <div class="acts"><span class="note">${c.day===today()?'I dag':esc(c.day)}</span><button class="ok" data-ok="${c.id}">Godkjenn</button><button data-no="${c.id}">Avslå</button></div></div>`).join('')}</div>` : ''}
     <h2>Premier</h2>
     <p class="note">${esc(NAME)} vinner en premie når rekorden hans når antall stjerner du skriver. Han får 2 stjerner for riktig bokstav på første forsøk og 1 på andre. En runde har ${ROUND} bilder, så en god runde gir rundt 15 stjerner.</p>
