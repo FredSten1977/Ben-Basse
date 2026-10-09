@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lydtest</title>
+<style>
+:root{--bg:#0b1f17;--fg:#f4f7ef;--btn:#ffd23f;--ink:#10221a}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.45 -apple-system,system-ui,sans-serif;padding:20px 16px}
+h1{font-size:26px;margin:0 0 12px}
+button{display:block;width:100%;max-width:420px;margin:12px 0;padding:18px;font:inherit;font-weight:700;border:0;border-radius:14px;background:var(--btn);color:var(--ink)}
+pre{white-space:pre-wrap;background:#06130d;border-radius:10px;padding:12px;font-size:15px;max-width:640px}
+</style>
+</head>
+<body>
+<h1>Lydtest</h1>
+<p>Trykk på de tre knappene etter tur. Ta så et skjermbilde av hele siden og send det til meg.</p>
+<button id="b1">1. Spill en pling</button>
+<button id="b2">2. Si en setning (norsk)</button>
+<button id="b3">3. Si en setning (standardstemme)</button>
+<pre id="log"></pre>
+<script>
+const log = s => { document.getElementById('log').textContent += s + "\n"; };
+log("Nettleser: " + navigator.userAgent);
+log("Hjem-skjerm-app: " + (navigator.standalone || matchMedia('(display-mode: standalone)').matches ? "ja" : "nei"));
+log("Tale finnes: " + ('speechSynthesis' in window ? "ja" : "NEI"));
+try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; log("audioSession: " + (navigator.audioSession ? navigator.audioSession.type : "finnes ikke")); }catch(e){ log("audioSession-feil: " + e.message); }
+let actx = null;
+function voices(){ return 'speechSynthesis' in window ? speechSynthesis.getVoices() : []; }
+function voiceInfo(){
+  const vs = voices();
+  const no = vs.filter(v=>/^(nb|no|nn)/i.test(v.lang) || /norsk|norw|nora/i.test(v.name));
+  log("Stemmer totalt: " + vs.length + ". Norske: " + (no.map(v=>v.name+" ("+v.lang+")").join(", ") || "INGEN"));
+}
+voiceInfo();
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = ()=>{ log("(stemmer lastet)"); voiceInfo(); };
+document.getElementById('b1').onclick = () => {
+  try{
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = 880; g.gain.setValueAtTime(.3, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + .6);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + .65);
+    setTimeout(()=>log("Pling: lydmotor er «" + actx.state + "»"), 300);
+  }catch(e){ log("Pling-feil: " + e.message); }
+};
+function say(useNo){
+  if(!('speechSynthesis' in window)){ log("Tale finnes ikke i denne nettleseren"); return; }
+  const u = new SpeechSynthesisUtterance("Hei Benjamin. Dette er en test av stemmen.");
+  if(useNo){ u.lang = "nb-NO"; const v = voices().find(v=>/^nb/i.test(v.lang)) || voices().find(v=>/^(no|nn)/i.test(v.lang)); if(v) u.voice = v; log("Bruker stemme: " + (v ? v.name : "ingen norsk funnet, ber om nb-NO")); }
+  else log("Bruker standardstemme");
+  u.onstart = ()=>log("Tale startet");
+  u.onend = ()=>log("Tale ferdig");
+  u.onerror = e=>log("Tale-feil: " + (e.error || "ukjent"));
+  window.__u = u;
+  speechSynthesis.speak(u);
+  setTimeout(()=>log("Etter 2 s: snakker=" + speechSynthesis.speaking + ", i kø=" + speechSynthesis.pending + ", pause=" + speechSynthesis.paused), 2000);
+}
+document.getElementById('b2').onclick = () => say(true);
+document.getElementById('b3').onclick = () => say(false);
+</script>
+</body>
+</html>
