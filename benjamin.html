@@ -239,6 +239,10 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .quitrow{display:flex;justify-content:center;margin:22px 0 10px}
 .quit{background:transparent;border:2px solid rgba(244,247,239,.35);color:var(--chalk);font:inherit;font-size:16px;padding:10px 20px;border-radius:999px;cursor:pointer}
 .quit.sure{border-color:var(--red);background:var(--red);color:#fff}
+.pbar{position:relative;height:16px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+.pbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#ffe27a,var(--led));box-shadow:0 0 8px rgba(255,210,63,.6);transition:width .6s ease}
+.pbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
+.rung.given .pbar i{background:linear-gradient(90deg,#7dd08f,#3fae5c);box-shadow:none}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -679,6 +683,8 @@ function nextCardHTML(){
   </div>`;
 }
 
+// Vannrett fremdriftslinje under hver premie: hvor langt rekorden har kommet mot premien.
+const barHTML = pct => `<div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct*100)}"><i style="width:${(pct*100).toFixed(1)}%"></i><span>${Math.round(pct*100)}%</span></div>`;
 function ladderHTML(compact){
   let list = sortedPrizes();
   if(!list.length) return compact ? '' : '<p class="note">Ingen premier ennå. Pappa kan legge inn premier i foreldresonen.</p>';
@@ -696,7 +702,7 @@ function ladderHTML(compact){
     if(it.me) return `<div class="rung me ${cls}"><span class="node ball">${BALL}</span><div class="me-body"><b>Du er her</b><small>${best} poeng</small></div></div>`;
     const st = it.given ? 'given' : best>=it.at ? 'open' : 'locked';
     const label = st==='given' ? 'Mottatt' : st==='open' ? 'Vunnet! Vis til pappa' : `${it.at-best} poeng igjen`;
-    return `<div class="rung ${st} ${cls}"><span class="node">${st==='locked'?LOCK:TROPHY}</span><div class="rung-body"><span class="pts-badge">${it.at}</span>${imgTag(it,'rimg')}<b>${esc(it.text)}</b><small>${label}</small></div></div>`;
+    return `<div class="rung ${st} ${cls}"><span class="node">${st==='locked'?LOCK:TROPHY}</span><div class="rung-body"><span class="pts-badge">${it.at}</span>${imgTag(it,'rimg')}<b>${esc(it.text)}</b><small>${label}</small>${barHTML(it.given ? 1 : Math.min(1, best/it.at))}</div></div>`;
   }).join('');
   return `<div class="ladder">${compact?'<h3>Premieveien</h3>':''}${nextCardHTML()}<div class="track">${rows}</div></div>`;
 }
