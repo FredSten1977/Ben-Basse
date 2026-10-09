@@ -236,6 +236,9 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 
 @media (max-width:360px){.answers{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.quitrow{display:flex;justify-content:center;margin:22px 0 10px}
+.quit{background:transparent;border:2px solid rgba(244,247,239,.35);color:var(--chalk);font:inherit;font-size:16px;padding:10px 20px;border-radius:999px;cursor:pointer}
+.quit.sure{border-color:var(--red);background:var(--red);color:#fff}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -539,7 +542,7 @@ let voice = null;
 function pickVoice(){
   if(!('speechSynthesis' in window)) return;
   const vs = speechSynthesis.getVoices();
-  voice = vs.find(v=>/^nb|^no|^nn/i.test(v.lang)) || vs.find(v=>/norsk|norw/i.test(v.name)) || null;
+  voice = vs.find(v=>/^nb/i.test(v.lang)) || vs.find(v=>/^no|^nn/i.test(v.lang)) || vs.find(v=>/norsk|norw|nora/i.test(v.name)) || null;
 }
 if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speak(text, onEnd){
@@ -547,6 +550,7 @@ function speak(text, onEnd){
   let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
   if(!('speechSynthesis' in window)){ setTimeout(finish, 400); return; }
   if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  if(!voice) pickVoice(); // iPad laster stemmene sent
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = .92; u.pitch = 1.05;
   u.onend = finish; u.onerror = finish;
@@ -1016,7 +1020,21 @@ function question(){
     <div class="hint" id="hint">Hør godt etter …</div>
     <div id="area"></div>
   </div>
-  <div id="after"></div>`;
+  <div id="after"></div>
+  <div class="quitrow"><button class="quit" id="quit">Avslutt kampen</button></div>`;
+  // Avslutt midt i kampen: to trykk, så det ikke skjer ved et uhell. Poeng han har fått, beholder han.
+  const quit = document.getElementById('quit');
+  quit.onclick = () => {
+    if(quit.dataset.sure){
+      token++; keyHandler = null;
+      if('speechSynthesis' in window) speechSynthesis.cancel();
+      S.quit = true;
+      if(S.home + S.away > 0) endScreen(); else startScreen();
+      return;
+    }
+    quit.dataset.sure = "1"; quit.textContent = "Trykk igjen for å avslutte"; quit.classList.add('sure');
+    setTimeout(()=>{ if(quit.isConnected){ delete quit.dataset.sure; quit.textContent = "Avslutt kampen"; quit.classList.remove('sure'); } }, 3000);
+  };
   const listen = document.getElementById('listen');
   const spoken = item.say || item.q;
   listen.onclick = () => { listen.classList.add('speaking'); speak(spoken, ()=>listen.classList.remove('speaking')); };
@@ -1194,7 +1212,7 @@ function endScreen(){
   app.innerHTML = `
   <div class="screen">
     <h1>${title}</h1>
-    <div class="board" style="width:100%;max-width:440px"><div class="team home">Benjamin FC</div><div class="score">${S.home}–${S.away}</div><div class="team away">Gjettelaget</div><div class="meta"><span>FULLTID</span><span><b>90'</b></span></div></div>
+    <div class="board" style="width:100%;max-width:440px"><div class="team home">Benjamin FC</div><div class="score">${S.home}–${S.away}</div><div class="team away">Gjettelaget</div><div class="meta"><span>${S.quit?'AVBRUTT':'FULLTID'}</span><span><b>${S.quit?'':"90'"}</b></span></div></div>
     <p class="delta ${S.delta>=0?'plus':'minus'}">${S.delta>=0?'+':'−'}${Math.abs(S.delta)} poeng i denne kampen</p>
     ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
     ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
