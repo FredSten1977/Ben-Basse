@@ -275,8 +275,34 @@ const WORDS = [
   ["🍇","Druer"],["🍐","Pære"],["🥛","Melk"],["🎸","Gitar"],["🥁","Tromme"],["🐉","Drage"],["🧸","Bamse"],["🐧","Pingvin"],
   ["🦀","Krabbe"],["🐺","Ulv"],["🌽","Mais"],["🍅","Tomat"],["🍋","Sitron"],["🧦","Sokk"],["🎩","Hatt"],["🐓","Hane"],
   ["🦄","Enhjørning"],["🍉","Vannmelon"],["🐊","Krokodille"],["🕷️","Edderkopp"],["🔥","Ild"],["🪁","Drage"],["🦈","Hai"],["🐐","Geit"],
+  ["🚑","Ambulanse"],["⚓","Anker"],["🍍","Ananas"],["🥑","Avokado"],["🥒","Agurk"],["🍊","Appelsin"],
+  ["🥦","Brokkoli"],["🌉","Bro"],["🛁","Badekar"],["🍃","Blad"],["🌊","Bølge"],["🚌","Buss"],
+  ["🐙","Blekksprut"],["🫐","Blåbær"],["🪣","Bøtte"],["🐬","Delfin"],["🦕","Dinosaur"],["💎","Diamant"],
+  ["🚪","Dør"],["🪆","Dukke"],["🚿","Dusj"],["🐿️","Ekorn"],["🎻","Fiolin"],["🦇","Flaggermus"],
+  ["🦩","Flamingo"],["🎆","Fyrverkeri"],["🍑","Fersken"],["🪶","Fjær"],["🦛","Flodhest"],["🦍","Gorilla"],
+  ["🧶","Garn"],["🎃","Gresskar"],["👦","Gutt"],["🔨","Hammer"],["🧤","Hansker"],["🐹","Hamster"],
+  ["🍯","Honning"],["🐔","Høne"],["🚁","Helikopter"],["🦞","Hummer"],["🍔","Hamburger"],
+  ["🐻‍❄️","Isbjørn"],["🧊","Isbit"],["🎄","Juletre"],["🧥","Jakke"],["🌍","Jordklode"],["🐨","Koala"],
+  ["🐪","Kamel"],["🦘","Kenguru"],["📷","Kamera"],["🛶","Kano"],["🥥","Kokosnøtt"],["🦃","Kalkun"],
+  ["🧳","Koffert"],["🗺️","Kart"],["☕","Kopp"],["💡","Lyspære"],["🐆","Leopard"],["⚡","Lyn"],
+  ["🦙","Lama"],["🔦","Lommelykt"],["🚚","Lastebil"],["🐜","Maur"],["🐞","Marihøne"],["🧁","Muffins"],
+  ["🧲","Magnet"],["🎤","Mikrofon"],["🦟","Mygg"],["🏍️","Motorsykkel"],["👃","Nese"],["🍜","Nudler"],
+  ["🌰","Nøtt"],["🦏","Neshorn"],["🦦","Oter"],["🫒","Oliven"],["🐂","Okse"],["🦜","Papegøye"],
+  ["🦔","Pinnsvin"],["🐼","Panda"],["🥞","Pannekake"],["🍿","Popkorn"],["🦚","Påfugl"],["🥔","Potet"],
+  ["🧩","Puslespill"],["🌹","Rose"],["🤖","Robot"],["🐀","Rotte"],["🦌","Rein"],["📻","Radio"],
+  ["🍚","Ris"],["🎒","Ryggsekk"],["🍄","Sopp"],["🦓","Sebra"],["🪜","Stige"],["🦭","Sel"],
+  ["🍭","Slikkepinne"],["🧂","Salt"],["🏖️","Strand"],["🎷","Saksofon"],["🕶️","Solbriller"],
+  ["🦢","Svane"],["🪑","Stol"],["👟","Sko"],["🧽","Svamp"],["🎪","Sirkus"],["🍣","Sushi"],["🚜","Traktor"],
+  ["🎲","Terning"],["🌮","Taco"],["⛺","Telt"],["📞","Telefon"],["🚽","Toalett"],["🪥","Tannbørste"],
+  ["🧵","Tråd"],["🛸","Ufo"],["🌋","Vulkan"],["🧇","Vaffel"],["🌬️","Vind"],["💧","Vann"],
+  ["⏰","Vekkerklokke"],["🏐","Volleyball"],["🪓","Øks"],["🦅","Ørn"],["🏝️","Øy"],
 ].filter((w,i,a)=>a.findIndex(x=>x[1]===w[1])===i).map(([pic,word])=>({pic, word, letter:word[0].toUpperCase()}));
 const ROUND = 10;
+// Rotasjon: bildene han ikke har sett på lengst kommer først. Husket per enhet i nettleseren.
+const SEEN_KEY = "bokstavjakten-seen";
+let SEEN = {}; try{ SEEN = JSON.parse(localStorage.getItem(SEEN_KEY)||"{}") || {}; }catch(e){}
+function markSeen(it){ SEEN[it.word] = Date.now(); try{ localStorage.setItem(SEEN_KEY, JSON.stringify(SEEN)); }catch(e){} }
+const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[x.word]||0)-(SEEN[y.word]||0));
 const LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"];
 
 /* Poeng: riktig på første forsøk gir 2 stjerner, på andre forsøk 1.
@@ -670,7 +696,7 @@ function startScreen(){
 
 /* ---------- Spill ---------- */
 function newRound(){
-  R = {items: shuffle(WORDS).slice(0, ROUND), i:0, res:[], got:0};
+  R = {items: freshFirst(WORDS).slice(0, ROUND), i:0, res:[], got:0};
   showPicture();
 }
 function dotsHTML(){
@@ -680,6 +706,7 @@ function showPicture(){
   const my = ++token; screen="play";
   const it = R.items[R.i];
   R.tries = 0;
+  markSeen(it);
   app.innerHTML = `
   <div class="topbar">${dotsHTML()}<div class="stars" aria-label="Stjerner">${STAR}<span id="starCount">${PROG.stars}</span></div></div>
   <div class="card">
