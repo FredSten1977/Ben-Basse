@@ -1435,9 +1435,14 @@ function parentScreen(confirmReset){
     </form>
     <h3>Poeng</h3>
     <p class="note">Nå: ${total(PROG)} poeng. Rekord: ${PROG.best}.</p>
-    ${confirmReset
+    ${confirmReset===true
       ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>`
       : `<div class="acts"><button id="reset">Nullstill poengene</button></div>`}
+    <h3>De nye øvelsene</h3>
+    <p class="note">Fjerner tider, poeng og nivå fra Rekordlesing, Lydlek, Lesespørsmål og norsk-nivåene, for eksempel etter at du har testet selv. Andre poeng og premier blir som de er.</p>
+    ${confirmReset==='nye'
+      ? `<div class="acts"><button id="nyeYes" class="danger">Ja, nullstill de nye øvelsene</button><button id="resetNo">Avbryt</button></div>`
+      : `<div class="acts"><button id="nye">Nullstill de nye øvelsene</button></div>`}
   </div>`;
   document.getElementById('back').onclick = progressScreen;
   document.getElementById('ukef').onsubmit = e => {
@@ -1461,6 +1466,14 @@ function parentScreen(confirmReset){
   app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
   wireImageButtons(()=>parentScreen());
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
+  const ny=document.getElementById('nye'); if(ny) ny.onclick=()=>parentScreen('nye');
+  const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
+    // Rekorden kan ikke gå ned ellers, men her trekkes testpoengene fra igjen.
+    const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0);
+    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, pts:{...PROG.pts, lydlek:0, lesespm:0}};
+    PROG.best = Math.max(total(PROG), PROG.best - fjernet);
+    save("prog"); parentScreen();
+  };
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={pts:zero(),best:0,right:0,wrong:0,matches:0,learned:[],bonus:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
   const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
 }
