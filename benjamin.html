@@ -245,6 +245,14 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .pbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#ffe27a,var(--led));box-shadow:0 0 8px rgba(255,210,63,.6);transition:width .6s ease}
 /* Norsk-nivåer, Lydlek og Rekordlesing */
 .task.locked{opacity:.45;cursor:default}
+.sil{display:inline-flex;gap:3px;align-items:flex-start;height:1.95em;vertical-align:middle}
+.sb{display:inline-flex;justify-content:center;align-items:flex-end;width:.82em;border:2px solid currentColor;border-radius:5px;box-sizing:border-box;padding-bottom:.06em}
+.sb i{font-style:normal;font-size:.72em;line-height:1}
+.sb.m{height:.9em;margin-top:.5em}
+.sb.h{height:1.4em}
+.sb.l{height:1.4em;margin-top:.5em;align-items:flex-start;padding-top:.06em}
+.sb.x{height:.9em;margin-top:.5em;border-style:dashed;color:var(--red)}
+.ans .sil{font-size:1.15em;gap:2px}
 .mode.locked{filter:grayscale(1);opacity:.55}
 .lasrad{grid-template-columns:1fr auto}
 .lasrad select{font:inherit;font-size:18px;padding:6px 10px;border-radius:8px;background:#050d09;color:var(--chalk);border:2px solid #24392e}
@@ -873,10 +881,33 @@ const TEKSTER = [
   {id:"odegaard", navn:"Ødegaard", linjer:["Martin Ødegaard er fra Drammen.","Han var 15 år i sin første kamp.","Han spilte for Strømsgodset.","Nå er han kaptein for Arsenal.","Han er kaptein for Norge også.","Han er god til å slå pasninger."],
    spm:[{q:"Hvor er Ødegaard fra?", a:"Drammen", w:["Bryne","Oslo","Bodø"]},{q:"Hvor gammel var han i sin første kamp?", a:"15 år", w:["9 år","20 år","30 år"]},{q:"Hva er Ødegaard for Arsenal?", a:"Kaptein", w:["Keeper","Trener","Dommer"]}]},
 ];
+/* ---------- Silhuetter (fra helhetslesing, Refsahl) ----------
+   Hver bokstav blir en rute: høy for b d f h k l t, hengende for g j p q y, ellers lav.
+   Han hører et ord, finner riktig silhuett blant tre og skriver ordet inn i rutene.
+   Ordene hentes fra fotballteksten han leser i Rekordlesing. */
+const form = c => /[bdfhklt]/.test(c) ? 'h' : /[gjpqy]/.test(c) ? 'l' : 'm';
+const formAv = w => [...w].map(form).join('');
+function boksHTML(ord, skrevet){
+  const n = Math.max(ord.length, skrevet.length);
+  return `<span class="sil">${Array.from({length:n}, (_,i)=>`<span class="sb ${i<ord.length ? form(ord.charAt(i)) : 'x'}"><i>${esc(skrevet.charAt(i))}</i></span>`).join('')}</span>`;
+}
+function silItems(id){
+  const t = TEKSTER.find(x=>x.id===id) || TEKSTER[0];
+  const ordAv = tekst => [...new Set(tekst.linjer.join(' ').split(/\s+/).map(w=>w.replace(/[.,!?]/g,'')).filter(w=>/^[a-zæøå]{3,9}$/.test(w)))];
+  const egne = ordAv(t), reserve = TEKSTER.flatMap(ordAv);
+  return shuffle(egne).map(a=>{
+    // Avledere med omtrent samme lengde, men ulik form, så han må se på de høye og hengende rutene.
+    const andre = [...new Set([...egne, ...reserve])].filter(w=>w!==a && formAv(w)!==formAv(a))
+      .map(w=>({w, d:Math.abs(w.length-a.length) + Math.random()*1.5})).sort((x,y)=>x.d-y.d).map(x=>x.w);
+    const w = [];
+    for(const x of andre){ if(w.length<2 && !w.some(y=>formAv(y)===formAv(x))) w.push(x); }
+    return {q:"Finn silhuetten til ordet du hører", say:`Finn ordet ${a}.`, a, w, sil:true};
+  });
+}
 const LES_PTS = 3, LES_MAKS = 6;
 const ordTall = t => t.linjer.join(' ').split(/\s+/).filter(Boolean).length;
 /* Pappa kan låse moduser i foreldresonen: åpen, låst, eller åpen etter én norskkamp i dag. Norsk er alltid åpen. */
-const LASBARE = {fotball:"Fotball", matte:"Matte", historie:"Historie", lydlek:"Lydlek", rekord:"Rekordlesing"};
+const LASBARE = {fotball:"Fotball", matte:"Matte", historie:"Historie", lydlek:"Lydlek", silhuett:"Silhuett", rekord:"Rekordlesing"};
 const lasValg = k => (PRIZES.las||{})[k] || 'apen';
 const norskIDag = () => PROG.norskDag === today();
 const erLast = k => lasValg(k)==='last' || (lasValg(k)==='norsk' && !norskIDag());
@@ -918,6 +949,7 @@ const MODES = {
   matte:    {name:"Matte",    color:"#ffd23f", right:2, make:()=>Array.from({length:MATCH_LEN}, mathQuestion)},
   historie: {name:"Historie", color:"#ffb3ad", right:4, make:()=>{ const L=new Set(PROG.learned||[]); return [...freshFirst(HISTORIE.filter(x=>!L.has(x.q))), ...freshFirst(HISTORIE.filter(x=>L.has(x.q)))]; }},
   norsk:    {name:"Norsk",    color:"#a8f0a0", right:4, make:n=>freshFirst(nivaItems(n ?? norskNiva()))},
+  silhuett: {name:"Silhuett", color:"#9fe3d6", right:2, make:id=>silItems(id || PROG.sisteTekst)},
   lydlek:   {name:"Lydlek",   color:"#ffb347", right:2, make:()=>Array.from({length:MATCH_LEN}, lydQuestion)},
   // Spørsmål etter Rekordlesing. Startes fra lesetekstene, ikke fra forsiden.
   lesespm:  {name:"Lesespørsmål", color:"#c9a7ff", right:2, skjult:true, make:id=>TEKSTER.find(t=>t.id===id).spm.map(x=>({...x}))},
@@ -1330,7 +1362,7 @@ function startScreen(){
       <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
     </button>
     <div class="modes">
-      ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode ${erLast(k)?'locked':''}" data-m="${k}" style="--c:${m.color}">${m.name}<small>${erLast(k) ? lasTekst(k) : k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
+      ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode ${erLast(k)?'locked':''}" data-m="${k}" style="--c:${m.color}">${m.name}<small>${erLast(k) ? lasTekst(k) : k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : k==='silhuett' ? 'Ord fra fotballtekstene' : `+${m.right} per riktig`}</small></button>`).join('')}
       <button class="mode ${erLast('rekord')?'locked':''}" id="rekord" style="--c:#f4f7ef">Rekordlesing<small>${erLast('rekord') ? lasTekst('rekord') : `Fotballtekster · +${LES_PTS} per lesing`}</small></button>
     </div>
     <div class="tasks">
@@ -1347,7 +1379,7 @@ function startScreen(){
   </div>`;
   document.getElementById('bigtxt').onclick = () => { const on = document.body.classList.toggle('big'); try{ localStorage.setItem(BIG, on?'1':''); }catch(e){} startScreen(); };
   const sperret = k => { speak(lasValg(k)==='last' ? 'Pappa har låst denne.' : 'Spill en norskkamp først, så åpner den seg.'); return true; };
-  app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : newMatch(b.dataset.m));
+  app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : b.dataset.m==='silhuett' ? silListe() : newMatch(b.dataset.m));
   document.getElementById('rekord').onclick = ()=> erLast('rekord') ? sperret('rekord') : lesListe();
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
@@ -1452,7 +1484,7 @@ function parentScreen(confirmReset){
       ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>`
       : `<div class="acts"><button id="reset">Nullstill poengene</button></div>`}
     <h3>De nye øvelsene</h3>
-    <p class="note">Fjerner tider, poeng og nivå fra Rekordlesing, Lydlek, Lesespørsmål og norsk-nivåene, for eksempel etter at du har testet selv. Andre poeng og premier blir som de er.</p>
+    <p class="note">Fjerner tider, poeng og nivå fra Rekordlesing, Lydlek, Silhuett, Lesespørsmål og norsk-nivåene, for eksempel etter at du har testet selv. Andre poeng og premier blir som de er.</p>
     ${confirmReset==='nye'
       ? `<div class="acts"><button id="nyeYes" class="danger">Ja, nullstill de nye øvelsene</button><button id="resetNo">Avbryt</button></div>`
       : `<div class="acts"><button id="nye">Nullstill de nye øvelsene</button></div>`}
@@ -1483,8 +1515,8 @@ function parentScreen(confirmReset){
   const ny=document.getElementById('nye'); if(ny) ny.onclick=()=>parentScreen('nye');
   const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
     // Rekorden kan ikke gå ned ellers, men her trekkes testpoengene fra igjen.
-    const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0);
-    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, pts:{...PROG.pts, lydlek:0, lesespm:0}};
+    const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0) + (PROG.pts.silhuett||0);
+    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, sisteTekst:null, pts:{...PROG.pts, lydlek:0, lesespm:0, silhuett:0}};
     PROG.best = Math.max(total(PROG), PROG.best - fjernet);
     save("prog"); parentScreen();
   };
@@ -1511,6 +1543,21 @@ function norskScreen(){
 }
 
 /* ---------- Rekordlesing ---------- */
+function silListe(){
+  token++; screen = "silhuett"; keyHandler = null;
+  const rek = PROG.rekord || {};
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Silhuett</h2>
+    <p class="note">Hør ordet, finn riktig silhuett og skriv ordet i rutene. Ordene kommer fra fotballteksten. Best er å lese teksten i Rekordlesing først, så silhuetter, så lese teksten igjen og slå rekorden.</p>
+    <div class="tasks">
+      ${TEKSTER.map(t=>`<button class="task" data-t="${t.id}"><span>${esc(t.navn)}</span><b>${PROG.sisteTekst===t.id ? '▶' : ''}</b><small>${PROG.sisteTekst===t.id ? 'Teksten du leste sist' : rek[t.id] ? `Lest ${rek[t.id].n} ${rek[t.id].n===1?'gang':'ganger'}` : 'Ikke lest ennå'}</small></button>`).join('')}
+    </div>
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>newMatch('silhuett', b.dataset.t));
+}
 function lesListe(){
   token++; screen = "lesing"; keyHandler = null;
   const rek = PROG.rekord || {}, igjen = LES_MAKS - lesIDag();
@@ -1560,7 +1607,7 @@ function lesFerdig(t, sek){
   const rek = {...(PROG.rekord||{})}, gammel = rek[t.id];
   const ny = !gammel || sek < gammel.best;
   rek[t.id] = {best: gammel ? Math.min(gammel.best, sek) : sek, n: (gammel ? gammel.n : 0) + 1};
-  PROG.rekord = rek;
+  PROG.rekord = rek; PROG.sisteTekst = t.id;
   const poeng = lesIDag() < LES_MAKS ? LES_PTS : 0;
   PROG.lesDag = {day: today(), n: lesIDag() + 1};
   const bestBefore = PROG.best;
@@ -1578,6 +1625,7 @@ function lesFerdig(t, sek){
     <div class="modes">
       <button class="mode" id="spm" style="--c:#7fd3ff">Svar på spørsmål</button>
       <button class="mode" id="igjen" style="--c:#ffd23f">Les igjen</button>
+      <button class="mode" id="sil" style="--c:#9fe3d6">Silhuetter fra teksten</button>
       <button class="mode" id="liste" style="--c:#f4f7ef">Andre tekster</button>
     </div>
   </div>`;
@@ -1587,6 +1635,7 @@ function lesFerdig(t, sek){
   document.getElementById('spm').onclick = ()=>newMatch('lesespm', t.id);
   document.getElementById('igjen').onclick = ()=>lesTekst(t.id);
   document.getElementById('liste').onclick = lesListe;
+  document.getElementById('sil').onclick = ()=> erLast('silhuett') ? speak(lasValg('silhuett')==='last' ? 'Pappa har låst denne.' : 'Spill en norskkamp først.') : newMatch('silhuett', t.id);
 }
 
 /* ---------- Kamp ---------- */
@@ -1655,7 +1704,7 @@ function renderAnswers(hidden){
   const box = document.getElementById('answers');
   box.innerHTML = S.cur.opts.map((o,k)=>{
     const isWrong = S.cur.wrongPicked===o;
-    return `<button class="ans ${hidden?'hidden-text':''} ${isWrong?'wrong':''}" data-o="${esc(o)}" ${hidden||isWrong?'disabled':''} id="ans${k}"><span class="reading">${esc(o)}</span><span class="bar"></span></button>`;
+    return `<button class="ans ${hidden?'hidden-text':''} ${isWrong?'wrong':''}" data-o="${esc(o)}" ${hidden||isWrong?'disabled':''} id="ans${k}"><span class="reading">${S.cur.item.sil ? boksHTML(o,'') : esc(o)}</span><span class="bar"></span></button>`;
   }).join('');
   box.querySelectorAll('.ans').forEach(b=>b.onclick=()=>pick(b));
 }
@@ -1714,8 +1763,36 @@ function finishChoice(my, won){
   right.classList.add('right','say');
   document.getElementById('hint').textContent = won ? 'Bra lest!' : 'Det riktige svaret var:';
   if(item.f) document.getElementById('area').insertAdjacentHTML('beforeend', `<div class="fact">${esc(item.f)}</div>`);
+  if(item.sil){
+    document.getElementById('hint').textContent = won ? 'Riktig silhuett!' : 'Dette var riktig silhuett.';
+    speak(item.a);
+    setTimeout(()=>{ if(my===token) silSkriv(my); }, 1600);
+    return;
+  }
   speak(item.f ? `${item.a}. ${item.f}` : item.a, ()=>right.classList.remove('say'));
   nextButton();
+}
+// Andre steg i Silhuett: skriv ordet inn i rutene. Gir ingen ekstra poeng, men må gjøres før neste ord.
+function silSkriv(my){
+  typingArea(my);
+  S.cur.skriv = true; S.cur.tries = 0;
+  document.getElementById('hint').textContent = 'Skriv ordet i rutene';
+}
+function checkSkriv(my){
+  const item = S.cur.item, guess = S.cur.typed.trim().toLowerCase();
+  if(!guess) return;
+  const typedEl = document.getElementById('typed');
+  if(guess===item.a){
+    keyHandler = null; typedEl.classList.add('ok'); sfxRight(false); speak(item.a);
+    document.getElementById('hint').innerHTML = `Riktig! <span class="answer-word">${esc(item.a)}</span>`;
+    nextButton();
+    return;
+  }
+  S.cur.tries++;
+  typedEl.classList.remove('shake'); void typedEl.offsetWidth; typedEl.classList.add('shake');
+  S.cur.typed = ""; drawTyped();
+  if(S.cur.tries===1){ document.getElementById('hint').textContent = 'Nesten! Hør en gang til.'; speak(item.a); }
+  else { document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${esc(item.a)}</span><br>Skriv det av.`; speak(item.a); }
 }
 function nextButton(){
   const last = S.i === S.qs.length-1;
@@ -1750,12 +1827,13 @@ function typingArea(my){
 }
 function drawTyped(){
   const el = document.getElementById('typed');
+  if(S.cur.item.sil || S.cur.hjelp){ el.innerHTML = boksHTML(S.cur.item.a.toLowerCase(), S.cur.typed); return; }
   el.innerHTML = S.cur.typed ? esc(S.cur.typed) : '<span class="ph">…</span>';
 }
 function typeKey(my, k){
   if(my!==token) return;
   if(k==="Backspace") S.cur.typed = S.cur.typed.slice(0,-1);
-  else if(k==="Enter") return checkTyped(my);
+  else if(k==="Enter") return S.cur.skriv ? checkSkriv(my) : checkTyped(my);
   else if(S.cur.typed.length < 16) S.cur.typed += k;
   drawTyped();
 }
@@ -1787,8 +1865,9 @@ async function checkTyped(my){
   if(S.cur.tries===1){
     await showFlash('<div class="col"><div class="msg mid">Nesten!</div><div class="sub">Ingen poeng tapt</div></div>', 1400);
     if(my!==token) return;
-    S.cur.typed = ""; drawTyped();
-    document.getElementById('hint').textContent = 'Nesten! Hør en gang til og prøv igjen.';
+    // Etter første feil vises silhuetten av ordet: hvor mange bokstaver, og hvor de høye og hengende står.
+    S.cur.typed = ""; S.cur.hjelp = true; drawTyped();
+    document.getElementById('hint').textContent = 'Nesten! Silhuetten viser hvordan ordet ser ut. Hør en gang til.';
     keyHandler = k => typeKey(my, k);
     speak(item.say);
   } else {
