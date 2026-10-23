@@ -245,6 +245,9 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .pbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#ffe27a,var(--led));box-shadow:0 0 8px rgba(255,210,63,.6);transition:width .6s ease}
 /* Norsk-nivåer, Lydlek og Rekordlesing */
 .task.locked{opacity:.45;cursor:default}
+.mode.locked{filter:grayscale(1);opacity:.55}
+.lasrad{grid-template-columns:1fr auto}
+.lasrad select{font:inherit;font-size:18px;padding:6px 10px;border-radius:8px;background:#050d09;color:var(--chalk);border:2px solid #24392e}
 .answer-word mark{background:var(--led);color:var(--ink);border-radius:4px;padding:0 1px}
 .answer-word .dot{font-style:normal;opacity:.5;margin:0 1px}
 .tips{display:block;font-family:var(--font-read);font-size:17px;margin:6px 0 2px;opacity:.9}
@@ -872,6 +875,12 @@ const TEKSTER = [
 ];
 const LES_PTS = 3, LES_MAKS = 6;
 const ordTall = t => t.linjer.join(' ').split(/\s+/).filter(Boolean).length;
+/* Pappa kan låse moduser i foreldresonen: åpen, låst, eller åpen etter én norskkamp i dag. Norsk er alltid åpen. */
+const LASBARE = {fotball:"Fotball", matte:"Matte", historie:"Historie", lydlek:"Lydlek", rekord:"Rekordlesing"};
+const lasValg = k => (PRIZES.las||{})[k] || 'apen';
+const norskIDag = () => PROG.norskDag === today();
+const erLast = k => lasValg(k)==='last' || (lasValg(k)==='norsk' && !norskIDag());
+const lasTekst = k => lasValg(k)==='last' ? '🔒 Låst av pappa' : '🔒 Spill norsk først';
 const lesIDag = () => (PROG.lesDag && PROG.lesDag.day===today()) ? PROG.lesDag.n : 0;
 
 
@@ -1321,8 +1330,8 @@ function startScreen(){
       <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
     </button>
     <div class="modes">
-      ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode" data-m="${k}" style="--c:${m.color}">${m.name}<small>${k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
-      <button class="mode" id="rekord" style="--c:#f4f7ef">Rekordlesing<small>Fotballtekster · +${LES_PTS} per lesing</small></button>
+      ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode ${erLast(k)?'locked':''}" data-m="${k}" style="--c:${m.color}">${m.name}<small>${erLast(k) ? lasTekst(k) : k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
+      <button class="mode ${erLast('rekord')?'locked':''}" id="rekord" style="--c:#f4f7ef">Rekordlesing<small>${erLast('rekord') ? lasTekst('rekord') : `Fotballtekster · +${LES_PTS} per lesing`}</small></button>
     </div>
     <div class="tasks">
       <h3>Hjemme-oppdrag</h3>
@@ -1337,8 +1346,9 @@ function startScreen(){
     <button class="parent-link" id="bigtxt">${document.body.classList.contains('big') ? 'Vanlig tekst' : 'Større tekst'}</button>
   </div>`;
   document.getElementById('bigtxt').onclick = () => { const on = document.body.classList.toggle('big'); try{ localStorage.setItem(BIG, on?'1':''); }catch(e){} startScreen(); };
-  app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> b.dataset.m==='norsk' ? norskScreen() : newMatch(b.dataset.m));
-  document.getElementById('rekord').onclick = lesListe;
+  const sperret = k => { speak(lasValg(k)==='last' ? 'Pappa har låst denne.' : 'Spill en norskkamp først, så åpner den seg.'); return true; };
+  app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : newMatch(b.dataset.m));
+  document.getElementById('rekord').onclick = ()=> erLast('rekord') ? sperret('rekord') : lesListe();
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
   app.querySelectorAll('.task[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Sendt til pappa for godkjenning'); startScreen(); });
@@ -1427,6 +1437,9 @@ function parentScreen(confirmReset){
         ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div>
       </div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
     </div>
+    <h3>Lås moduser</h3>
+    <p class="note">Norsk er alltid åpen. «Etter norsk» betyr at modusen åpner seg når Benjamin har fullført én norskkamp samme dag.</p>
+    <div class="prizes">${Object.entries(LASBARE).map(([k,n])=>`<label class="prize lasrad"><b>${n}</b><select data-las="${k}">${[['apen','Åpen'],['norsk','Etter norsk'],['last','Låst']].map(([v,t])=>`<option value="${v}" ${lasValg(k)===v?'selected':''}>${t}</option>`).join('')}</select></label>`).join('')}</div>
     <h3>Ukens ord</h3>
     <p class="note">Skriv inn staveordene fra skolen, med komma eller linjeskift mellom. De blir et eget valg under Norsk. Del gjerne ordet i stavelser med bindestrek, som fot-ball.</p>
     <form id="ukef" class="form add">
@@ -1445,6 +1458,7 @@ function parentScreen(confirmReset){
       : `<div class="acts"><button id="nye">Nullstill de nye øvelsene</button></div>`}
   </div>`;
   document.getElementById('back').onclick = progressScreen;
+  app.querySelectorAll('[data-las]').forEach(sel=>sel.onchange=()=>{ PRIZES.las = {...(PRIZES.las||{}), [sel.dataset.las]: sel.value}; save("prizes"); });
   document.getElementById('ukef').onsubmit = e => {
     e.preventDefault();
     const ord = document.getElementById('ukeord').value.toLowerCase().split(/[\s,;]+/).map(w=>w.replace(/[^a-zæøå-]/g,'').replace(/^-+|-+$/g,'')).filter(Boolean);
@@ -1792,6 +1806,10 @@ async function checkTyped(my){
 /* ---------- Slutt på kampen ---------- */
 function endScreen(){
   token++; screen = "end"; keyHandler = null;
+  // En fullført norskkamp åpner moduser som pappa har satt til «åpen etter norsk».
+  const forLast = Object.keys(LASBARE).filter(erLast);
+  if(S.mode==='norsk' && !S.quit) PROG.norskDag = today();
+  const aapnet = forLast.filter(k=>!erLast(k));
   PROG.matches++; save("prog");
   const won = S.home>S.away, draw = S.home===S.away;
   const title = won ? 'Du vant kampen!' : draw ? 'Uavgjort!' : 'Gjettelaget vant';
@@ -1808,6 +1826,7 @@ function endScreen(){
     <p class="delta ${S.delta>=0?'plus':'minus'}">${S.delta>=0?'+':'−'}${Math.abs(S.delta)} poeng i denne kampen</p>
     ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
     ${nyttNiva ? `<p class="unlock">Nytt i norsk: <b>${NIVAER[PROG.norskNiva].navn}</b></p>` : ''}
+    ${aapnet.length ? `<p class="unlock">Nå er det åpent: <b>${aapnet.map(k=>LASBARE[k]).join(', ')}</b></p>` : ''}
     ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
     <p style="font-size:22px;max-width:440px;margin:0">${line}</p>
     <div class="modes">
