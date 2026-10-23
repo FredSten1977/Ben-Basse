@@ -243,6 +243,20 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .quit.sure{border-color:var(--red);background:var(--red);color:#fff}
 .pbar{position:relative;height:16px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
 .pbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#ffe27a,var(--led));box-shadow:0 0 8px rgba(255,210,63,.6);transition:width .6s ease}
+/* Norsk-nivåer, Lydlek og Rekordlesing */
+.task.locked{opacity:.45;cursor:default}
+.answer-word mark{background:var(--led);color:var(--ink);border-radius:4px;padding:0 1px}
+.answer-word .dot{font-style:normal;opacity:.5;margin:0 1px}
+.tips{display:block;font-family:var(--font-read);font-size:17px;margin:6px 0 2px;opacity:.9}
+.lestekst{list-style:none;margin:0;padding:6px 18px;background:#fff;color:#000;border-radius:14px;font-family:var(--font-read);font-weight:700;font-size:clamp(28px,7vw,46px);line-height:1.45;letter-spacing:.03em;word-spacing:.12em}
+.lestekst li{padding:6px 0;border-bottom:2px solid #d4d4d4}
+.lestekst li:last-child{border-bottom:0}
+.lesbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.klokke{font-family:var(--font-board);font-size:28px;color:var(--led)}
+.form textarea{font:inherit;font-size:20px;padding:10px 12px;border-radius:10px;border:2px solid #24392e;background:#050d09;color:var(--chalk);width:100%;box-sizing:border-box}
+/* Større tekst og mer luft mellom bokstavene, for dårlig syn og dysleksi. Slås på fra forsiden. */
+body.big .wrap{zoom:1.15}
+body.big .qtext,body.big .ans,body.big .typed,body.big .fact,body.big .answer-word{letter-spacing:.06em;word-spacing:.2em;line-height:1.6}
 .pbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
 .rung.given .pbar i{background:linear-gradient(90deg,#7dd08f,#3fae5c);box-shadow:none}
 </style>
@@ -782,6 +796,84 @@ const NORSK = ["Hjem","Gjerne","Kjøkken","Sjokolade","Kjole","Fotball","Gutt","
   "Hyggelig","Morsom","Lekser","Klasse","Friminutt","Blyant","Viskelær","Tavle","Trener","Kamp","Pokal","Jubel",
   "Stadion","Drakt","Sko","Julaften","Bursdag","Familie","Middag","Frokost","Melk","Vann","Regn","Snø","Torden",
   "Stjerne","Måne","Himmel","Elv","Skog","Telefon","Sjakk"].map(sp);
+/* ---------- Norsk etter nivåer (dysleksi) ----------
+   Ordene kommer i rekkefølgen dysleksitrening anbefaler: lydrette ord først, så ett stavemønster om gangen.
+   Bindestrek deler ordet i stavelser. «mark» er mønsteret som utheves når han får se hvordan ordet skrives.
+   Nytt nivå låses opp når han får minst 6 av 8 riktige på første forsøk. */
+const NIVAER = [
+  {navn:"Korte lydrette ord", tips:"Hver lyd har sin bokstav. Lytt og skriv lyd for lyd.",
+   ord:["sol","mål","bil","lag","mus","is","ku","fot","tå","ost","tak","mor","far","bok","fem","ni","sko","lek","ris","hus","seks","rom","kamp","vant","spark"]},
+  {navn:"Lange lydrette ord", tips:"Klapp stavelsene og skriv én stavelse om gangen.",
+   ord:["ba-nan","to-mat","ro-bot","so-fa","a-vis","pu-te","so-ve","ma-le","ti-ger","sta-di-on","vin-ter","lek-se","ka-me-ra","pi-rat","tav-le","tre-ner","drakt","mål-vakt","fri-spark","for-svar"]},
+  {navn:"To like konsonanter", tips:"Kort vokal? Da kommer det ofte to like bokstaver etter: gutt, ball.",
+   mark:/(bb|dd|ff|gg|kk|ll|mm|nn|pp|rr|ss|tt)/g,
+   ord:["gutt","ball","som-mer","katt","trapp","flagg","kopp","mann","penn","tann","hyt-te","egg","troll","fot-ball","snill","syk-kel","ham-mer","lyk-ke","takk","mam-ma","pap-pa","rygg","gress","spiss","dom-mer","spil-ler"]},
+  {navn:"Stumme bokstaver", tips:"Noen bokstaver sier ingenting: h-en i hv og hj, g-en i gj og ofte d-en til slutt.",
+   mark:/^(hv|hj|gj)|ld|d$/g,
+   ord:["hva","hvor","hvem","hvit","hval","hvi-le","hjem","hjelp","hjer-te","hjelm","gjest","gjø-re","gjer-de","glad","rød","god","brød","sted","kald","hol-de"]},
+  {navn:"Kj- og skj-lyden", tips:"Samme lyd kan skrives på mange måter: kj, skj, sj, k foran i og sk foran i.",
+   mark:/skj|kj|sj|sk(?=i)|k(?=i)/g,
+   ord:["kjo-le","kjøk-ken","kjem-pe","kjø-re","kjeks","kjøtt","skjor-te","skje","skjerm","skjegg","sjo-ko-la-de","sjø","sjef","sji-raff","ki-no","kir-ke","ski"]},
+  {navn:"Alle ordene", tips:"Blandet fra alle nivåene. Nå er du klar for alt!", alle:true, ord:[]},
+];
+// Ett ord blir en skriveoppgave. «syl» husker stavelsene og «niva» hvilket mønster som skal utheves.
+const ordItem = (w, niva) => ({...sp(cap(w.replace(/-/g,''))), syl:w, niva});
+function nivaItems(n){
+  if(n === 'uke') return (PRIZES.ukensOrd||[]).map(w=>ordItem(w,'uke'));
+  if(NIVAER[n].alle) return [...NORSK, ...NIVAER.slice(0,-1).flatMap((l,i)=>l.ord.map(w=>ordItem(w,i)))];
+  return NIVAER[n].ord.map(w=>ordItem(w,n));
+}
+const norskNiva = () => Math.min(PROG.norskNiva||0, NIVAER.length-1);
+// Viser ordet med prikk mellom stavelsene og mønsteret uthevet, f.eks. «fot·ba<ll>».
+function markWord(item){
+  const plain = item.a.toLowerCase(), syl = (item.syl || plain).toLowerCase();
+  const re = typeof item.niva === 'number' && NIVAER[item.niva].mark;
+  const on = new Set();
+  if(re){ for(const m of plain.matchAll(new RegExp(re.source, 'g'))) for(let k=0;k<m[0].length;k++) on.add(m.index+k); }
+  const cuts = new Set(); let pos = 0;
+  for(const ch of syl){ if(ch==='-') cuts.add(pos); else pos++; }
+  return [...plain].map((ch,k)=>(cuts.has(k)?'<i class="dot">·</i>':'') + (on.has(k)?`<mark>${esc(ch)}</mark>`:esc(ch))).join('');
+}
+
+/* ---------- Lydlek ----------
+   Muntlig lydtrening: første lyd, siste lyd, antall stavelser og å sette sammen stavelser.
+   Bare lydrette ord og dobbel konsonant, så bokstaven og lyden stemmer. */
+const LYDORD = NIVAER.slice(0,3).flatMap(l=>l.ord);
+const BOKSTAVER = [..."bdfgklmnprstv", ..."aeiouyæøå"];
+const ANTALL = ["en","to","tre","fire"];
+function lydQuestion(){
+  const w = shuffle(LYDORD)[0], plain = w.replace(/-/g,''), syl = w.split('-');
+  const kind = shuffle(syl.length>1 ? ['først','sist','stavelser','sammen'] : ['først','sist','først'])[0];
+  const letterOpts = a => shuffle(BOKSTAVER.filter(b=>b!==a)).slice(0,3);
+  if(kind==='først'){ const a = plain[0]; return {q:"Hvilken lyd hører du først i ordet?", say:`Hvilken lyd hører du først i ordet ${plain}?`, a, w:letterOpts(a), lyd:plain}; }
+  if(kind==='sist'){ const a = plain.at(-1); return {q:"Hvilken lyd hører du sist i ordet?", say:`Hvilken lyd hører du sist i ordet ${plain}?`, a, w:letterOpts(a), lyd:plain}; }
+  if(kind==='stavelser'){ const a = ANTALL[syl.length-1]; return {q:"Hvor mange stavelser har ordet? Klapp!", say:`Klapp ordet ${plain}. Hvor mange stavelser har det?`, a, w:ANTALL.filter(x=>x!==a).slice(0,3), lyd:plain}; }
+  const andre = shuffle(LYDORD.filter(x=>x.includes('-') && x!==w)).slice(0,3).map(x=>x.replace(/-/g,''));
+  return {q:"Sett sammen stavelsene. Hvilket ord blir det?", say:`Sett sammen: ${syl.join(', ')}.`, a:plain, w:andre, lyd:plain};
+}
+
+/* ---------- Rekordlesing ----------
+   Gjentatt lesing: han leser samme korte tekst høyt for pappa flere ganger og prøver å slå sin egen tid.
+   Pappa trykker Start og Ferdig. Hver lesing gir +3 poeng, maks 6 lesinger om dagen. */
+// Samme stil som lesearkene: én kort setning per linje, veldig stor skrift. Etter lesingen kommer tre spørsmål om teksten.
+const TEKSTER = [
+  {id:"ronaldo", navn:"Ronaldo", linjer:["Ronaldo spiller fotball.","Han er fra Portugal.","Han ble født i 1985.","Han er veldig rask.","Han har scoret over 900 mål.","Han har nummer 7 på drakten.","Han trener hver dag."],
+   spm:[{q:"Hvor er Ronaldo fra?", a:"Portugal", w:["Brasil","Norge","Spania"]},{q:"Hvilket nummer har Ronaldo på drakten?", a:"7", w:["10","9","3"]},{q:"Hvor ofte trener Ronaldo?", a:"Hver dag", w:["En gang i uka","Aldri","Bare om sommeren"]}]},
+  {id:"pele", navn:"Pelé", linjer:["Pelé kom fra Brasil.","Som liten var han fattig.","Han spilte med en sokk full av papir.","Han var 17 år da han vant VM.","Han vant VM tre ganger.","Han hadde nummer 10."],
+   spm:[{q:"Hvor kom Pelé fra?", a:"Brasil", w:["Portugal","Argentina","Sverige"]},{q:"Hva spilte han med som liten?", a:"En sokk", w:["En sko","En stein","En lue"]},{q:"Hvor mange ganger vant Pelé VM?", a:"Tre", w:["En","To","Fem"]}]},
+  {id:"messi", navn:"Messi", linjer:["Messi er fra Argentina.","Som gutt var han liten og tynn.","Han måtte ta medisin for å vokse.","Han flyttet til Barcelona som 13-åring.","Der ble han en stjerne.","I 2022 vant han VM."],
+   spm:[{q:"Hvor er Messi fra?", a:"Argentina", w:["Brasil","Italia","Portugal"]},{q:"Hvorfor tok Messi medisin?", a:"For å vokse", w:["For å løpe fort","For å sove","For å synge"]},{q:"Hvilket år vant Messi VM?", a:"2022", w:["1985","2010","2018"]}]},
+  {id:"zico", navn:"Zico", linjer:["Zico kom fra Brasil.","Han spilte for Flamengo.","Han var kjent for frisparkene sine.","Ballen gikk over muren.","Folk kalte ham den hvite Pelé."],
+   spm:[{q:"Hvilket lag spilte Zico for?", a:"Flamengo", w:["Barcelona","Brann","Arsenal"]},{q:"Hva var Zico kjent for?", a:"Frispark", w:["Å stå i mål","Å synge","Lange innkast"]},{q:"Hva kalte folk Zico?", a:"Den hvite Pelé", w:["Den raske Messi","Lille Ronaldo","Kongen av Norge"]}]},
+  {id:"haaland", navn:"Haaland", linjer:["Erling Haaland er fra Bryne.","Han er høy og veldig rask.","Han spiller for Manchester City.","Han skyter hardt foran mål.","En sesong scoret han 36 mål.","Han spiller også for Norge."],
+   spm:[{q:"Hvor er Haaland fra?", a:"Bryne", w:["Bergen","Drammen","Tromsø"]},{q:"Hvilket lag spiller Haaland for?", a:"Manchester City", w:["Flamengo","Real Madrid","Rosenborg"]},{q:"Hvor mange mål scoret han på én sesong?", a:"36", w:["7","10","100"]}]},
+  {id:"odegaard", navn:"Ødegaard", linjer:["Martin Ødegaard er fra Drammen.","Han var 15 år i sin første kamp.","Han spilte for Strømsgodset.","Nå er han kaptein for Arsenal.","Han er kaptein for Norge også.","Han er god til å slå pasninger."],
+   spm:[{q:"Hvor er Ødegaard fra?", a:"Drammen", w:["Bryne","Oslo","Bodø"]},{q:"Hvor gammel var han i sin første kamp?", a:"15 år", w:["9 år","20 år","30 år"]},{q:"Hva er Ødegaard for Arsenal?", a:"Kaptein", w:["Keeper","Trener","Dommer"]}]},
+];
+const LES_PTS = 3, LES_MAKS = 6;
+const ordTall = t => t.linjer.join(' ').split(/\s+/).filter(Boolean).length;
+const lesIDag = () => (PROG.lesDag && PROG.lesDag.day===today()) ? PROG.lesDag.n : 0;
+
 
 // Matte: tallene står i spørsmålet, men svarene er skrevet med bokstaver, så han må lese tallordet.
 const ONES = ["null","en","to","tre","fire","fem","seks","sju","åtte","ni","ti","elleve","tolv","tretten","fjorten","femten","seksten","sytten","atten","nitten"];
@@ -816,7 +908,10 @@ const MODES = {
   fotball:  {name:"Fotball",  color:"#7fd3ff", right:2, make:()=>shuffle([...freshFirst(FAVORITTER).slice(0,5), ...freshFirst(FOTBALL).slice(0,MATCH_LEN-5)])},
   matte:    {name:"Matte",    color:"#ffd23f", right:2, make:()=>Array.from({length:MATCH_LEN}, mathQuestion)},
   historie: {name:"Historie", color:"#ffb3ad", right:4, make:()=>{ const L=new Set(PROG.learned||[]); return [...freshFirst(HISTORIE.filter(x=>!L.has(x.q))), ...freshFirst(HISTORIE.filter(x=>L.has(x.q)))]; }},
-  norsk:    {name:"Norsk",    color:"#a8f0a0", right:4, make:()=>freshFirst(NORSK)},
+  norsk:    {name:"Norsk",    color:"#a8f0a0", right:4, make:n=>freshFirst(nivaItems(n ?? norskNiva()))},
+  lydlek:   {name:"Lydlek",   color:"#ffb347", right:2, make:()=>Array.from({length:MATCH_LEN}, lydQuestion)},
+  // Spørsmål etter Rekordlesing. Startes fra lesetekstene, ikke fra forsiden.
+  lesespm:  {name:"Lesespørsmål", color:"#c9a7ff", right:2, skjult:true, make:id=>TEKSTER.find(t=>t.id===id).spm.map(x=>({...x}))},
 };
 
 /* ---------- Poengregler ----------
@@ -838,6 +933,8 @@ let PROG = {pts:zero(), best:0, right:0, wrong:0, matches:0, learned:[], bonus:0
 // Hjemme-oppdrag: Benjamin trykker, pappa godkjenner i foreldresonen før poengene kommer. Maks én av hver per dag.
 const TASKS = {
   lekser: {label:"Jeg har gjort lekser", pts:30},
+  lese:   {label:"Jeg har lest 10 minutter med pappa", pts:15},
+  lydbok: {label:"Jeg har hørt på lydbok", pts:5},
   sove:   {label:"Jeg var flink til å legge meg", pts:10},
   orden:  {label:"Jeg har holdt orden", pts:10},
 };
@@ -858,9 +955,11 @@ function decideClaim(id, ok){
 }
 let PRIZES = {pin:"", list:[]};
 const LS = "benjaminfc-v2";
+const BIG = "benjaminfc-big";
+try{ if(localStorage.getItem(BIG)) document.body.classList.add('big'); }catch(e){}
 try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.assign(PROG,c.prog); PROG.pts=Object.assign(zero(),PROG.pts); PRIZES=Object.assign(PRIZES,c.prizes); } }catch(e){}
 let db = null;
-const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0);
+const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0) + (p.lesing||0);
 function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
 async function save(which){
   cacheLocal();
@@ -1215,14 +1314,15 @@ function startScreen(){
     <div class="rules">
       <div class="rule"><i>1</i><span>Hør på spørsmålet.</span></div>
       <div class="rule"><i>2</i><span>Les svarene selv. I norsk skriver du ordet selv.</span></div>
-      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer.</span></div>
+      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer. I norsk mister du aldri poeng for å skrive feil.</span></div>
     </div>
     <button class="pts pts-btn" id="prog">
       <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
       <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
     </button>
     <div class="modes">
-      ${Object.entries(MODES).map(([k,m])=>`<button class="mode" data-m="${k}" style="--c:${m.color}">${m.name}<small>+${m.right} per riktig</small></button>`).join('')}
+      ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode" data-m="${k}" style="--c:${m.color}">${m.name}<small>${k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
+      <button class="mode" id="rekord" style="--c:#f4f7ef">Rekordlesing<small>Fotballtekster · +${LES_PTS} per lesing</small></button>
     </div>
     <div class="tasks">
       <h3>Hjemme-oppdrag</h3>
@@ -1234,8 +1334,11 @@ function startScreen(){
     </div>
     ${ladderHTML(true)}
     <p class="note">Skru på lyden. Hver kamp har ${MATCH_LEN} spørsmål.</p>
+    <button class="parent-link" id="bigtxt">${document.body.classList.contains('big') ? 'Vanlig tekst' : 'Større tekst'}</button>
   </div>`;
-  app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>newMatch(b.dataset.m));
+  document.getElementById('bigtxt').onclick = () => { const on = document.body.classList.toggle('big'); try{ localStorage.setItem(BIG, on?'1':''); }catch(e){} startScreen(); };
+  app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> b.dataset.m==='norsk' ? norskScreen() : newMatch(b.dataset.m));
+  document.getElementById('rekord').onclick = lesListe;
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
   app.querySelectorAll('.task[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Sendt til pappa for godkjenning'); startScreen(); });
@@ -1255,11 +1358,13 @@ function progressScreen(){
     <div class="pts">
       <div class="pts-total"><span>Poeng nå</span><b>${t}</b></div>
       <div class="pts-row">${Object.entries(MODES).map(([k,m])=>`<div><span>${m.name}</span><b style="color:${m.color}">${PROG.pts[k]}</b></div>`).join('')}</div>
+      <div class="pts-bonus"><span>Rekordlesing</span><b>${PROG.lesing||0}</b></div>
       <div class="pts-bonus"><span>Hjemme-oppdrag</span><b>${PROG.bonus||0}</b></div>
     </div>
     <div class="level">
       <div class="level-top"><span class="badge">${li+1}</span><div><b>${LEVELS[li][1]}</b><small>${nextL ? `${nextL[0]-PROG.best} poeng til ${nextL[1]}` : 'Høyeste nivå!'}</small></div></div>
       <div class="meter"><span style="width:${pct}%"></span></div>
+      <small>Norsk: nivå ${norskNiva()+1} av ${NIVAER.length}, ${NIVAER[norskNiva()].navn.toLowerCase()}</small>
       <small>Historie lært: ${HISTORIE.filter(x=>(PROG.learned||[]).includes(x.q)).length} av ${HISTORIE.length}</small>
       <small>Rekord: ${PROG.best} poeng · ${PROG.right} riktige · ${PROG.wrong} feil</small>
     </div>
@@ -1322,6 +1427,12 @@ function parentScreen(confirmReset){
         ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div>
       </div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
     </div>
+    <h3>Ukens ord</h3>
+    <p class="note">Skriv inn staveordene fra skolen, med komma eller linjeskift mellom. De blir et eget valg under Norsk. Del gjerne ordet i stavelser med bindestrek, som fot-ball.</p>
+    <form id="ukef" class="form add">
+      <label class="grow">Ord<textarea id="ukeord" rows="3" maxlength="600">${esc((PRIZES.ukensOrd||[]).join(', '))}</textarea></label>
+      <button class="next" type="submit">Lagre ord</button>
+    </form>
     <h3>Poeng</h3>
     <p class="note">Nå: ${total(PROG)} poeng. Rekord: ${PROG.best}.</p>
     ${confirmReset
@@ -1329,6 +1440,11 @@ function parentScreen(confirmReset){
       : `<div class="acts"><button id="reset">Nullstill poengene</button></div>`}
   </div>`;
   document.getElementById('back').onclick = progressScreen;
+  document.getElementById('ukef').onsubmit = e => {
+    e.preventDefault();
+    const ord = document.getElementById('ukeord').value.toLowerCase().split(/[\s,;]+/).map(w=>w.replace(/[^a-zæøå-]/g,'').replace(/^-+|-+$/g,'')).filter(Boolean);
+    PRIZES.ukensOrd = [...new Set(ord)].slice(0,40); save("prizes"); parentScreen();
+  };
   document.getElementById('addf').onsubmit = async e => {
     e.preventDefault();
     const at = parseInt(document.getElementById('pat').value,10), text = document.getElementById('ptx').value.trim();
@@ -1349,19 +1465,116 @@ function parentScreen(confirmReset){
   const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
 }
 
+/* ---------- Velg norsk-nivå ---------- */
+function norskScreen(){
+  token++; screen = "norsk"; keyHandler = null;
+  const open = norskNiva(), uke = (PRIZES.ukensOrd||[]).length;
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Norsk</h2>
+    <p class="note">Ett stavemønster om gangen. Få 6 av 8 riktige på første forsøk for å låse opp neste nivå.</p>
+    <div class="tasks">
+      ${uke ? `<button class="task niva" data-n="uke"><span>Ukens ord fra skolen</span><b>${uke}</b><small>Ordene pappa har lagt inn</small></button>` : ''}
+      ${NIVAER.map((l,i)=>`<button class="task niva ${i>open?'locked':''}" data-n="${i}" ${i>open?'disabled':''}><span>${i+1}. ${l.navn}</span><b>${i<open?'✓':i===open?'▶':'🔒'}</b><small>${esc(l.tips)}</small></button>`).join('')}
+    </div>
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  app.querySelectorAll('.niva:not([disabled])').forEach(b=>b.onclick=()=>newMatch('norsk', b.dataset.n==='uke' ? 'uke' : +b.dataset.n));
+}
+
+/* ---------- Rekordlesing ---------- */
+function lesListe(){
+  token++; screen = "lesing"; keyHandler = null;
+  const rek = PROG.rekord || {}, igjen = LES_MAKS - lesIDag();
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tilbake</button>
+    <h2>Rekordlesing</h2>
+    <p class="note">Les samme tekst høyt for pappa tre ganger. Første gang kan du høre den først. Prøv å slå din egen rekord, ikke noen andres.</p>
+    <p class="note">${igjen>0 ? `+${LES_PTS} poeng per lesing. ${igjen} lesinger igjen i dag.` : 'Du har lest masse i dag! Du kan fortsatt lese, men poengene er brukt opp.'}</p>
+    <div class="tasks">
+      ${TEKSTER.map(t=>{ const r = rek[t.id]; return `<button class="task" data-t="${t.id}"><span>${esc(t.navn)}</span><b>${r ? r.best+'s' : 'Ny'}</b><small>${r ? `Lest ${r.n} ${r.n===1?'gang':'ganger'} · rekord ${r.best} sekunder` : `${ordTall(t)} ord`}</small></button>`; }).join('')}
+    </div>
+  </div>`;
+  document.getElementById('back').onclick = startScreen;
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>lesTekst(b.dataset.t));
+}
+function lesTekst(id){
+  const my = ++token; screen = "lesing"; keyHandler = null;
+  const t = TEKSTER.find(x=>x.id===id), r = (PROG.rekord||{})[id];
+  let start = 0, tick = null;
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ Tekstene</button>
+    <h2>${esc(t.navn)}</h2>
+    <ol class="lestekst">${t.linjer.map(l=>`<li>${esc(l)}</li>`).join('')}</ol>
+    <div class="lesbar">
+      <button class="quit" id="hor">Hør teksten først</button>
+      <span class="klokke" id="klokke">${r ? `Rekord: ${r.best} s` : '0 s'}</span>
+    </div>
+    <button class="next" id="go">Start – pappa trykker</button>
+  </div>`;
+  const go = document.getElementById('go'), klokke = document.getElementById('klokke');
+  document.getElementById('back').onclick = ()=>{ clearInterval(tick); if('speechSynthesis' in window) speechSynthesis.cancel(); lesListe(); };
+  document.getElementById('hor').onclick = ()=>speak(t.linjer.join(' '));
+  go.onclick = ()=>{
+    if(!start){
+      if('speechSynthesis' in window) speechSynthesis.cancel();
+      start = Date.now(); go.textContent = 'Ferdig!';
+      tick = setInterval(()=>{ if(my!==token) return clearInterval(tick); klokke.textContent = Math.round((Date.now()-start)/1000)+' s'; }, 250);
+      return;
+    }
+    clearInterval(tick);
+    lesFerdig(t, Math.max(1, Math.round((Date.now()-start)/1000)));
+  };
+}
+function lesFerdig(t, sek){
+  const rek = {...(PROG.rekord||{})}, gammel = rek[t.id];
+  const ny = !gammel || sek < gammel.best;
+  rek[t.id] = {best: gammel ? Math.min(gammel.best, sek) : sek, n: (gammel ? gammel.n : 0) + 1};
+  PROG.rekord = rek;
+  const poeng = lesIDag() < LES_MAKS ? LES_PTS : 0;
+  PROG.lesDag = {day: today(), n: lesIDag() + 1};
+  const bestBefore = PROG.best;
+  if(poeng){ PROG.lesing = (PROG.lesing||0) + poeng; PROG.best = Math.max(PROG.best, total(PROG)); }
+  save("prog");
+  const opm = Math.round(ordTall(t) / sek * 60);
+  token++; screen = "lesing";
+  app.innerHTML = `
+  <div class="screen">
+    <h1>${ny && gammel ? 'Ny rekord!' : 'Bra lest!'}</h1>
+    <p class="final">${sek} s</p>
+    <p style="font-size:22px;margin:0">${opm} ord i minuttet${gammel ? ` · forrige rekord ${gammel.best} s` : ''}</p>
+    ${poeng ? `<p class="delta plus">+${poeng} poeng</p>` : ''}
+    <p class="note">Lest ${rek[t.id].n} ${rek[t.id].n===1?'gang':'ganger'}. ${rek[t.id].n<3 ? 'Les den en gang til, da går det fortere.' : 'Prøv gjerne en ny tekst neste gang.'}</p>
+    <div class="modes">
+      <button class="mode" id="spm" style="--c:#7fd3ff">Svar på spørsmål</button>
+      <button class="mode" id="igjen" style="--c:#ffd23f">Les igjen</button>
+      <button class="mode" id="liste" style="--c:#f4f7ef">Andre tekster</button>
+    </div>
+  </div>`;
+  if(ny && gammel) showFlash('<div class="msg mid">REKORD!</div>', 1500);
+  speak(ny && gammel ? 'Ny rekord!' : 'Bra lest!');
+  if(sortedPrizes().some(p=>bestBefore < p.at && PROG.best >= p.at)) checkCelebrate();
+  document.getElementById('spm').onclick = ()=>newMatch('lesespm', t.id);
+  document.getElementById('igjen').onclick = ()=>lesTekst(t.id);
+  document.getElementById('liste').onclick = lesListe;
+}
+
 /* ---------- Kamp ---------- */
-function newMatch(mode){
-  S = {mode, qs: MODES[mode].make().slice(0, MATCH_LEN), i:0, home:0, away:0, bestBefore:PROG.best, delta:0};
+function newMatch(mode, arg){
+  S = {mode, arg, qs: MODES[mode].make(arg).slice(0, MATCH_LEN), i:0, home:0, away:0, bestBefore:PROG.best, delta:0};
   question();
 }
 
 function boardHTML(){
-  const minute = Math.round((S.i)/MATCH_LEN*90);
+  const minute = Math.round((S.i)/S.qs.length*90);
   return `<div class="board" role="status" aria-label="Stilling">
     <div class="team home">Benjamin FC</div>
     <div class="score">${S.home}–${S.away}</div>
     <div class="team away">Gjettelaget</div>
-    <div class="meta"><span>${MODES[S.mode].name.toUpperCase()} · <b>${S.i+1}</b>/${MATCH_LEN}</span><span><b>${minute}'</b></span></div>
+    <div class="meta"><span>${MODES[S.mode].name.toUpperCase()} · <b>${S.i+1}</b>/${S.qs.length}</span><span><b>${minute}'</b></span></div>
   </div>`;
 }
 function scoreWrong(){ S.away++; S.delta+=WRONG; changePts(S.mode, WRONG); app.querySelector('.board').outerHTML = boardHTML(); }
@@ -1478,7 +1691,7 @@ function finishChoice(my, won){
   nextButton();
 }
 function nextButton(){
-  const last = S.i === MATCH_LEN-1;
+  const last = S.i === S.qs.length-1;
   document.getElementById('after').innerHTML = `<div style="display:flex;justify-content:center"><button class="next" id="nx">${last?'Se resultatet':'Neste spørsmål'}</button></div>`;
   const nx = document.getElementById('nx');
   nx.onclick = ()=>{ if(last) endScreen(); else { S.i++; question(); } };
@@ -1537,25 +1750,27 @@ async function checkTyped(my){
     else { sfxRight(false); await showFlash('<div><div class="msg mid">Riktig!</div><div class="sub">Men ingen mål denne gangen</div></div>', 1400); }
     if(my!==token) return;
     app.querySelector('.board').outerHTML = boardHTML();
-    document.getElementById('hint').textContent = 'Riktig skrevet!';
+    document.getElementById('hint').innerHTML = `Riktig skrevet! <span class="answer-word">${markWord(item)}</span>`;
     speak(item.a);
     nextButton();
     return;
   }
-  scoreWrong(); sfxFart();
+  // Stavefeil koster ingen poeng og gir ingen promp: han kan ikke gjette når han skriver selv, og med dysleksi kommer feilene ofte.
   document.getElementById('attempts').innerHTML += `<s>${esc(guess)}</s>`;
   if(S.cur.tries===1){
-    await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div>${ptsTag(WRONG)}</div>`, 1800);
+    await showFlash('<div class="col"><div class="msg mid">Nesten!</div><div class="sub">Ingen poeng tapt</div></div>', 1400);
     if(my!==token) return;
     S.cur.typed = ""; drawTyped();
     document.getElementById('hint').textContent = 'Nesten! Hør en gang til og prøv igjen.';
     keyHandler = k => typeKey(my, k);
     speak(item.say);
   } else {
-    await showFlash(`<div class="col"><div class="card r"></div><div class="sub">Rødt kort! Gjettelaget scoret igjen.</div>${ptsTag(WRONG)}</div>`, 1800);
+    S.away++; app.querySelector('.board').outerHTML = boardHTML();
+    await showFlash('<div class="col"><div class="sub">Gjettelaget scoret, men du mister ingen poeng.</div></div>', 1800);
     if(my!==token) return;
     S.cur.copy = true; S.cur.typed = ""; drawTyped();
-    document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${esc(item.a.toLowerCase())}</span><br>Skriv det av.`;
+    const tips = typeof item.niva === 'number' ? `<br><small class="tips">${esc(NIVAER[item.niva].tips)}</small>` : '';
+    document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${markWord(item)}</span>${tips}<br>Skriv det av.`;
     speak(item.a);
     keyHandler = k => typeKey(my, k);
   }
@@ -1570,16 +1785,20 @@ function endScreen(){
   const line = won ? 'Du leste godt. Det er sånn mesterne gjør det.' : draw ? 'Jevn kamp. Klarer du å vinne neste?' : 'Les alle svarene før du trykker, så slår du dem neste gang.';
   const unlocked = sortedPrizes().filter(p=>S.bestBefore < p.at && PROG.best >= p.at);
   const lvlUp = levelOf(PROG.best) > levelOf(S.bestBefore);
+  // Nytt norsk-nivå: minst 6 av 8 riktige på første forsøk på det høyeste åpne nivået.
+  const nyttNiva = S.mode==='norsk' && !S.quit && S.arg===norskNiva() && S.home>=6 && S.arg<NIVAER.length-1;
+  if(nyttNiva){ PROG.norskNiva = S.arg+1; save("prog"); }
   app.innerHTML = `
   <div class="screen">
     <h1>${title}</h1>
     <div class="board" style="width:100%;max-width:440px"><div class="team home">Benjamin FC</div><div class="score">${S.home}–${S.away}</div><div class="team away">Gjettelaget</div><div class="meta"><span>${S.quit?'AVBRUTT':'FULLTID'}</span><span><b>${S.quit?'':"90'"}</b></span></div></div>
     <p class="delta ${S.delta>=0?'plus':'minus'}">${S.delta>=0?'+':'−'}${Math.abs(S.delta)} poeng i denne kampen</p>
     ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
+    ${nyttNiva ? `<p class="unlock">Nytt i norsk: <b>${NIVAER[PROG.norskNiva].navn}</b></p>` : ''}
     ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
     <p style="font-size:22px;max-width:440px;margin:0">${line}</p>
     <div class="modes">
-      <button class="mode" id="again" style="--c:${MODES[S.mode].color}">Ny kamp i ${MODES[S.mode].name.toLowerCase()}</button>
+      <button class="mode" id="again" style="--c:${MODES[S.mode].color}">${S.mode==='lesespm' ? 'Til lesetekstene' : nyttNiva ? 'Prøv neste nivå' : `Ny kamp i ${MODES[S.mode].name.toLowerCase()}`}</button>
       <button class="mode" id="menu" style="--c:#f4f7ef">Til start</button>
     </div>
   </div>`;
@@ -1587,7 +1806,8 @@ function endScreen(){
   else if(won) showFlash('<div class="msg">SEIER!</div>', 1500);
   if(!unlocked.length) speak(title);
   const mode = S.mode;
-  document.getElementById('again').onclick = ()=>newMatch(mode);
+  const arg = nyttNiva ? PROG.norskNiva : S.arg;
+  document.getElementById('again').onclick = ()=> mode==='lesespm' ? lesListe() : newMatch(mode, arg);
   document.getElementById('menu').onclick = startScreen;
 }
 
