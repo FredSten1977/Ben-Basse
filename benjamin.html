@@ -243,6 +243,9 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .quit.sure{border-color:var(--red);background:var(--red);color:#fff}
 .pbar{position:relative;height:16px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
 .pbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#ffe27a,var(--led));box-shadow:0 0 8px rgba(255,210,63,.6);transition:width .6s ease}
+/* Større tekst og mer luft mellom bokstavene, for dårlig syn og dysleksi. Slås på fra forsiden. */
+body.big .wrap{zoom:1.15}
+body.big .qtext,body.big .ans,body.big .typed,body.big .fact,body.big .answer-word{letter-spacing:.06em;word-spacing:.2em;line-height:1.6}
 .pbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
 .rung.given .pbar i{background:linear-gradient(90deg,#7dd08f,#3fae5c);box-shadow:none}
 </style>
@@ -838,6 +841,8 @@ let PROG = {pts:zero(), best:0, right:0, wrong:0, matches:0, learned:[], bonus:0
 // Hjemme-oppdrag: Benjamin trykker, pappa godkjenner i foreldresonen før poengene kommer. Maks én av hver per dag.
 const TASKS = {
   lekser: {label:"Jeg har gjort lekser", pts:30},
+  lese:   {label:"Jeg har lest 10 minutter med pappa", pts:15},
+  lydbok: {label:"Jeg har hørt på lydbok", pts:5},
   sove:   {label:"Jeg var flink til å legge meg", pts:10},
   orden:  {label:"Jeg har holdt orden", pts:10},
 };
@@ -858,6 +863,8 @@ function decideClaim(id, ok){
 }
 let PRIZES = {pin:"", list:[]};
 const LS = "benjaminfc-v2";
+const BIG = "benjaminfc-big";
+try{ if(localStorage.getItem(BIG)) document.body.classList.add('big'); }catch(e){}
 try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.assign(PROG,c.prog); PROG.pts=Object.assign(zero(),PROG.pts); PRIZES=Object.assign(PRIZES,c.prizes); } }catch(e){}
 let db = null;
 const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0);
@@ -1215,7 +1222,7 @@ function startScreen(){
     <div class="rules">
       <div class="rule"><i>1</i><span>Hør på spørsmålet.</span></div>
       <div class="rule"><i>2</i><span>Les svarene selv. I norsk skriver du ordet selv.</span></div>
-      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer.</span></div>
+      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer. I norsk mister du aldri poeng for å skrive feil.</span></div>
     </div>
     <button class="pts pts-btn" id="prog">
       <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
@@ -1234,7 +1241,9 @@ function startScreen(){
     </div>
     ${ladderHTML(true)}
     <p class="note">Skru på lyden. Hver kamp har ${MATCH_LEN} spørsmål.</p>
+    <button class="parent-link" id="bigtxt">${document.body.classList.contains('big') ? 'Vanlig tekst' : 'Større tekst'}</button>
   </div>`;
+  document.getElementById('bigtxt').onclick = () => { const on = document.body.classList.toggle('big'); try{ localStorage.setItem(BIG, on?'1':''); }catch(e){} startScreen(); };
   app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>newMatch(b.dataset.m));
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
@@ -1542,17 +1551,18 @@ async function checkTyped(my){
     nextButton();
     return;
   }
-  scoreWrong(); sfxFart();
+  // Stavefeil koster ingen poeng og gir ingen promp: han kan ikke gjette når han skriver selv, og med dysleksi kommer feilene ofte.
   document.getElementById('attempts').innerHTML += `<s>${esc(guess)}</s>`;
   if(S.cur.tries===1){
-    await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div>${ptsTag(WRONG)}</div>`, 1800);
+    await showFlash('<div class="col"><div class="msg mid">Nesten!</div><div class="sub">Ingen poeng tapt</div></div>', 1400);
     if(my!==token) return;
     S.cur.typed = ""; drawTyped();
     document.getElementById('hint').textContent = 'Nesten! Hør en gang til og prøv igjen.';
     keyHandler = k => typeKey(my, k);
     speak(item.say);
   } else {
-    await showFlash(`<div class="col"><div class="card r"></div><div class="sub">Rødt kort! Gjettelaget scoret igjen.</div>${ptsTag(WRONG)}</div>`, 1800);
+    S.away++; app.querySelector('.board').outerHTML = boardHTML();
+    await showFlash('<div class="col"><div class="sub">Gjettelaget scoret, men du mister ingen poeng.</div></div>', 1800);
     if(my!==token) return;
     S.cur.copy = true; S.cur.typed = ""; drawTyped();
     document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${esc(item.a.toLowerCase())}</span><br>Skriv det av.`;
