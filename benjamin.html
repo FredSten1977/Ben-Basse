@@ -118,6 +118,10 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .pts-row b{font-family:var(--font-board);font-weight:400;font-size:24px}
 
 
+.qtext .enw{display:inline-block;background:#e4d8ff;color:var(--ink);border-radius:10px;padding:0 10px;margin:2px 0;font-size:1.25em;letter-spacing:.04em;word-spacing:.15em}
+.listen-big{font-size:16px;font-weight:400;opacity:.8;margin-top:6px}
+.en-ans .ans{letter-spacing:.05em;word-spacing:.15em}
+.modes .mode:last-child:nth-child(odd){grid-column:1/-1}
 .fact{position:relative;z-index:1;margin-top:14px;background:rgba(5,13,9,.82);border-left:6px solid var(--led);border-radius:10px;padding:12px 14px;font-size:20px;line-height:1.45}
 .ladder{width:100%;max-width:520px;display:grid;gap:14px;text-align:left}
 .ladder h3{margin:0;text-align:center}
@@ -478,6 +482,48 @@ const FOTBALL = [
   {q:"Hva har spillerne under strømpene for å beskytte leggene?", a:"Leggskinn", w:["Leggskinke","Hjelm","Kneputer"]},
   {q:"Hva har fotballsko under sålen for å stå støtt?", a:"Knotter", w:["Knapper","Hjul","Sugekopper"]},
   {q:"Hva blåser dommeren i for å stoppe spillet?", a:"Fløyte", w:["Fløte","Bjelle","Horn"]},
+  // Litt vanskeligere (lagt til november 2026)
+  {q:"Hvilket land vant VM for kvinner i 2023?", a:"Spania", w:["Slovakia","England","Sverige"]},
+  {q:"Hvem vant Gullballen for herrer i 2024?", a:"Rodri", w:["Rodrigo","Vinícius Júnior","Jude Bellingham"]},
+  {q:"Hvilken klubb vant Champions League for herrer i 2025?", a:"PSG", w:["PSV","Inter","Arsenal"]},
+  {q:"Hvilket land vant VM for herrer i 2006?", a:"Italia", w:["Irland","Frankrike","Tyskland"]},
+  {q:"Hvilket land vant VM i 1998 på hjemmebane?", a:"Frankrike", w:["Finland","Brasil","Italia"]},
+  {q:"Hvilket land vant VM for herrer i 2002?", a:"Brasil", w:["Bolivia","Tyskland","Sør-Korea"]},
+  {q:"Hvilke to land arrangerte VM sammen i 2002?", a:"Japan og Sør-Korea", w:["Japan og Kina","USA og Mexico","Spania og Portugal"]},
+  {q:"Hvor mange ganger har Brasil vunnet VM for herrer?", a:"Fem", w:["Femten","Fire","Tre"]},
+  {q:"Hvilket land har vunnet flest EM for herrer?", a:"Spania", w:["Sverige","Tyskland","Frankrike"]},
+  {q:"Hvilket VM var Norges herrelag med i for første gang siden 1998?", a:"2026", w:["2062","2014","2022"]},
+  {q:"Hvem er kaptein på Norges herrelandslag?", a:"Martin Ødegaard", w:["Morten Ødegaard","Erling Haaland","Ståle Solbakken"]},
+  {q:"Hvem ble landslagstrener for Norges herrer i 2020?", a:"Ståle Solbakken", w:["Ståle Solheim","Egil Olsen","Lars Lagerbäck"]},
+  {q:"Hvem har scoret flest mål for Norges herrelandslag?", a:"Erling Haaland", w:["Erlend Haaland","Jørgen Juve","John Carew"]},
+  {q:"Hvilken stor spansk klubb kjøpte Martin Ødegaard da han var seksten år?", a:"Real Madrid", w:["Real Betis","Barcelona","Atlético Madrid"]},
+  {q:"Hvilken norsk klubb kom til semifinalen i Europa League i 2025?", a:"Bodø/Glimt", w:["Brann","Molde","Rosenborg"]},
+  {q:"Hva heter pokalen som vinneren av cupfinalen i Norge får?", a:"Kongepokalen", w:["Kongeriket","Gullballen","Verdenspokalen"]},
+  {q:"Hvilket land kommer Kylian Mbappé fra?", a:"Frankrike", w:["Finland","Belgia","Kamerun"]},
+  {q:"Hvilken klubb gikk Kylian Mbappé til i 2024?", a:"Real Madrid", w:["Real Sociedad","Barcelona","Liverpool"]},
+  {q:"Hvilket land kommer Kevin De Bruyne fra?", a:"Belgia", w:["Bulgaria","Nederland","Tyskland"]},
+  {q:"Hva er tegnet på merket til Arsenal?", a:"En kanon", w:["En kano","En løve","En hane"]},
+  {q:"Hvilket dyr er på merket til Chelsea?", a:"En løve", w:["En lue","En ørn","En hane"]},
+  {q:"Hva kalles kampen mellom Real Madrid og Barcelona?", a:"El Clásico", w:["El Chico","Derbyet","Superfinalen"]},
+  {q:"Hva kaller vi en kamp mellom to lag fra samme by?", a:"Derby", w:["Debut","Finale","Treningskamp"]},
+  {q:"Hvilken klubb er Liverpools store rival i samme by?", a:"Everton", w:["Exeter","Arsenal","Leeds"]},
+  {q:"Hvilken klubb vant Premier League sesongen 2024–25?", a:"Liverpool", w:["Leicester","Arsenal","Manchester City"]},
+  {q:"Leicester vant Premier League helt overraskende. Hvilket år var det?", a:"2016", w:["2006","2012","2020"]},
+  {q:"Hvor mange lag spiller i Premier League?", a:"Tjue", w:["Tjueto","Seksten","Tolv"]},
+  {q:"Hvor mange lag spiller i Eliteserien?", a:"Seksten", w:["Seks","Tjue","Tolv"]},
+  {q:"Hva heter den europeiske klubbturneringen som er nest størst etter Champions League?", a:"Europa League", w:["Europa Leaf","Conference League","Eliteserien"]},
+  {q:"Hvilket år fikk Champions League det navnet?", a:"1992", w:["1929","1955","2000"]},
+  {q:"Hvor mange spillere må et lag minst ha på banen for at kampen kan fortsette?", a:"Sju", w:["Sytten","Fem","Ni"]},
+  {q:"Hvor bredt er et fotballmål for voksne?", a:"Litt over sju meter", w:["Litt over sytti meter","To meter","Femten meter"]},
+  {q:"Hvor høyt er et fotballmål for voksne?", a:"Litt over to meter", w:["Litt over tjue meter","En meter","Fem meter"]},
+  {q:"Hva kaller vi det når kampen avgjøres med straffespark etter ekstraomgangene?", a:"Straffesparkkonkurranse", w:["Straffesparkkake","Omkamp","Golden goal"]},
+  {q:"Hva heter frisparket der du ikke har lov til å skyte rett i mål?", a:"Indirekte frispark", w:["Indirekte straffe","Direkte frispark","Innkast"]},
+  {q:"Hva kaller vi et skudd der ballen sparkes før den treffer bakken?", a:"Volley", w:["Volleyball","Heading","Takling"]},
+  {q:"Hva heter sparket der spilleren sparker ballen bakover over sitt eget hode?", a:"Brassespark", w:["Brasseriespark","Hælspark","Volley"]},
+  {q:"Hva kaller vi det når ballen løftes over keeperen og inn i mål?", a:"Lobb", w:["Lapp","Volley","Takling"]},
+  {q:"Dommeren lar spillet gå videre etter en feil fordi laget som ble felt, har ballen. Hva heter det?", a:"Fordel", w:["Fordeling","Offside","Frispark"]},
+  {q:"Hva kalles tiden dommeren legger til på slutten av en omgang?", a:"Tilleggstid", w:["Tilleggsskatt","Ekstraomganger","Pause"]},
+  {q:"Hvor på laget spiller en midtstopper?", a:"I forsvaret", w:["I forsetet","I angrepet","I mål"]},
 ];
 // Benjamins favoritter: United, Ronaldo, Messi, Pelé, Lamine Yamal og Solskjær. Hver kamp får minst fem av disse.
 const FAVORITTER = [
@@ -593,6 +639,20 @@ const FAVORITTER = [
   {q:"Hvem tok hjørnesparket rett før Solskjærs vinnermål i 1999-finalen?", a:"David Beckham", w:["David Bentley","Ryan Giggs","Roy Keane"]},
   {q:"Solskjær har bursdag i februar. Hvilken dato er det?", a:"Tjuesjette", w:["Sjette","Tjuende","Tolvte"]},
   {q:"Hvilket år sluttet Solskjær som manager i Manchester United?", a:"2021", w:["2012","2019","2023"]},
+  // Litt vanskeligere (lagt til november 2026)
+  {q:"Hvem var manager da United vant Europa League i 2017?", a:"José Mourinho", w:["José Morales","Louis van Gaal","Erik ten Hag"]},
+  {q:"Hvilket lag slo United i FA-cupfinalen i 2024?", a:"Manchester City", w:["Manchester Rovers","Liverpool","Coventry"]},
+  {q:"Hvilken portugisisk manager tok over United i november 2024?", a:"Ruben Amorim", w:["Ruben Dias","José Mourinho","Erik ten Hag"]},
+  {q:"Hvilket lag slo United i Europa League-finalen i 2025?", a:"Tottenham", w:["Nottingham","Chelsea","Bodø/Glimt"]},
+  {q:"Mot hvilket lag scoret Ronaldo med hodet i Champions League-finalen i 2008?", a:"Chelsea", w:["Charlton","Arsenal","Barcelona"]},
+  {q:"Hvor mange ganger har Cristiano Ronaldo vunnet Gullballen?", a:"Fem", w:["Femten","Fire","Åtte"]},
+  {q:"Hvor på banen spilte den unge Ronaldo i United?", a:"På kanten", w:["På kontoret","I mål","Midtstopper"]},
+  {q:"Hva vant Messi med Argentina i OL i Beijing i 2008?", a:"Gullmedalje", w:["Gullfisk","Sølvmedalje","VM-pokalen"]},
+  {q:"Hvilket land slo Brasil og Pelé i VM-finalen i 1970?", a:"Italia", w:["Irland","Tyskland","England"]},
+  {q:"Hvem vant Gullballen i 2025, rett foran Lamine Yamal?", a:"Ousmane Dembélé", w:["Ousmane Diallo","Mohamed Salah","Raphinha"]},
+  {q:"Hvilket draktnummer fikk Lamine Yamal i Barcelona sommeren 2025?", a:"Ti", w:["Tolv","Nitten","Sju"]},
+  {q:"Hvilket tyrkisk lag ble Solskjær trener for i januar 2025?", a:"Beşiktaş", w:["Bergen","Galatasaray","Fenerbahçe"]},
+  {q:"Hvor mange mål scoret Solskjær for Manchester United?", a:"126", w:["162","26","216"]},
 ];
 // Historie: allmennkunnskap, fra oldtiden til i dag. "f" er en kort forklaring som vises og leses opp etter svaret.
 const HISTORIE = [
@@ -963,7 +1023,7 @@ function silItems(id){
 const LES_PTS = 3, LES_MAKS = 6, FEILFRI_PTS = 2, KINO_MAKS = 10;
 const ordTall = t => t.linjer.join(' ').split(/\s+/).filter(Boolean).length;
 /* Pappa kan låse moduser i foreldresonen: åpen, låst, eller åpen etter én norskkamp i dag. Norsk er alltid åpen. */
-const LASBARE = {fotball:"Fotball", matte:"Matte", gange:"Gangetabell", historie:"Historie", lydlek:"Lydlek", rekord:"Lesetekster"};
+const LASBARE = {fotball:"Fotball", matte:"Matte", engelsk:"Engelsk", gange:"Gangetabell", historie:"Historie", lydlek:"Lydlek", rekord:"Lesetekster"};
 const lasValg = k => (PRIZES.las||{})[k] || 'apen';
 const norskIDag = () => PROG.norskDag === today();
 const erLast = k => lasValg(k)==='last' || (lasValg(k)==='norsk' && !norskIDag());
@@ -1042,6 +1102,70 @@ function gangeHint(a,b){
 // Prikkbilde: a rader med b prikker, med luft etter hver femte så de er lette å telle.
 const prikkHTML = (a,b) => `<div class="prikker" style="--k:${b}">${Array.from({length:a*b},(_,i)=>`<i class="${(i%b)===4 && b>5 ? 'fem' : ''}"></i>`).join('')}</div>`;
 
+/* Engelsk for 4. trinn, laget med tanke på dysleksi:
+   - bare tre svar å velge mellom, korte ord og store bokstaver (Andika-fonten)
+   - engelske ord leses opp med engelsk stemme, norske med norsk
+   - noen oppgaver er bare lytting (ordet vises ikke), så han kan øve uten å måtte lese engelsk
+   - etter svaret hører han både det engelske og det norske ordet. */
+const EN_WORDS = {
+  dyr:     [["dog","Hund"],["cat","Katt"],["horse","Hest"],["cow","Ku"],["pig","Gris"],["bird","Fugl"],["fish","Fisk"],["mouse","Mus"],["sheep","Sau"],["rabbit","Kanin"],["bear","Bjørn"],["lion","Løve"],["duck","And"],["frog","Frosk"],["snake","Slange"]],
+  farger:  [["red","Rød"],["blue","Blå"],["green","Grønn"],["yellow","Gul"],["black","Svart"],["white","Hvit"],["pink","Rosa"],["brown","Brun"],["purple","Lilla"],["grey","Grå"]],
+  tall:    [["one","En"],["two","To"],["three","Tre"],["four","Fire"],["five","Fem"],["six","Seks"],["seven","Sju"],["eight","Åtte"],["nine","Ni"],["ten","Ti"],["eleven","Elleve"],["twelve","Tolv"],["twenty","Tjue"]],
+  familie: [["mother","Mor"],["father","Far"],["brother","Bror"],["sister","Søster"],["grandmother","Bestemor"],["grandfather","Bestefar"],["friend","Venn"],["boy","Gutt"],["girl","Jente"]],
+  kropp:   [["head","Hode"],["hand","Hånd"],["foot","Fot"],["eye","Øye"],["ear","Øre"],["nose","Nese"],["mouth","Munn"],["leg","Bein"],["hair","Hår"],["knee","Kne"],["tooth","Tann"]],
+  mat:     [["apple","Eple"],["banana","Banan"],["bread","Brød"],["milk","Melk"],["water","Vann"],["cheese","Ost"],["cake","Kake"],["ice cream","Is"],["carrot","Gulrot"],["chicken","Kylling"],["potato","Potet"]],
+  skole:   [["book","Bok"],["pencil","Blyant"],["teacher","Lærer"],["school","Skole"],["desk","Pult"],["chair","Stol"],["table","Bord"],["ruler","Linjal"],["school bag","Skolesekk"]],
+  klaer:   [["shoe","Sko"],["sock","Sokk"],["hat","Hatt"],["jacket","Jakke"],["trousers","Bukse"],["shirt","Skjorte"],["sweater","Genser"],["dress","Kjole"],["glove","Hanske"]],
+  hjemme:  [["house","Hus"],["door","Dør"],["window","Vindu"],["bed","Seng"],["kitchen","Kjøkken"],["room","Rom"],["car","Bil"],["bike","Sykkel"],["toy","Leke"],["garden","Hage"]],
+  dager:   [["Monday","Mandag"],["Tuesday","Tirsdag"],["Wednesday","Onsdag"],["Thursday","Torsdag"],["Friday","Fredag"],["Saturday","Lørdag"],["Sunday","Søndag"]],
+  natur:   [["sun","Sol"],["rain","Regn"],["snow","Snø"],["wind","Vind"],["flower","Blomst"],["sea","Hav"],["sky","Himmel"],["star","Stjerne"],["moon","Måne"]],
+  gjore:   [["run","Løpe"],["jump","Hoppe"],["swim","Svømme"],["eat","Spise"],["drink","Drikke"],["sleep","Sove"],["read","Lese"],["write","Skrive"],["sing","Synge"],["kick","Sparke"],["throw","Kaste"],["walk","Gå"]],
+  beskrive:[["big","Stor"],["small","Liten"],["happy","Glad"],["sad","Lei seg"],["fast","Rask"],["old","Gammel"],["new","Ny"],["hungry","Sulten"],["tired","Trøtt"],["cold","Kald"],["hot","Varm"]],
+  fotball: [["goal","Mål"],["team","Lag"],["match","Kamp"],["referee","Dommer"],["goalkeeper","Keeper"],["win","Vinne"],["lose","Tape"],["coach","Trener"],["player","Spiller"],["trophy","Pokal"],["pitch","Fotballbane"]],
+  fraser:  [["Hello!","Hei!"],["Good morning!","God morgen!"],["Good night!","God natt!"],["Thank you!","Takk!"],["Goodbye!","Ha det!"],["Sorry!","Unnskyld!"],
+            ["How are you?","Hvordan har du det?"],["What is your name?","Hva heter du?"],["How old are you?","Hvor gammel er du?"],["Where do you live?","Hvor bor du?"],
+            ["I like football.","Jeg liker fotball."],["I am hungry.","Jeg er sulten."],["It is raining.","Det regner."],["Happy birthday!","Gratulerer med dagen!"],
+            ["See you tomorrow!","Vi ses i morgen!"],["I don't know.","Jeg vet ikke."],["Can you help me?","Kan du hjelpe meg?"],["Open your book.","Åpne boka di."]],
+};
+const EN = s => ({en:s});
+const enQ = en => /[?!.]$/.test(en) ? `Hva betyr dette: «${en}»` : `Hva betyr «${en}»?`;
+const ENGELSK = [];
+Object.entries(EN_WORDS).forEach(([cat, list])=>list.forEach(([en, no])=>{
+  const base = {cat, word:en, after:[EN(en), "betyr", no], f:`${en} = ${no.toLowerCase()}`};
+  // Les det engelske ordet, velg det norske.
+  ENGELSK.push({...base, q:enQ(en), say:["Hva betyr", EN(en)], a:no, dir:"no"});
+  // Hør ordet uten å se det, velg det norske.
+  ENGELSK.push({...base, q:"Hør godt! Hva betyr det engelske ordet?", say:["Hør godt. Hva betyr", EN(en), "Én gang til:", EN(en)], a:no, dir:"no", listen:true});
+  // Norsk ord, velg det engelske.
+  ENGELSK.push({...base, q:`Hva er «${no.replace(/[!.?]$/,"").toLowerCase()}» på engelsk?`, say:`Hva er ${no.replace(/[!.?]$/,"")} på engelsk?`, a:en, dir:"en"});
+}));
+// Små samtaler: hva svarer du?
+[["How are you?","I am fine, thank you.",["My name is Ben.","It is a cat."]],
+ ["What is your name?","My name is Benjamin.",["I am fine.","I like pizza."]],
+ ["Do you like football?","Yes, I do!",["I am a dog.","It is Monday."]],
+ ["What colour is the sun?","It is yellow.",["It is blue.","It is a cow."]],
+ ["Where do you live?","I live in Norway.",["I live in a banana.","I am hungry."]],
+ ["What is your favourite team?","Manchester United!",["Monday!","Pizza!"]],
+ ["Thank you!","You're welcome.",["Good night.","I am a cow."]],
+ ["Good morning!","Good morning!",["Good night!","Goodbye!"]],
+].forEach(([ask, a, w])=>ENGELSK.push({cat:"svar", word:ask, q:`Noen sier: «${ask}» Hva svarer du?`, say:["Noen sier", EN(ask), "Hva svarer du?"], a, w, dir:"en", after:[EN(a)], f:a}));
+// Feilsvar hentes fra samme gruppe (dyr, farger …), så de passer sammen. Bare to feil, så det blir tre å velge mellom.
+function englishMatch(){
+  const used = new Set(), out = [];
+  for(const it of freshFirst(ENGELSK)){
+    if(used.has(it.word)) continue;
+    used.add(it.word);
+    let w = it.w;
+    if(!w){
+      const pool = EN_WORDS[it.cat].filter(([en])=>en!==it.word).map(([en,no])=>it.dir==="en"?en:no);
+      w = shuffle(pool).slice(0,2);
+    }
+    out.push({...it, w});
+    if(out.length>=MATCH_LEN) break;
+  }
+  return out;
+}
+
 const MATCH_LEN = 8;
 /* Rotasjon: spørsmålene han ikke har sett på lengst kommer først, så det tar lang tid før noe gjentas.
    Husket per enhet i nettleseren. */
@@ -1059,13 +1183,14 @@ const MODES = {
   // Silhuett og Fyll inn startes fra en lesetekst, ikke fra forsiden. Silhuett er bare variasjon.
   silhuett: {name:"Silhuett", color:"#9fe3d6", right:2, skjult:true, make:id=>silItems(id || PROG.sisteTekst)},
   fyllinn:  {name:"Fyll inn", color:"#ffd6a5", right:2, skjult:true, make:id=>fyllItems(id || PROG.sisteTekst)},
+  engelsk:  {name:"Engelsk",  color:"#c9b3ff", right:3, make:englishMatch},
   lydlek:   {name:"Lydlek",   color:"#ffb347", right:2, make:()=>Array.from({length:MATCH_LEN}, lydQuestion)},
   // Sant/usant om leseteksten. Startes fra lesetekstene, ikke fra forsiden.
   lesespm:  {name:"Lesespørsmål", color:"#c9a7ff", right:2, skjult:true, make:id=>TEKSTER.find(t=>t.id===id).spm.map(x=>({...x}))},
 };
 
 /* ---------- Poengregler ----------
-   Riktig på første forsøk: +4 i norsk og historie, +2 i fotball og matte. Hvert feil svar: −1 (og Gjettelaget scorer).
+   Riktig på første forsøk: +4 i norsk og historie, +3 i engelsk, +2 i fotball og matte. Hvert feil svar: −1 (og Gjettelaget scorer).
    Å gjette blindt blant fire svar gir i snitt minus, å lese gir pluss. */
 const WRONG = -1;
 const RIGHT_OF = () => MODES[S.mode].right;
@@ -1145,26 +1270,44 @@ let S = null;   // kampstatus
 let token = 0;  // stopper gamle timere når vi går videre
 
 /* ---------- Tale ---------- */
-let voice = null;
+let voice = null, voiceEn = null;
 function pickVoice(){
   if(!('speechSynthesis' in window)) return;
   const vs = speechSynthesis.getVoices();
   voice = vs.find(v=>/^nb/i.test(v.lang)) || vs.find(v=>/^no|^nn/i.test(v.lang)) || vs.find(v=>/norsk|norw|nora/i.test(v.name)) || null;
+  // Engelsk: britisk stemme først (som i skolen), ellers amerikansk eller annen engelsk.
+  voiceEn = vs.find(v=>/^en[-_]GB/i.test(v.lang) && v.localService) || vs.find(v=>/^en[-_]GB/i.test(v.lang)) || vs.find(v=>/^en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
 }
 if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, onEnd){
+let speechChain = 0;
+function speak(text, onEnd, en, keepChain){
+  if(!keepChain) speechChain++;
   const fallbackMs = 900 + text.length*70;
   let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
   if(!('speechSynthesis' in window)){ setTimeout(finish, 400); return; }
   const busy = speechSynthesis.speaking || speechSynthesis.pending;
   if(busy) speechSynthesis.cancel();
-  if(!voice) pickVoice(); // iPad laster stemmene sent
+  if(!voice || !voiceEn) pickVoice(); // iPad laster stemmene sent
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = .92; u.pitch = 1.05;
+  if(en){ u.lang = 'en-GB'; if(voiceEn) u.voice = voiceEn; u.rate = .8; u.pitch = 1; }
+  else { u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = .92; u.pitch = 1.05; }
   u.onend = finish; u.onerror = finish;
   window.__utt = u; try{ speechSynthesis.resume(); }catch(e){}
   if(busy) setTimeout(()=>speechSynthesis.speak(u), 150); else speechSynthesis.speak(u);
   setTimeout(finish, fallbackMs + 1500); // noen nettlesere glemmer onend
+}
+
+// Leser opp en blanding av norsk og engelsk: tekst er norsk, {en:"..."} er engelsk. Engelsk leses litt saktere.
+function speakAny(x, onEnd){
+  if(!Array.isArray(x)) return speak(x, onEnd);
+  const id = ++speechChain;
+  const step = i => {
+    if(id!==speechChain) return;
+    if(i>=x.length){ onEnd && onEnd(); return; }
+    const p = x[i];
+    speak(typeof p==='string' ? p : p.en, ()=>step(i+1), typeof p!=='string', true);
+  };
+  step(0);
 }
 
 /* ---------- Hjelpere ---------- */
@@ -1464,7 +1607,7 @@ function startScreen(){
     <div class="rules">
       <div class="rule"><i>1</i><span>Hør på spørsmålet.</span></div>
       <div class="rule"><i>2</i><span>Les svarene selv. I norsk skriver du ordet selv.</span></div>
-      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer. I norsk mister du aldri poeng for å skrive feil.</span></div>
+      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie, <b class="plus">+3</b> i engelsk og gangetabell og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer. I norsk mister du aldri poeng for å skrive feil.</span></div>
     </div>
     <button class="pts pts-btn" id="prog">
       <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
@@ -1969,7 +2112,7 @@ function question(){
   app.innerHTML = `${boardHTML()}
   <div class="pitch">
     <div class="qcard">
-      <div class="qtext" id="qt">${esc(item.q)}</div>
+      <div class="qtext" id="qt">${esc(item.q).replace(/«(.+?)»/g, S.mode==='engelsk' ? '<span class="enw">$1</span>' : '«$1»')}${item.listen?'<div class="listen-big">Trykk på høyttaleren for å høre igjen</div>':''}</div>
       <button class="listen" id="listen" aria-label="Hør igjen">${SPEAKER}</button>
     </div>
     <div class="hint" id="hint">Hør godt etter …</div>
@@ -1992,24 +2135,25 @@ function question(){
   };
   const listen = document.getElementById('listen');
   const spoken = item.say || item.q;
-  listen.onclick = () => { listen.classList.add('speaking'); speak(spoken, ()=>listen.classList.remove('speaking')); };
+  listen.onclick = () => { listen.classList.add('speaking'); speakAny(spoken, ()=>listen.classList.remove('speaking')); };
   listen.classList.add('speaking');
   if(item.tall){
     tallArea(my);
-    speak(spoken, ()=>listen.classList.remove('speaking'));
+    speakAny(spoken, ()=>listen.classList.remove('speaking'));
   } else if(item.type){
     typingArea(my);
-    speak(spoken, ()=>listen.classList.remove('speaking'));
+    speakAny(spoken, ()=>listen.classList.remove('speaking'));
   } else {
     document.getElementById('area').innerHTML = '<div class="answers" id="answers"></div>';
     renderAnswers(true);
-    speak(spoken, ()=>{ listen.classList.remove('speaking'); if(my===token) reveal(my); });
+    speakAny(spoken, ()=>{ listen.classList.remove('speaking'); if(my===token) reveal(my); });
   }
 }
 
 /* ----- Flervalg ----- */
 function renderAnswers(hidden){
   const box = document.getElementById('answers');
+  box.classList.toggle('en-ans', S.mode==='engelsk' && S.cur.item.dir==='en');
   box.innerHTML = S.cur.opts.map((o,k)=>{
     const isWrong = S.cur.wrongPicked===o;
     return `<button class="ans ${hidden?'hidden-text':''} ${isWrong?'wrong':''}" data-o="${esc(o)}" ${hidden||isWrong?'disabled':''} id="ans${k}"><span class="reading">${S.cur.item.sil ? boksHTML(o,'') : esc(o)}</span><span class="bar"></span></button>`;
@@ -2077,7 +2221,7 @@ function finishChoice(my, won){
     setTimeout(()=>{ if(my===token) silSkriv(my); }, 1600);
     return;
   }
-  speak(item.f ? `${item.a}. ${item.f}` : item.a, ()=>right.classList.remove('say'));
+  speakAny(item.after || (item.f ? `${item.a}. ${item.f}` : item.a), ()=>right.classList.remove('say'));
   nextButton();
 }
 // Andre steg i Silhuett: skriv ordet inn i rutene. Gir ingen ekstra poeng, men må gjøres før neste ord.
@@ -2200,7 +2344,7 @@ function endScreen(){
   PROG.matches++; save("prog");
   const won = S.home>S.away, draw = S.home===S.away;
   const title = won ? 'Du vant kampen!' : draw ? 'Uavgjort!' : 'Gjettelaget vant';
-  const line = S.mode==='gange' ? (won ? 'Sterkt regnet! Triksene sitter.' : 'Bruk triksene og prikkene, så sitter det snart.') : won ? 'Du leste godt. Det er sånn mesterne gjør det.' : draw ? 'Jevn kamp. Klarer du å vinne neste?' : 'Les alle svarene før du trykker, så slår du dem neste gang.';
+  const line = S.mode==='engelsk' ? (won ? 'Great job! Du er god i engelsk.' : draw ? 'Good try! Klarer du å vinne neste?' : 'Good try! Hør på ordene igjen, så slår du dem neste gang.') : S.mode==='gange' ? (won ? 'Sterkt regnet! Triksene sitter.' : 'Bruk triksene og prikkene, så sitter det snart.') : won ? 'Du leste godt. Det er sånn mesterne gjør det.' : draw ? 'Jevn kamp. Klarer du å vinne neste?' : 'Les alle svarene før du trykker, så slår du dem neste gang.';
   const unlocked = sortedPrizes().filter(p=>S.bestBefore < p.at && PROG.best >= p.at);
   const lvlUp = levelOf(PROG.best) > levelOf(S.bestBefore);
   // Nytt norsk-nivå: minst 6 av 8 riktige på første forsøk på det høyeste åpne nivået.
