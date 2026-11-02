@@ -912,6 +912,8 @@ function nivaItems(n){
 }
 const norskNiva = () => Math.min(PROG.norskNiva||0, NIVAER.length-1);
 // Viser ordet med prikk mellom stavelsene og mønsteret uthevet, f.eks. «fot·ba<ll>».
+// Leser opp fasiten: engelske ord med engelsk stemme.
+const sayA = item => speakAny(item.en ? [EN(item.a)] : item.a);
 function markWord(item){
   const plain = item.a.toLowerCase(), syl = (item.syl || plain).toLowerCase();
   const re = typeof item.niva === 'number' && NIVAER[item.niva].mark;
@@ -1149,9 +1151,20 @@ Object.entries(EN_WORDS).forEach(([cat, list])=>list.forEach(([en, no])=>{
  ["Thank you!","You're welcome.",["Good night.","I am a cow."]],
  ["Good morning!","Good morning!",["Good night!","Goodbye!"]],
 ].forEach(([ask, a, w])=>ENGELSK.push({cat:"svar", word:ask, q:`Noen sier: «${ask}» Hva svarer du?`, say:["Noen sier", EN(ask), "Hva svarer du?"], a, w, dir:"en", after:[EN(a)], f:a}));
+// Skriv selv: korte, lydnære engelske ord (maks fem bokstaver). Han hører ordet på engelsk og skriver det.
+// Feil koster ingen poeng, akkurat som i norsk, og etter første feil vises silhuetten av ordet.
+// Bare ord som skrives omtrent som de høres, uten vanskelige stumme bokstaver.
+const EN_SKRIV_ORD = new Set("dog cat pig cow fish duck frog red blue pink six ten boy leg hand foot nose hat sock bed door car bike toy sun rain snow wind sea star moon run jump swim eat sing kick big sad hot cold old new milk cake book desk goal team win".split(" "));
+const ENGELSK_SKRIV = [];
+Object.entries(EN_WORDS).forEach(([cat, list])=>list.forEach(([en, no])=>{
+  if(!EN_SKRIV_ORD.has(en)) return;
+  ENGELSK_SKRIV.push({cat, word:en, type:true, en:true, q:`Skriv på engelsk: «${no.toLowerCase()}»`, say:[`${no} heter`, EN(en), "på engelsk. Skriv", EN(en)], a:en});
+}));
 // Feilsvar hentes fra samme gruppe (dyr, farger …), så de passer sammen. Bare to feil, så det blir tre å velge mellom.
 function englishMatch(){
   const used = new Set(), out = [];
+  // To skriveoppgaver i hver kamp, resten er flervalg.
+  for(const it of freshFirst(ENGELSK_SKRIV).slice(0,2)){ used.add(it.word); out.push(it); }
   for(const it of freshFirst(ENGELSK)){
     if(used.has(it.word)) continue;
     used.add(it.word);
@@ -1163,7 +1176,7 @@ function englishMatch(){
     out.push({...it, w});
     if(out.length>=MATCH_LEN) break;
   }
-  return out;
+  return shuffle(out);
 }
 
 const MATCH_LEN = 8;
@@ -2295,7 +2308,7 @@ async function checkTyped(my){
   const typedEl = document.getElementById('typed');
   if(S.cur.copy){
     // Etter rødt kort skriver han av det riktige ordet før han går videre. Gir ingen poeng.
-    if(ok){ keyHandler=null; typedEl.classList.add('ok'); speak(item.a); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
+    if(ok){ keyHandler=null; typedEl.classList.add('ok'); sayA(item); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
     else { typedEl.classList.remove('shake'); void typedEl.offsetWidth; typedEl.classList.add('shake'); }
     return;
   }
@@ -2308,7 +2321,7 @@ async function checkTyped(my){
     if(my!==token) return;
     app.querySelector('.board').outerHTML = boardHTML();
     document.getElementById('hint').innerHTML = `Riktig skrevet! <span class="answer-word">${markWord(item)}</span>`;
-    speak(item.a);
+    sayA(item);
     nextButton();
     return;
   }
@@ -2321,7 +2334,7 @@ async function checkTyped(my){
     S.cur.typed = ""; S.cur.hjelp = true; drawTyped();
     document.getElementById('hint').textContent = 'Nesten! Silhuetten viser hvordan ordet ser ut. Hør en gang til.';
     keyHandler = k => typeKey(my, k);
-    speak(item.say);
+    speakAny(item.say);
   } else {
     S.away++; app.querySelector('.board').outerHTML = boardHTML();
     await showFlash('<div class="col"><div class="sub">Gjettelaget scoret, men du mister ingen poeng.</div></div>', 1800);
@@ -2329,7 +2342,7 @@ async function checkTyped(my){
     S.cur.copy = true; S.cur.typed = ""; drawTyped();
     const tips = typeof item.niva === 'number' ? `<br><small class="tips">${esc(NIVAER[item.niva].tips)}</small>` : '';
     document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${markWord(item)}</span>${tips}<br>Skriv det av.`;
-    speak(item.a);
+    sayA(item);
     keyHandler = k => typeKey(my, k);
   }
 }
