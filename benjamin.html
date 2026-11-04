@@ -1194,6 +1194,8 @@ function lekseItems(del){
   const L = lekseAlle() || {};
   if(del==='ord') return shuffle((L.ord||[]).map(w=>ordItem(String(w).toLowerCase(),'uke')));
   if(del==='oppgaver') return shuffle((L.oppgaver||[]).map(x=>({q:String(x.q), a:String(x.a), w:(x.w||[]).map(String).slice(0,3), say:x.say, f:x.f})));
+  if(del==='engskriv') return shuffle((L.engelsk||[]).filter(p=>Array.isArray(p) && p.length===2).map(([en, no])=>
+    ({q:`Skriv på engelsk: «${no.toLowerCase()}»`, say:["Skriv det engelske ordet", EN(en.toLowerCase()), `Det betyr ${no.toLowerCase()}.`], a:en.toLowerCase(), type:true, en:true})));
   if(del==='engelsk'){
     const par = (L.engelsk||[]).filter(p=>Array.isArray(p) && p.length===2);
     const reserve = Object.values(EN_WORDS).flat();
@@ -1869,10 +1871,11 @@ function lekseScreen(forhand){
   lekseTekstSync(true);
   const t = TEKSTER.find(x=>x.id===lekseTekstId()), c = claimToday('lekser');
   const deler = [
-    (L.ord||[]).length && {k:'ord', navn:'Staveord', info:`${L.ord.length} ord · hør ordet og skriv det`},
+    (L.ord||[]).length && {k:'ord', navn:'Norske diktatord', info:`${L.ord.length} ord · hør ordet og skriv det`},
     t && {k:'tekst', navn:t.navn, info:`Lesetekst · ${ordTall(t)} ord`},
     (L.oppgaver||[]).length && {k:'oppgaver', navn:L.oppgaveNavn || 'Oppgaver', info:`${L.oppgaver.length} oppgaver`},
-    (L.engelsk||[]).length && {k:'engelsk', navn:'Engelske ord', info:`${L.engelsk.length} ord`},
+    (L.engelsk||[]).length && {k:'engskriv', navn:'Engelske diktatord', info:`${L.engelsk.length} ord · hør ordet og skriv det på engelsk`},
+    (L.engelsk||[]).length && {k:'engelsk', navn:'Hva betyr de engelske ordene?', info:`${L.engelsk.length} ord · velg riktig betydning`},
   ].filter(Boolean);
   app.innerHTML = `
   <div class="screen left">
@@ -2383,13 +2386,15 @@ function typeKey(my, k){
   else if(S.cur.typed.length < 16) S.cur.typed += k;
   drawTyped();
 }
+// Engelske skriveord leses med engelsk stemme.
+const sayWord = item => item.en ? speakAny([EN(item.a)]) : speak(item.a);
 async function checkTyped(my){
   const item = S.cur.item, guess = S.cur.typed.trim().toLowerCase(), ok = guess===item.a.toLowerCase();
   if(!guess) return;
   const typedEl = document.getElementById('typed');
   if(S.cur.copy){
     // Etter rødt kort skriver han av det riktige ordet før han går videre. Gir ingen poeng.
-    if(ok){ keyHandler=null; typedEl.classList.add('ok'); speak(item.a); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
+    if(ok){ keyHandler=null; typedEl.classList.add('ok'); sayWord(item); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
     else { typedEl.classList.remove('shake'); void typedEl.offsetWidth; typedEl.classList.add('shake'); }
     return;
   }
@@ -2402,7 +2407,7 @@ async function checkTyped(my){
     if(my!==token) return;
     app.querySelector('.board').outerHTML = boardHTML();
     document.getElementById('hint').innerHTML = `Riktig skrevet! <span class="answer-word">${markWord(item)}</span>`;
-    speak(item.a);
+    sayWord(item);
     nextButton();
     return;
   }
@@ -2415,7 +2420,7 @@ async function checkTyped(my){
     S.cur.typed = ""; S.cur.hjelp = true; drawTyped();
     document.getElementById('hint').textContent = 'Nesten! Silhuetten viser hvordan ordet ser ut. Hør en gang til.';
     keyHandler = k => typeKey(my, k);
-    speak(item.say);
+    speakAny(item.say);
   } else {
     S.away++; app.querySelector('.board').outerHTML = boardHTML();
     await showFlash('<div class="col"><div class="sub">Gjettelaget scoret, men du mister ingen poeng.</div></div>', 1800);
@@ -2423,7 +2428,7 @@ async function checkTyped(my){
     S.cur.copy = true; S.cur.typed = ""; drawTyped();
     const tips = typeof item.niva === 'number' ? `<br><small class="tips">${esc(NIVAER[item.niva].tips)}</small>` : '';
     document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${markWord(item)}</span>${tips}<br>Skriv det av.`;
-    speak(item.a);
+    sayWord(item);
     keyHandler = k => typeKey(my, k);
   }
 }
