@@ -274,6 +274,8 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .kb.num .key{max-width:90px;height:58px;font-size:28px}
 .kb.num .key.check{width:auto;flex:1 1 0;max-width:120px}
 .mode.locked{filter:grayscale(1);opacity:.55}
+.lekse-btn{width:100%;max-width:520px;font-size:30px;animation:pulse 2.2s infinite}
+.beskjed{background:rgba(255,210,63,.15);border-left:5px solid var(--led);border-radius:8px;padding:10px 14px;font-size:20px;margin:0 0 6px}
 .lasrad{grid-template-columns:1fr auto}
 .lasrad select{font:inherit;font-size:18px;padding:6px 10px;border-radius:8px;background:#050d09;color:var(--chalk);border:2px solid #24392e}
 .answer-word mark{background:var(--led);color:var(--ink);border-radius:4px;padding:0 1px}
@@ -1170,7 +1172,44 @@ const SEEN_KEY = "demo-benjaminfc-seen";
 let SEEN = {}; try{ SEEN = JSON.parse(localStorage.getItem(SEEN_KEY)||"{}") || {}; }catch(e){}
 const qKey = it => it.q + "|" + it.a;
 function markSeen(it){ SEEN[qKey(it)] = Date.now(); try{ localStorage.setItem(SEEN_KEY, JSON.stringify(SEEN)); }catch(e){} }
-const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[qKey(x)]||0)-(SEEN[qKey(y)]||0));
+const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[qKey(x)]||0)-(SEEN[qKey(y)]||0));/* ---------- Ukens lekse ----------
+   Leksen fra skolen ligger i PRIZES.lekse (samme dokument som premiene), så en ny lekse trenger ingen ny kode:
+   {id, tittel, beskjed, aktiv, ord:["fot-ball",...], tekst:{navn, linjer:[...], ove:[...], hjelp:[...], spm:[{q, sant}]},
+    oppgaver:[{q, a, w:[feil, feil], say?, f?}], engelsk:[["dog","Hund"], ...]}
+   Benjamin ser den først når pappa har trykket «Vis for Benjamin» i foreldresonen (aktiv). */
+// Leksen Claude har bygget inn i appen. En lekse lagt inn i foreldresonen vinner hvis den er like ny eller nyere.
+const INNEBYGD_LEKSE = {"id": "2026-11-skoleuniform", "tittel": "Lekse til torsdag", "beskjed": "Innen torsdag: Les 15 minutter hver dag med lesekortet, og en voksen signerer. Svar på de fem spørsmålene om skoleuniform i lekseboka. Lag din egen trylledrikk på engelsk og les den høyt for en voksen. Her i appen øver du på diktatordene og leser om skoleuniform.", "ord": ["for-tel-le", "for-kla-re", "un-der-sø-ke", "me-ning"], "tekst": {"navn": "Skoleuniform i England", "hjelp": ["England", "uniform", "skoleuniform"], "ove": ["like", "klær", "genser", "slips", "klassen", "velge", "dyr", "fag"], "linjer": ["I England går mange barn med skoleuniform.", "En skoleuniform er like klær for alle på skolen.", "Ola har en blå genser og et slips.", "Alle i klassen har like klær.", "Det er bra, for ingen ser rik eller fattig ut.", "Det er ikke så bra, for du kan ikke velge selv.", "Og uniformen kan være dyr.", "På skolen har Ola fag som matte, engelsk og gym."], "spm": [{"q": "Ola har en blå genser.", "sant": true}, {"q": "Alle i klassen har ulike klær.", "sant": false}, {"q": "Uniformen kan være dyr.", "sant": true}]}, "oppgaver": [{"q": "Hva er en skoleuniform?", "a": "Like klær for alle på skolen", "w": ["En sekk til bøkene", "En lærer i England"]}, {"q": "Hva er bra med skoleuniform?", "a": "Ingen ser rik eller fattig ut", "w": ["Du kan velge klær selv", "Den er gratis"]}, {"q": "Hva er ikke så bra med skoleuniform?", "a": "Du kan ikke velge klær selv", "w": ["Alle ser like ut", "Den er blå"]}, {"q": "Hvilket fag har Ola på skolen?", "a": "Matte", "w": ["Fotball", "Kino"]}, {"q": "Hva betyr «fortelle»?", "a": "Si hva som skjedde", "w": ["Tegne et bilde", "Løpe fort"]}, {"q": "Hva betyr «forklare»?", "a": "Si hvordan noe er, så andre skjønner", "w": ["Lukke en dør", "Synge en sang"]}, {"q": "Hva betyr «undersøke»?", "a": "Se nøye etter og finne ut", "w": ["Sove lenge", "Spise opp"]}, {"q": "Hva er en «mening»?", "a": "Det du synes og tror", "w": ["En sko", "Et tall"]}], "oppgaveNavn": "Skoleuniform og ord", "engelsk": [["dyed", "Farget"], ["fangs", "Hoggtenner"], ["creatures", "Skapninger"], ["recently", "Nettopp"], ["suddenly", "Plutselig"]], "dato": "2026-11-04", "aktiv": true};
+const lekseAlle = () => { const p = PRIZES.lekse; return p && (p.dato||'') >= (INNEBYGD_LEKSE.dato||'') ? p : INNEBYGD_LEKSE; };
+const lekse = () => { const L = lekseAlle(); return L && L.aktiv ? L : null; };
+const lekseTekstId = () => 'lekse-' + ((lekseAlle() && lekseAlle().id) || '1');
+// Leseteksten fra leksen legges øverst blant lesetekstene, så alle tekstøvelsene virker på den.
+function lekseTekstSync(vis){
+  for(let i=TEKSTER.length-1;i>=0;i--) if(String(TEKSTER[i].id).startsWith('lekse')) TEKSTER.splice(i,1);
+  const L = vis ? lekseAlle() : lekse(), t = L && L.tekst;
+  if(t && Array.isArray(t.linjer) && t.linjer.length)
+    TEKSTER.unshift({id:lekseTekstId(), navn:t.navn || 'Ukens lesetekst', lekse:true, hjelp:t.hjelp||[], ove:t.ove||[], linjer:t.linjer, spm:(t.spm||[]).map(x=>SU(x.q, !!x.sant))});
+}
+function lekseItems(del){
+  const L = lekseAlle() || {};
+  if(del==='ord') return shuffle((L.ord||[]).map(w=>ordItem(String(w).toLowerCase(),'uke')));
+  if(del==='oppgaver') return shuffle((L.oppgaver||[]).map(x=>({q:String(x.q), a:String(x.a), w:(x.w||[]).map(String).slice(0,3), say:x.say, f:x.f})));
+  if(del==='engskriv') return shuffle((L.engelsk||[]).filter(p=>Array.isArray(p) && p.length===2).map(([en, no])=>
+    ({q:`Skriv på engelsk: «${no.toLowerCase()}»`, say:["Skriv det engelske ordet", EN(en.toLowerCase()), `Det betyr ${no.toLowerCase()}.`], a:en.toLowerCase(), type:true, en:true})));
+  if(del==='engelsk'){
+    const par = (L.engelsk||[]).filter(p=>Array.isArray(p) && p.length===2);
+    const reserve = Object.values(EN_WORDS).flat();
+    const feil = (rett, i) => shuffle([...new Set([...par, ...reserve].map(p=>p[i]).filter(x=>x!==rett))]).slice(0,2);
+    return shuffle(par.flatMap(([en, no])=>{
+      const base = {word:en, after:[EN(en), "betyr", no], f:`${en} = ${no.toLowerCase()}`};
+      return shuffle([
+        {...base, q:enQ(en), say:["Hva betyr", EN(en)], a:no, w:feil(no,1), dir:"no"},
+        {...base, q:`Hva er «${no.replace(/[!.?]$/,"").toLowerCase()}» på engelsk?`, say:`Hva er ${no.replace(/[!.?]$/,"")} på engelsk?`, a:en, w:feil(en,0), dir:"en"},
+      ]).slice(0,1);
+    }));
+  }
+  return [];
+}
+
 const MODES = {
   fotball:  {name:"Fotball",  color:"#7fd3ff", right:2, make:()=>shuffle([...freshFirst(FAVORITTER).slice(0,5), ...freshFirst(FOTBALL).slice(0,MATCH_LEN-5)])},
   matte:    {name:"Matte",    color:"#ffd23f", right:2, make:()=>Array.from({length:MATCH_LEN}, mathQuestion)},
@@ -1184,6 +1223,8 @@ const MODES = {
   lydlek:   {name:"Lydlek",   color:"#ffb347", right:2, make:()=>Array.from({length:MATCH_LEN}, lydQuestion)},
   // Sant/usant om leseteksten. Startes fra lesetekstene, ikke fra forsiden.
   lesespm:  {name:"Lesespørsmål", color:"#c9a7ff", right:2, skjult:true, make:id=>TEKSTER.find(t=>t.id===id).spm.map(x=>({...x}))},
+  // Ukens lekse: startes fra lekse-siden. Alle oppgavene i en del tas med, ikke bare 8.
+  lekse:    {name:"Lekse",    color:"#ffd23f", right:4, skjult:true, len:30, make:del=>lekseItems(del)},
 };
 
 /* ---------- Poengregler ----------
@@ -1233,10 +1274,15 @@ try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.as
 let db = null;
 const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0) + (p.lesing||0);
 function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
+// Hver lagring får et tidsstempel (_t). Data fra databasen som er eldre enn det enheten har, eller mangler
+// tidsstempel, skal aldri skrive over nyere fremgang. Da sendes enhetens egne data opp i stedet.
+// En enhet uten tidsstempel (gammel versjon) med høyere rekord enn databasen beholder også sine tall.
+const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t) || (!loc._t && (loc.best||0) > (d.best||0)));
 async function save(which){
+  (which==="prog"?PROG:PRIZES)._t = Date.now();
   cacheLocal();
   if(!db) return;
-  try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
+  try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); window.__sistLagret = Date.now(); }
   catch(e){ if(e && e.code==="unavailable"){ setTimeout(()=>save(which), 800+Math.random()*800); } }
 }
 function changePts(mode, d){
@@ -1249,9 +1295,11 @@ function changePts(mode, d){
   try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
   if(!db) return;
   db.doc("benjamin/progress").onSnapshot(s=>{
+    if(s.exists ? staleRemote(s.data(), PROG, PROG.best>0 || PROG.matches>0) : !!(PROG.best>0 || PROG.matches>0)){ save("prog"); return; }
     if(s.exists){ const d=s.data(); PROG = {...PROG, ...JSON.parse(JSON.stringify(d)), pts:Object.assign(zero(), d.pts||{})}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
   db.doc("benjamin/prizes").onSnapshot(s=>{
+    if(s.exists ? staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length) : !!(PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; }
     if(s.exists){ PRIZES = {pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
 })();
@@ -1590,7 +1638,8 @@ function wireImageButtons(rerender){
 /* ---------- Startside ---------- */
 function startScreen(){
   token++; screen = "start"; keyHandler = null;
-  const np = nextPrize();
+  const np = nextPrize(), L = lekse();
+  lekseTekstSync();
   app.innerHTML = `
   <div class="screen">
     <svg class="crest" viewBox="0 0 120 120" aria-hidden="true">
@@ -1610,6 +1659,7 @@ function startScreen(){
       <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
       <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
     </button>
+    ${L ? `<button class="mode lekse-btn" id="lekseBtn" style="--c:#ffd23f">📚 Ukens lekse<small>${esc(L.tittel || 'Fra skolen')}</small></button>` : ''}
     <div class="modes">
       ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode ${erLast(k)?'locked':''}" data-m="${k}" style="--c:${m.color}">${m.name}<small>${erLast(k) ? lasTekst(k) : k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : k==='gange' ? `Steg ${gangeSteg()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
       <button class="mode ${erLast('rekord')?'locked':''}" id="rekord" style="--c:#f4f7ef">Lesetekster<small>${erLast('rekord') ? lasTekst('rekord') : 'Fotball · les uten feil'}</small></button>
@@ -1630,6 +1680,7 @@ function startScreen(){
   const sperret = k => { speak(lasValg(k)==='last' ? 'Pappa har låst denne.' : 'Spill en norskkamp først, så åpner den seg.'); return true; };
   app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : b.dataset.m==='gange' ? gangeScreen() : newMatch(b.dataset.m));
   document.getElementById('rekord').onclick = ()=> erLast('rekord') ? sperret('rekord') : lesListe();
+  if(L) document.getElementById('lekseBtn').onclick = ()=>lekseScreen();
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
   app.querySelectorAll('.task[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Sendt til pappa for godkjenning'); startScreen(); });
@@ -1726,6 +1777,16 @@ function parentScreen(confirmReset){
     <p class="note">Fra Ordkino og lesetekstene. Et ord er sikkert når han har lest det riktig tre ganger på rad.</p>
     ${(()=>{ const o = Object.entries(PROG.ord||{}), grupper = [['sikker','Mestrer sikkert'],['ove','Øver på'],['vanskelig','For vanskelig foreløpig']];
       return o.length ? grupper.map(([k,n])=>{ const ws = o.filter(([w,x])=>ordStatus(x)===k).map(([w])=>w).sort(); return `<p class="note"><b>${n} (${ws.length}):</b> ${ws.length ? esc(ws.join(', ')) : '–'}</p>`; }).join('') : '<p class="note">Ingen ord ennå.</p>'; })()}
+    <h3>Ukens lekse</h3>
+    ${lekseAlle() ? `<p class="note"><b>${esc(lekseAlle().tittel || 'Lekse')}</b> · ${lekseAlle().aktiv ? 'Benjamin ser leksen nå.' : 'Skjult for Benjamin.'}</p>
+    <div class="acts"><button id="lekseSe">Se leksen</button><button id="lekseVis" class="${lekseAlle().aktiv ? '' : 'ok'}">${lekseAlle().aktiv ? 'Skjul for Benjamin' : 'Vis for Benjamin'}</button></div>`
+      : '<p class="note">Ingen lekse lagt inn ennå.</p>'}
+    <p class="note">Ny lekse: send PDF-en fra skolen til Claude og lim inn lekse-koden du får tilbake her. Leksen er skjult for Benjamin til du trykker «Vis for Benjamin».</p>
+    <form id="leksef" class="form add">
+      <label class="grow">Lekse-kode<textarea id="leksekode" rows="2" placeholder='{"tittel": "Lekse uke 46", ...}'></textarea></label>
+      <button class="next" type="submit">Legg inn lekse</button>
+    </form>
+    <p class="err" id="lekseErr"></p>
     <h3>Ukens ord</h3>
     <p class="note">Skriv inn staveordene fra skolen, med komma eller linjeskift mellom. De blir et eget valg under Norsk. Del gjerne ordet i stavelser med bindestrek, som fot-ball.</p>
     <form id="ukef" class="form add">
@@ -1744,6 +1805,17 @@ function parentScreen(confirmReset){
       : `<div class="acts"><button id="nye">Nullstill de nye øvelsene</button></div>`}
   </div>`;
   document.getElementById('back').onclick = progressScreen;
+  const lSe = document.getElementById('lekseSe'); if(lSe) lSe.onclick = ()=>lekseScreen(true);
+  document.getElementById('leksef').onsubmit = e => {
+    e.preventDefault();
+    try{
+      const L = JSON.parse(document.getElementById('leksekode').value.trim());
+      if(!L || typeof L!=='object' || !(L.ord||L.tekst||L.oppgaver||L.engelsk)) throw 0;
+      PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), dato: new Date().toISOString(), aktiv:false};
+      save("prizes"); lekseScreen(true);
+    }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
+  };
+  const lVis = document.getElementById('lekseVis'); if(lVis) lVis.onclick = ()=>{ const L = lekseAlle(); PRIZES.lekse = {...L, aktiv:!L.aktiv}; save("prizes"); parentScreen(); };
   app.querySelectorAll('[data-las]').forEach(sel=>sel.onchange=()=>{ PRIZES.las = {...(PRIZES.las||{}), [sel.dataset.las]: sel.value}; save("prizes"); });
   document.getElementById('ukef').onsubmit = e => {
     e.preventDefault();
@@ -1775,6 +1847,16 @@ function parentScreen(confirmReset){
     save("prog"); parentScreen();
   };
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={pts:zero(),best:0,right:0,wrong:0,matches:0,learned:[],bonus:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
+  const famf = document.getElementById('famf');
+  if(famf) famf.onsubmit = e => {
+    e.preventDefault();
+    const kode = document.getElementById('famkode').value.trim();
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(kode)){ document.getElementById('famErr').textContent = 'Koden ser ikke riktig ut.'; return; }
+    // Denne enhetens poeng skal vinne over det som ligger i databasen, så de ferske tallene sendes opp.
+    PROG._t = PRIZES._t = Date.now(); cacheLocal();
+    
+    location.hash = "k=" + kode; location.reload();
+  };
   const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
 }
 
@@ -1796,9 +1878,43 @@ function norskScreen(){
   app.querySelectorAll('.niva:not([disabled])').forEach(b=>b.onclick=()=>newMatch('norsk', b.dataset.n==='uke' ? 'uke' : +b.dataset.n));
 }
 
+/* ---------- Ukens lekse ---------- */
+// forhand: pappa ser leksen fra foreldresonen før den er synlig for Benjamin.
+function lekseScreen(forhand){
+  token++; screen = "lekse"; keyHandler = null;
+  const L = lekseAlle();
+  if(!L){ startScreen(); return; }
+  lekseTekstSync(true);
+  const t = TEKSTER.find(x=>x.id===lekseTekstId()), c = claimToday('lekser');
+  const deler = [
+    (L.ord||[]).length && {k:'ord', navn:'Norske diktatord', info:`${L.ord.length} ord · hør ordet og skriv det`},
+    t && {k:'tekst', navn:t.navn, info:`Lesetekst · ${ordTall(t)} ord`},
+    (L.oppgaver||[]).length && {k:'oppgaver', navn:L.oppgaveNavn || 'Oppgaver', info:`${L.oppgaver.length} oppgaver`},
+    (L.engelsk||[]).length && {k:'engskriv', navn:'Engelske diktatord', info:`${L.engelsk.length} ord · hør ordet og skriv det på engelsk`},
+    (L.engelsk||[]).length && {k:'engelsk', navn:'Hva betyr de engelske ordene?', info:`${L.engelsk.length} ord · velg riktig betydning`},
+  ].filter(Boolean);
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ ${forhand ? 'Foreldresonen' : 'Tilbake'}</button>
+    <h2>${esc(L.tittel || 'Ukens lekse')}</h2>
+    ${forhand && !L.aktiv ? '<p class="note"><b>Forhåndsvisning.</b> Benjamin ser ikke leksen før du trykker «Vis for Benjamin» i foreldresonen.</p>' : ''}
+    ${L.beskjed ? `<p class="beskjed">${esc(L.beskjed)}</p>` : ''}
+    <p class="note">+${MODES.lekse.right} per riktig. Gjør delene i den rekkefølgen du vil.</p>
+    <div class="tasks">
+      ${deler.map(d=>`<button class="task" data-del="${d.k}"><span>${esc(d.navn)}</span><b>▶</b><small>${esc(d.info)}</small></button>`).join('')}
+    </div>
+    ${forhand ? '' : `<div class="tasks"><button class="task ${c?c.status:''}" id="lekseFerdig" ${c?'disabled':''}><span>${esc(TASKS.lekser.label)}</span><b>+${TASKS.lekser.pts}</b>${c ? `<small>${c.status==='pending' ? 'Venter på at pappa godkjenner' : 'Godkjent i dag!'}</small>` : ''}</button></div>`}
+  </div>`;
+  document.getElementById('back').onclick = forhand ? ()=>{ lekseTekstSync(); parentScreen(); } : startScreen;
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=> b.dataset.del==='tekst' ? tekstMeny(lekseTekstId()) : newMatch('lekse', b.dataset.del));
+  const f = document.getElementById('lekseFerdig');
+  if(f) f.onclick = ()=>{ claimTask('lekser'); speak('Sendt til pappa for godkjenning'); lekseScreen(); };
+}
+
 /* ---------- Lesetekster ---------- */
 function lesListe(){
   token++; screen = "lesing"; keyHandler = null;
+  lekseTekstSync();
   const rek = PROG.rekord || {}, igjen = LES_MAKS - lesIDag();
   app.innerHTML = `
   <div class="screen left">
@@ -2085,7 +2201,7 @@ async function checkTall(my){
 /* ---------- Kamp ---------- */
 const TEKSTMODUS = ['lesespm','fyllinn','silhuett'];
 function newMatch(mode, arg){
-  S = {mode, arg, qs: MODES[mode].make(arg).slice(0, MATCH_LEN), i:0, home:0, away:0, bestBefore:PROG.best, delta:0};
+  S = {mode, arg, qs: MODES[mode].make(arg).slice(0, MODES[mode].len || MATCH_LEN), i:0, home:0, away:0, bestBefore:PROG.best, delta:0};
   question();
 }
 
@@ -2286,13 +2402,15 @@ function typeKey(my, k){
   else if(S.cur.typed.length < 16) S.cur.typed += k;
   drawTyped();
 }
+// Engelske skriveord leses med engelsk stemme.
+const sayWord = item => item.en ? speakAny([EN(item.a)]) : speak(item.a);
 async function checkTyped(my){
   const item = S.cur.item, guess = S.cur.typed.trim().toLowerCase(), ok = guess===item.a.toLowerCase();
   if(!guess) return;
   const typedEl = document.getElementById('typed');
   if(S.cur.copy){
     // Etter rødt kort skriver han av det riktige ordet før han går videre. Gir ingen poeng.
-    if(ok){ keyHandler=null; typedEl.classList.add('ok'); speak(item.a); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
+    if(ok){ keyHandler=null; typedEl.classList.add('ok'); sayWord(item); document.getElementById('hint').textContent='Bra! Nå husker du det.'; nextButton(); }
     else { typedEl.classList.remove('shake'); void typedEl.offsetWidth; typedEl.classList.add('shake'); }
     return;
   }
@@ -2305,7 +2423,7 @@ async function checkTyped(my){
     if(my!==token) return;
     app.querySelector('.board').outerHTML = boardHTML();
     document.getElementById('hint').innerHTML = `Riktig skrevet! <span class="answer-word">${markWord(item)}</span>`;
-    speak(item.a);
+    sayWord(item);
     nextButton();
     return;
   }
@@ -2318,7 +2436,7 @@ async function checkTyped(my){
     S.cur.typed = ""; S.cur.hjelp = true; drawTyped();
     document.getElementById('hint').textContent = 'Nesten! Silhuetten viser hvordan ordet ser ut. Hør en gang til.';
     keyHandler = k => typeKey(my, k);
-    speak(item.say);
+    speakAny(item.say);
   } else {
     S.away++; app.querySelector('.board').outerHTML = boardHTML();
     await showFlash('<div class="col"><div class="sub">Gjettelaget scoret, men du mister ingen poeng.</div></div>', 1800);
@@ -2326,7 +2444,7 @@ async function checkTyped(my){
     S.cur.copy = true; S.cur.typed = ""; drawTyped();
     const tips = typeof item.niva === 'number' ? `<br><small class="tips">${esc(NIVAER[item.niva].tips)}</small>` : '';
     document.getElementById('hint').innerHTML = `Slik skrives det: <span class="answer-word">${markWord(item)}</span>${tips}<br>Skriv det av.`;
-    speak(item.a);
+    sayWord(item);
     keyHandler = k => typeKey(my, k);
   }
 }
@@ -2362,7 +2480,7 @@ function endScreen(){
     ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
     <p style="font-size:22px;max-width:440px;margin:0">${line}</p>
     <div class="modes">
-      <button class="mode" id="again" style="--c:${MODES[S.mode].color}">${TEKSTMODUS.includes(S.mode) ? 'Flere øvelser' : nyttNiva ? 'Prøv neste nivå' : nyttSteg ? 'Prøv neste steg' : `Ny kamp i ${MODES[S.mode].name.toLowerCase()}`}</button>
+      <button class="mode" id="again" style="--c:${MODES[S.mode].color}">${S.mode==='lekse' ? 'Tilbake til leksen' : TEKSTMODUS.includes(S.mode) ? 'Flere øvelser' : nyttNiva ? 'Prøv neste nivå' : nyttSteg ? 'Prøv neste steg' : `Ny kamp i ${MODES[S.mode].name.toLowerCase()}`}</button>
       <button class="mode" id="menu" style="--c:#f4f7ef">Til start</button>
     </div>
   </div>`;
@@ -2371,7 +2489,7 @@ function endScreen(){
   if(!unlocked.length) speak(title);
   const mode = S.mode;
   const arg = nyttNiva ? PROG.norskNiva : nyttSteg ? PROG.gangeSteg : S.arg;
-  document.getElementById('again').onclick = ()=> TEKSTMODUS.includes(mode) ? tekstMeny(arg) : mode==='gange' ? gangeIntro(arg) : newMatch(mode, arg);
+  document.getElementById('again').onclick = ()=> mode==='lekse' ? lekseScreen() : TEKSTMODUS.includes(mode) ? tekstMeny(arg) : mode==='gange' ? gangeIntro(arg) : newMatch(mode, arg);
   document.getElementById('menu').onclick = startScreen;
 }
 
