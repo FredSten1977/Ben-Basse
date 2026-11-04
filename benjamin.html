@@ -1275,7 +1275,11 @@ try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.as
 let db = null;
 const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0) + (p.lesing||0);
 function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
+// Hver lagring får et tidsstempel (_t). Data fra databasen som er eldre enn det enheten har, eller mangler
+// tidsstempel, skal aldri skrive over nyere fremgang. Da sendes enhetens egne data opp i stedet.
+const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t));
 async function save(which){
+  (which==="prog"?PROG:PRIZES)._t = Date.now();
   cacheLocal();
   if(!db) return;
   try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
@@ -1291,9 +1295,11 @@ function changePts(mode, d){
   try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
   if(!db) return;
   db.doc("benjamin/progress").onSnapshot(s=>{
+    if(s.exists && staleRemote(s.data(), PROG, PROG.best>0 || PROG.matches>0)){ save("prog"); return; }
     if(s.exists){ const d=s.data(); PROG = {...PROG, ...JSON.parse(JSON.stringify(d)), pts:Object.assign(zero(), d.pts||{})}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
   db.doc("benjamin/prizes").onSnapshot(s=>{
+    if(s.exists && staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; }
     if(s.exists){ PRIZES = {pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
 })();
