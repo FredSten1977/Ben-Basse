@@ -1279,12 +1279,13 @@ const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonu
 function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
 // Hver lagring får et tidsstempel (_t). Data fra databasen som er eldre enn det enheten har, eller mangler
 // tidsstempel, skal aldri skrive over nyere fremgang. Da sendes enhetens egne data opp i stedet.
-const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t));
+// En enhet uten tidsstempel (gammel versjon) med høyere rekord enn databasen beholder også sine tall.
+const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t) || (!loc._t && (loc.best||0) > (d.best||0)));
 async function save(which){
   (which==="prog"?PROG:PRIZES)._t = Date.now();
   cacheLocal();
   if(!db) return;
-  try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
+  try{ await db.doc(which==="prog"?"benjamin/progress":"benjamin/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); window.__sistLagret = Date.now(); }
   catch(e){ if(e && e.code==="unavailable"){ setTimeout(()=>save(which), 800+Math.random()*800); } }
 }
 function changePts(mode, d){
@@ -1297,11 +1298,11 @@ function changePts(mode, d){
   try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
   if(!db) return;
   db.doc("benjamin/progress").onSnapshot(s=>{
-    if(s.exists && staleRemote(s.data(), PROG, PROG.best>0 || PROG.matches>0)){ save("prog"); return; }
+    if(s.exists ? staleRemote(s.data(), PROG, PROG.best>0 || PROG.matches>0) : !!(PROG.best>0 || PROG.matches>0)){ save("prog"); return; }
     if(s.exists){ const d=s.data(); PROG = {...PROG, ...JSON.parse(JSON.stringify(d)), pts:Object.assign(zero(), d.pts||{})}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
   db.doc("benjamin/prizes").onSnapshot(s=>{
-    if(s.exists && staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; }
+    if(s.exists ? staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length) : !!(PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; }
     if(s.exists){ PRIZES = {pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); }
   }, ()=>{});
 })();
@@ -1795,6 +1796,9 @@ function parentScreen(confirmReset){
       <label class="grow">Ord<textarea id="ukeord" rows="3" maxlength="600">${esc((PRIZES.ukensOrd||[]).join(', '))}</textarea></label>
       <button class="next" type="submit">Lagre ord</button>
     </form>
+    <h3>Lagring</h3>
+    <p class="note">${FQ.family ? `Denne enheten lagrer i databasen, så poengene blir like på alle enheter. ${window.__sistLagret ? 'Sist lagret: kl. ' + new Date(window.__sistLagret).toLocaleTimeString('no',{hour:'2-digit',minute:'2-digit'}) + '.' : 'Ikke lagret ennå i denne økten.'}` : '<b>Denne enheten lagrer bare lokalt.</b> Skriv inn familiekoden for å lagre i databasen. Poengene på denne enheten blir da sendt opp og gjelder for alle enheter.'}</p>
+    ${FQ.family ? '' : `<form id="famf" class="form add"><label class="grow">Familiekode<input id="famkode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label><button class="next" type="submit">Koble til</button></form><p class="err" id="famErr"></p>`}
     <h3>Poeng</h3>
     <p class="note">Nå: ${total(PROG)} poeng. Rekord: ${PROG.best}.</p>
     ${confirmReset===true
@@ -1849,6 +1853,16 @@ function parentScreen(confirmReset){
     save("prog"); parentScreen();
   };
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={pts:zero(),best:0,right:0,wrong:0,matches:0,learned:[],bonus:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
+  const famf = document.getElementById('famf');
+  if(famf) famf.onsubmit = e => {
+    e.preventDefault();
+    const kode = document.getElementById('famkode').value.trim();
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(kode)){ document.getElementById('famErr').textContent = 'Koden ser ikke riktig ut.'; return; }
+    // Denne enhetens poeng skal vinne over det som ligger i databasen, så de ferske tallene sendes opp.
+    PROG._t = PRIZES._t = Date.now(); cacheLocal();
+    try{ localStorage.setItem("familiekode", kode); }catch(err){}
+    location.hash = "k=" + kode; location.reload();
+  };
   const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
 }
 

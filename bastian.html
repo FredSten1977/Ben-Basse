@@ -339,12 +339,13 @@ let db = null;
 function cacheLocal(){ try{ localStorage.setItem(LS, JSON.stringify({prog:PROG, prizes:PRIZES})); }catch(e){} }
 // Hver lagring får et tidsstempel (_t). Data fra databasen som er eldre enn det enheten har, eller mangler
 // tidsstempel, skal aldri skrive over nyere fremgang. Da sendes enhetens egne data opp i stedet.
-const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t));
+// En enhet uten tidsstempel (gammel versjon) med høyere rekord enn databasen beholder også sine tall.
+const staleRemote = (d, loc, harData) => !!harData && (!d._t || (!!loc._t && d._t < loc._t) || (!loc._t && (loc.best||0) > (d.best||0)));
 async function save(which){
   (which==="prog"?PROG:PRIZES)._t = Date.now();
   cacheLocal();
   if(!db) return;
-  try{ await db.doc(which==="prog"?"lillebror/progress":"lillebror/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); }
+  try{ await db.doc(which==="prog"?"lillebror/progress":"lillebror/prizes").set(JSON.parse(JSON.stringify(which==="prog"?PROG:PRIZES))); window.__sistLagret = Date.now(); }
   catch(e){ if(e && e.code==="unavailable") setTimeout(()=>save(which), 800+Math.random()*800); }
 }
 function addStars(n){ PROG.stars += n; PROG.best = Math.max(PROG.best, PROG.stars); save("prog"); }
@@ -353,8 +354,8 @@ function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') 
 (async()=>{
   try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
   if(!db) return;
-  db.doc("lillebror/progress").onSnapshot(s=>{ if(s.exists && staleRemote(s.data(), PROG, PROG.best>0 || PROG.rounds>0)){ save("prog"); return; } if(s.exists){ PROG={...PROG, ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
-  db.doc("lillebror/prizes").onSnapshot(s=>{ if(s.exists && staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; } if(s.exists){ PRIZES={pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
+  db.doc("lillebror/progress").onSnapshot(s=>{ if(s.exists ? staleRemote(s.data(), PROG, PROG.best>0 || PROG.rounds>0) : !!(PROG.best>0 || PROG.rounds>0)){ save("prog"); return; } if(s.exists){ PROG={...PROG, ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
+  db.doc("lillebror/prizes").onSnapshot(s=>{ if(s.exists ? staleRemote(s.data(), PRIZES, PRIZES.pin || (PRIZES.list||[]).length) : !!(PRIZES.pin || (PRIZES.list||[]).length)){ save("prizes"); return; } if(s.exists){ PRIZES={pin:"", list:[], ...JSON.parse(JSON.stringify(s.data()))}; cacheLocal(); refreshIdle(); } }, ()=>{});
 })();
 
 /* ---------- Tale ---------- */
@@ -856,6 +857,9 @@ function parentScreen(confirmReset){
       ${prizes.map(p=>`<div class="prow"><span class="at">${p.at}</span><b>${esc(p.text)}</b>
         ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div></div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
     </div>
+    <h3>Lagring</h3>
+    <p class="note">${FQ.family ? `Denne enheten lagrer i databasen, så poengene blir like på alle enheter. ${window.__sistLagret ? 'Sist lagret: kl. ' + new Date(window.__sistLagret).toLocaleTimeString('no',{hour:'2-digit',minute:'2-digit'}) + '.' : 'Ikke lagret ennå i denne økten.'}` : '<b>Denne enheten lagrer bare lokalt.</b> Skriv inn familiekoden for å lagre i databasen. Poengene på denne enheten blir da sendt opp og gjelder for alle enheter.'}</p>
+    ${FQ.family ? '' : `<form id="famf" class="form add"><label class="grow">Familiekode<input id="famkode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label><button class="next" type="submit">Koble til</button></form><p class="err" id="famErr"></p>`}
     <h3>Stjerner</h3>
     <p class="note">Nå: ${PROG.stars}. Riktige: ${PROG.right}. Feil: ${PROG.wrong}. Runder: ${PROG.rounds}.</p>
     ${confirmReset ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>` : `<div class="acts"><button id="reset">Nullstill stjernene</button></div>`}
@@ -878,6 +882,16 @@ function parentScreen(confirmReset){
   app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={stars:0,best:0,right:0,wrong:0,rounds:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
+  const famf = document.getElementById('famf');
+  if(famf) famf.onsubmit = e => {
+    e.preventDefault();
+    const kode = document.getElementById('famkode').value.trim();
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(kode)){ document.getElementById('famErr').textContent = 'Koden ser ikke riktig ut.'; return; }
+    // Denne enhetens poeng skal vinne over det som ligger i databasen, så de ferske tallene sendes opp.
+    PROG._t = PRIZES._t = Date.now(); cacheLocal();
+    try{ localStorage.setItem("familiekode", kode); }catch(err){}
+    location.hash = "k=" + kode; location.reload();
+  };
   const n=document.getElementById('resetNo'); if(n) n.onclick=()=>parentScreen();
 }
 
