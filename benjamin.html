@@ -1772,7 +1772,13 @@ function parentScreen(confirmReset){
     <h3>Ukens lekse</h3>
     ${lekseAlle() ? `<p class="note"><b>${esc(lekseAlle().tittel || 'Lekse')}</b> · ${lekseAlle().aktiv ? 'Benjamin ser leksen nå.' : 'Skjult for Benjamin.'}</p>
     <div class="acts"><button id="lekseSe">Se leksen</button><button id="lekseVis" class="${lekseAlle().aktiv ? '' : 'ok'}">${lekseAlle().aktiv ? 'Skjul for Benjamin' : 'Vis for Benjamin'}</button></div>`
-      : '<p class="note">Ingen lekse lagt inn. Send PDF-en fra skolen til Claude, så blir den lagt inn her.</p>'}
+      : '<p class="note">Ingen lekse lagt inn ennå.</p>'}
+    <p class="note">Ny lekse: send PDF-en fra skolen til Claude og lim inn lekse-koden du får tilbake her. Leksen er skjult for Benjamin til du trykker «Vis for Benjamin».</p>
+    <form id="leksef" class="form add">
+      <label class="grow">Lekse-kode<textarea id="leksekode" rows="2" placeholder='{"tittel": "Lekse uke 46", ...}'></textarea></label>
+      <button class="next" type="submit">Legg inn lekse</button>
+    </form>
+    <p class="err" id="lekseErr"></p>
     <h3>Ukens ord</h3>
     <p class="note">Skriv inn staveordene fra skolen, med komma eller linjeskift mellom. De blir et eget valg under Norsk. Del gjerne ordet i stavelser med bindestrek, som fot-ball.</p>
     <form id="ukef" class="form add">
@@ -1792,6 +1798,15 @@ function parentScreen(confirmReset){
   </div>`;
   document.getElementById('back').onclick = progressScreen;
   const lSe = document.getElementById('lekseSe'); if(lSe) lSe.onclick = ()=>lekseScreen(true);
+  document.getElementById('leksef').onsubmit = e => {
+    e.preventDefault();
+    try{
+      const L = JSON.parse(document.getElementById('leksekode').value.trim());
+      if(!L || typeof L!=='object' || !(L.ord||L.tekst||L.oppgaver||L.engelsk)) throw 0;
+      PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), aktiv:false};
+      save("prizes"); lekseScreen(true);
+    }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
+  };
   const lVis = document.getElementById('lekseVis'); if(lVis) lVis.onclick = ()=>{ PRIZES.lekse = {...PRIZES.lekse, aktiv:!PRIZES.lekse.aktiv}; save("prizes"); parentScreen(); };
   app.querySelectorAll('[data-las]').forEach(sel=>sel.onchange=()=>{ PRIZES.las = {...(PRIZES.las||{}), [sel.dataset.las]: sel.value}; save("prizes"); });
   document.getElementById('ukef').onsubmit = e => {
