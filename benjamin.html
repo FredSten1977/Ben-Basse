@@ -1180,9 +1180,11 @@ const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[qKey(x)]||0)-(SEEN[qK
    {id, tittel, beskjed, aktiv, ord:["fot-ball",...], tekst:{navn, linjer:[...], ove:[...], hjelp:[...], spm:[{q, sant}]},
     oppgaver:[{q, a, w:[feil, feil], say?, f?}], engelsk:[["dog","Hund"], ...]}
    Benjamin ser den først når pappa har trykket «Vis for Benjamin» i foreldresonen (aktiv). */
-const lekseAlle = () => PRIZES.lekse || null;
-const lekse = () => PRIZES.lekse && PRIZES.lekse.aktiv ? PRIZES.lekse : null;
-const lekseTekstId = () => 'lekse-' + ((PRIZES.lekse && PRIZES.lekse.id) || '1');
+// Leksen Claude har bygget inn i appen. En lekse lagt inn i foreldresonen vinner hvis den er like ny eller nyere.
+const INNEBYGD_LEKSE = {"id": "2026-11-skoleuniform", "tittel": "Lekse til torsdag", "beskjed": "Innen torsdag: Les 15 minutter hver dag med lesekortet, og en voksen signerer. Svar på de fem spørsmålene om skoleuniform i lekseboka. Lag din egen trylledrikk på engelsk og les den høyt for en voksen. Her i appen øver du på diktatordene og leser om skoleuniform.", "ord": ["for-tel-le", "for-kla-re", "un-der-sø-ke", "me-ning"], "tekst": {"navn": "Skoleuniform i England", "hjelp": ["England", "uniform", "skoleuniform"], "ove": ["like", "klær", "genser", "slips", "klassen", "velge", "dyr", "fag"], "linjer": ["I England går mange barn med skoleuniform.", "En skoleuniform er like klær for alle på skolen.", "Ola har en blå genser og et slips.", "Alle i klassen har like klær.", "Det er bra, for ingen ser rik eller fattig ut.", "Det er ikke så bra, for du kan ikke velge selv.", "Og uniformen kan være dyr.", "På skolen har Ola fag som matte, engelsk og gym."], "spm": [{"q": "Ola har en blå genser.", "sant": true}, {"q": "Alle i klassen har ulike klær.", "sant": false}, {"q": "Uniformen kan være dyr.", "sant": true}]}, "oppgaver": [{"q": "Hva er en skoleuniform?", "a": "Like klær for alle på skolen", "w": ["En sekk til bøkene", "En lærer i England"]}, {"q": "Hva er bra med skoleuniform?", "a": "Ingen ser rik eller fattig ut", "w": ["Du kan velge klær selv", "Den er gratis"]}, {"q": "Hva er ikke så bra med skoleuniform?", "a": "Du kan ikke velge klær selv", "w": ["Alle ser like ut", "Den er blå"]}, {"q": "Hvilket fag har Ola på skolen?", "a": "Matte", "w": ["Fotball", "Kino"]}, {"q": "Hva betyr «fortelle»?", "a": "Si hva som skjedde", "w": ["Tegne et bilde", "Løpe fort"]}, {"q": "Hva betyr «forklare»?", "a": "Si hvordan noe er, så andre skjønner", "w": ["Lukke en dør", "Synge en sang"]}, {"q": "Hva betyr «undersøke»?", "a": "Se nøye etter og finne ut", "w": ["Sove lenge", "Spise opp"]}, {"q": "Hva er en «mening»?", "a": "Det du synes og tror", "w": ["En sko", "Et tall"]}], "oppgaveNavn": "Skoleuniform og ord", "engelsk": [["dyed", "Farget"], ["fangs", "Hoggtenner"], ["creatures", "Skapninger"], ["recently", "Nettopp"], ["suddenly", "Plutselig"]], "dato": "2026-11-04", "aktiv": true};
+const lekseAlle = () => { const p = PRIZES.lekse; return p && (p.dato||'') >= (INNEBYGD_LEKSE.dato||'') ? p : INNEBYGD_LEKSE; };
+const lekse = () => { const L = lekseAlle(); return L && L.aktiv ? L : null; };
+const lekseTekstId = () => 'lekse-' + ((lekseAlle() && lekseAlle().id) || '1');
 // Leseteksten fra leksen legges øverst blant lesetekstene, så alle tekstøvelsene virker på den.
 function lekseTekstSync(vis){
   for(let i=TEKSTER.length-1;i>=0;i--) if(String(TEKSTER[i].id).startsWith('lekse')) TEKSTER.splice(i,1);
@@ -1811,11 +1813,11 @@ function parentScreen(confirmReset){
     try{
       const L = JSON.parse(document.getElementById('leksekode').value.trim());
       if(!L || typeof L!=='object' || !(L.ord||L.tekst||L.oppgaver||L.engelsk)) throw 0;
-      PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), aktiv:false};
+      PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), dato: new Date().toISOString(), aktiv:false};
       save("prizes"); lekseScreen(true);
     }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
   };
-  const lVis = document.getElementById('lekseVis'); if(lVis) lVis.onclick = ()=>{ PRIZES.lekse = {...PRIZES.lekse, aktiv:!PRIZES.lekse.aktiv}; save("prizes"); parentScreen(); };
+  const lVis = document.getElementById('lekseVis'); if(lVis) lVis.onclick = ()=>{ const L = lekseAlle(); PRIZES.lekse = {...L, aktiv:!L.aktiv}; save("prizes"); parentScreen(); };
   app.querySelectorAll('[data-las]').forEach(sel=>sel.onchange=()=>{ PRIZES.las = {...(PRIZES.las||{}), [sel.dataset.las]: sel.value}; save("prizes"); });
   document.getElementById('ukef').onsubmit = e => {
     e.preventDefault();
