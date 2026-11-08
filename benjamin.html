@@ -1801,6 +1801,11 @@ function parentScreen(confirmReset){
     ${FQ.family ? '' : `<form id="famf" class="form add"><label class="grow">Familiekode<input id="famkode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label><button class="next" type="submit">Koble til</button></form><p class="err" id="famErr"></p>`}
     <h3>Poeng</h3>
     <p class="note">Nå: ${total(PROG)} poeng. Rekord: ${PROG.best}.</p>
+    <form id="poengf" class="form add">
+      <label>Sett total poengsum<input id="poengNy" type="number" inputmode="numeric" min="0" max="99999" required value="${total(PROG)}"></label>
+      <label style="flex-basis:100%;display:flex;flex-direction:row;align-items:center;gap:10px"><input id="poengRekord" type="checkbox" style="width:22px;height:22px;flex:none"> Sett rekorden til samme tall (premiene følger rekorden)</label>
+      <button class="next" type="submit">Lagre poeng</button>
+    </form>
     ${confirmReset===true
       ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>`
       : `<div class="acts"><button id="reset">Nullstill poengene</button></div>`}
@@ -1843,6 +1848,18 @@ function parentScreen(confirmReset){
   app.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.ok, true); parentScreen(); }); });
   app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
   wireImageButtons(()=>parentScreen());
+  // Pappa kan sette total poengsum selv. Forskjellen legges i bonus, så poengene per modus blir som de er.
+  document.getElementById('poengf').onsubmit = e => {
+    e.preventDefault();
+    const ny = parseInt(document.getElementById('poengNy').value,10), rek = document.getElementById('poengRekord').checked;
+    if(!(ny>=0)) return;
+    e.target.querySelector('[type=submit]').disabled = true;
+    FQ.fresh().then(()=>{
+      PROG.bonus = (PROG.bonus||0) + (ny - total(PROG));
+      PROG.best = rek ? ny : Math.max(PROG.best, ny);
+      save("prog"); parentScreen();
+    });
+  };
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
   const ny=document.getElementById('nye'); if(ny) ny.onclick=()=>parentScreen('nye');
   const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
