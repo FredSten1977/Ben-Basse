@@ -81,6 +81,15 @@ h3{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0}
 .key:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(29,43,79,.18)}
 .key[disabled]{opacity:.35;cursor:default}
 .kb.locked .key{opacity:.45;pointer-events:none}
+/* Skriv ordet: en rute per bokstav */
+.btn.skriv{background:#7bd3ff;box-shadow:0 6px 0 #3a9fd0}
+.btn.skriv:active{box-shadow:0 3px 0 #3a9fd0}
+.slots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.slots .slot{width:clamp(50px,15vw,76px);height:clamp(58px,17vw,86px);font-size:clamp(36px,11vw,56px);border-radius:16px}
+.slots .slot.now{border:4px solid var(--sun);background:#fff8dc;animation:pulse 1.4s ease-in-out infinite}
+.slots .slot.ghost{color:rgba(29,43,79,.28)}
+.key.glow{background:var(--leaf)!important;color:#fff;animation:pulse 1s ease-in-out infinite;position:relative;z-index:1}
+.tips{border:0;background:transparent;font:inherit;font-weight:700;font-size:18px;color:var(--ink);opacity:.75;cursor:pointer;padding:4px 10px;text-decoration:underline}
 
 /* Natthimmelpanel rundt stjerneveien */
 .night{width:100%;max-width:560px;box-sizing:border-box;background:radial-gradient(ellipse at 30% 0%,#2a3b7a,var(--navy) 70%);color:var(--chalk);border-radius:24px;padding:18px 14px;text-align:left}
@@ -750,6 +759,7 @@ function startScreen(){
     <p style="font-size:22px;margin:0">Hei, ${esc(NAME)}! Se på bildet og finn bokstaven ordet begynner på.</p>
     <button class="stars" id="starsBtn" aria-label="Stjernene dine">${STAR}<span>${PROG.stars}</span></button>
     <button class="btn" id="go">Spill</button>
+    <button class="btn skriv" id="skriv">✏️ Skriv ordet</button>
     ${lekse() ? `<button class="bed lekser" id="lekseBtn" aria-label="Lekser"><span class="bed-pic">📚</span><span class="bed-text"><b>${esc(lekse().tittel || 'Lekser')}</b><small>${lekseGjort(lekse())} av ${(lekse().gjoremal||[]).length} ferdig</small></span></button>` : ''}
     ${Object.entries(TASKS).filter(([k,t])=>!t.skjult).map(([k,t])=>{ const c = claimToday(k); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
       return `<button class="bed ${k} ${st}" data-t="${k}" ${c?'disabled':''} aria-label="${t.label}">
@@ -760,6 +770,7 @@ function startScreen(){
     <button class="parent-link" id="parent">Foreldresone${pendingClaims().length?` <span class="pill">${pendingClaims().length} venter</span>`:''}</button>
   </div>`;
   document.getElementById('go').onclick = ()=>newRound();
+  document.getElementById('skriv').onclick = ()=>skrivRound();
   const lb = document.getElementById('lekseBtn'); if(lb) lb.onclick = ()=>lekseScreen();
   app.querySelectorAll('.bed[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Bra! Nå sjekker pappa.'); startScreen(); });
   document.getElementById('starsBtn').onclick = ()=>speak(`Du har ${PROG.stars} stjerner`);
@@ -843,9 +854,104 @@ function nextButton(){
   const last = R.i === R.items.length-1;
   document.getElementById('after').innerHTML = `<button class="btn" id="nx">${last?'Ferdig!':'Neste bilde'}</button>`;
   const nx = document.getElementById('nx');
-  nx.onclick = ()=>{ if(last) endScreen(); else { R.i++; showPicture(); } };
+  nx.onclick = ()=>{ if(last) endScreen(); else { R.i++; R.skriv ? showSkriv() : showPicture(); } };
   keyHandler = null;
   setTimeout(()=>{ if(document.activeElement===document.body) nx.focus({preventScroll:true}); }, 50);
+}
+/* ---------- Skriv ordet ----------
+   Bastian ser et bilde og skriver hele ordet, bokstav for bokstav. Bare korte ord som skrives slik de høres.
+   Riktig bokstav settes inn med en gang. Feil bokstav ristes bort, og etter to feil på samme bokstav lyser riktig tast.
+   Hele ordet uten feil og uten tips gir 3 stjerner, ellers 1. */
+const SKRIV_ORD = [
+  ["🍦","Is"],["🐄","Ku"],["🏝️","Øy"],
+  ["☀️","Sol"],["🚗","Bil"],["🏠","Hus"],["🐭","Mus"],["🐑","Sau"],["🐺","Ulv"],["🧀","Ost"],["🥚","Egg"],["🚂","Tog"],
+  ["✈️","Fly"],["⛵","Båt"],["🌳","Tre"],["🦊","Rev"],["📖","Bok"],["🦶","Fot"],["🐝","Bie"],["🐒","Ape"],["👂","Øre"],
+  ["👁️","Øye"],["❄️","Snø"],["⚡","Lyn"],["🍚","Ris"],["🦭","Sel"],["🦈","Hai"],["🪓","Øks"],["🦅","Ørn"],["🚪","Dør"],
+  ["🌉","Bro"],["🏹","Pil"],
+  ["🐱","Katt"],["🐟","Fisk"],["⚽","Ball"],["🐷","Gris"],["🌙","Måne"],["🦷","Tann"],["🎩","Hatt"],["🧦","Sokk"],["🌹","Rose"],
+  ["🎂","Kake"],["🎁","Gave"],["👃","Nese"],["🐂","Okse"],["🦙","Lama"],["🛶","Kano"],["🧂","Salt"],["⛺","Telt"],["💧","Vann"],
+  ["🐜","Maur"],["🍄","Sopp"],["🐓","Hane"],["🐐","Geit"],["🚌","Buss"],["🗺️","Kart"],["☕","Kopp"],["🪑","Stol"],["🌽","Mais"],
+  ["🐴","Hest"],["🦁","Løve"],["🦉","Ugle"],["🍅","Tomat"],["🍌","Banan"],["🐸","Frosk"],
+].map(([pic,word])=>({pic, word:word.toUpperCase()}));
+const SKRIV_RUNDE = 8, SKRIV_HEL = 3, SKRIV_HALV = 1;
+const SKRIV_SEEN_KEY = "skriveord-seen";
+let SKRIV_SEEN = {}; try{ SKRIV_SEEN = JSON.parse(localStorage.getItem(SKRIV_SEEN_KEY)||"{}") || {}; }catch(e){}
+function skrivRound(){
+  // De ordene han har sett minst nylig, og de korteste først i runden.
+  const items = shuffle(SKRIV_ORD).sort((x,y)=>(SKRIV_SEEN[x.word]||0)-(SKRIV_SEEN[y.word]||0)).slice(0, SKRIV_RUNDE).sort((x,y)=>x.word.length-y.word.length);
+  R = {items, i:0, res:[], got:0, skriv:true};
+  showSkriv();
+}
+function showSkriv(){
+  const my = ++token; screen="play";
+  const it = R.items[R.i], w = [...it.word];
+  R.pos = 0; R.feil = 0; R.feilHer = 0; R.tips = false;
+  SKRIV_SEEN[it.word] = Date.now(); try{ localStorage.setItem(SKRIV_SEEN_KEY, JSON.stringify(SKRIV_SEEN)); }catch(e){}
+  app.innerHTML = `
+  <div class="topbar">${dotsHTML()}<div class="stars" aria-label="Stjerner">${STAR}<span id="starCount">${PROG.stars}</span></div></div>
+  <div class="card">
+    <button class="listen" id="listen" aria-label="Hør ordet">${SPEAKER}</button>
+    <div class="pic" role="img" aria-label="Bilde">${it.pic}</div>
+    <div class="slots" id="slots">${w.map((_,k)=>`<div class="slot${k===0?' now':''}" data-s="${k}"></div>`).join('')}</div>
+  </div>
+  <div class="hint" id="hint">Skriv ordet! Det har ${w.length} bokstaver.</div>
+  <div id="after" style="display:flex;justify-content:center"><button class="tips" id="tips">💡 Vis meg ordet</button></div>
+  <div class="kb" id="kb">${LETTERS.map(l=>`<button class="key" data-k="${l}">${l}</button>`).join('')}</div>`;
+  const listen = document.getElementById('listen');
+  const say = () => { listen.classList.add('speaking'); speak(`${it.word.toLowerCase()}. Kan du skrive ${it.word.toLowerCase()}?`, ()=>listen.classList.remove('speaking')); };
+  listen.onclick = say;
+  say();
+  document.getElementById('tips').onclick = ()=>{
+    if(my!==token || R.pos>=w.length) return;
+    R.tips = true;
+    const tomme = [...app.querySelectorAll('.slots .slot')].slice(R.pos);
+    tomme.forEach((el,k)=>{ el.textContent = w[R.pos+k]; el.classList.add('ghost'); });
+    speak(w.join(', ').toLowerCase());
+    setTimeout(()=>{ if(my!==token) return; tomme.forEach(el=>{ if(el.classList.contains('ghost')){ el.textContent=''; el.classList.remove('ghost'); } }); }, 3000);
+  };
+  document.querySelectorAll('.key').forEach(b=>b.onclick=()=>keyHandler && keyHandler(b.dataset.k));
+  keyHandler = k => skrivGuess(my, k);
+}
+function skrivGuess(my, k){
+  if(my!==token) return;
+  const it = R.items[R.i], w = [...it.word];
+  const slots = [...app.querySelectorAll('.slots .slot')], slot = slots[R.pos];
+  const hint = document.getElementById('hint'), kb = document.getElementById('kb');
+  app.querySelectorAll('.key.glow').forEach(b=>b.classList.remove('glow'));
+  if(k===w[R.pos]){
+    slot.textContent = k; slot.className = 'slot ok';
+    R.pos++; R.feilHer = 0;
+    if(R.pos < w.length){
+      tone([660], 'sine', .15, .12);
+      slots[R.pos].textContent = ''; slots[R.pos].className = 'slot now';
+      hint.textContent = 'Bra! Neste bokstav.';
+      return;
+    }
+    // Hele ordet er skrevet.
+    keyHandler = null;
+    const n = (R.feil===0 && !R.tips) ? SKRIV_HEL : SKRIV_HALV;
+    R.res[R.i] = R.feil===0 && !R.tips; R.got += n; PROG.right++;
+    addStars(n); ding(); flyStars(n, slots[slots.length-1]);
+    hint.textContent = n===SKRIV_HEL ? `${it.word}! Helt riktig! Tre stjerner!` : `${it.word}! Du klarte det! En stjerne.`;
+    speak(`${it.word.toLowerCase()}! ${n===SKRIV_HEL ? 'Helt riktig!' : 'Du klarte det!'}`);
+    nextButton();
+  } else {
+    R.feil++; R.feilHer++; PROG.wrong++; save("prog");
+    slot.textContent = k; slot.className = 'slot bad';
+    bonk();
+    keyHandler = null; kb.classList.add('locked');
+    const igjen = () => { if(my!==token) return; kb.classList.remove('locked'); slot.textContent=''; slot.className='slot now'; keyHandler = kk => skrivGuess(my, kk); };
+    if(R.feilHer>=2){
+      hint.textContent = `Trykk på den grønne: ${w[R.pos]}`;
+      speak(`Neste bokstav er ${w[R.pos]}`);
+      setTimeout(()=>{ igjen(); const b = app.querySelector(`.key[data-k="${w[R.pos]}"]`); if(b && my===token) b.classList.add('glow'); }, 900);
+    } else {
+      hint.textContent = 'Nesten! Hør en gang til.';
+      speak(it.word.toLowerCase());
+      setTimeout(()=>{ igjen(); if(my===token) hint.textContent = 'Prøv igjen!'; }, 1500);
+    }
+  }
+  const sc = document.getElementById('starCount'); if(sc) sc.textContent = PROG.stars;
 }
 function flyStars(n, from){
   const target = document.getElementById('starCount');
@@ -866,13 +972,13 @@ function endScreen(){
   app.innerHTML = `
   <div class="screen">
     <h1>Bra jobba!</h1>
-    <p style="font-size:24px;margin:0">Du fant <b>${right}</b> av ${R.items.length} bokstaver.</p>
+    <p style="font-size:24px;margin:0">${R.skriv ? `Du skrev <b>${right}</b> av ${R.items.length} ord helt uten feil.` : `Du fant <b>${right}</b> av ${R.items.length} bokstaver.`}</p>
     <div class="stars" style="cursor:default">${STAR}<span>+${R.got}</span></div>
     <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">${R.lekse ? 'Tilbake til leksene' : 'Spill igjen'}</button><button class="btn" id="home" style="background:#fff;box-shadow:0 6px 0 rgba(29,43,79,.18)">Til start</button></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">${R.lekse ? 'Tilbake til leksene' : R.skriv ? 'Skriv flere ord' : 'Spill igjen'}</button><button class="btn" id="home" style="background:#fff;box-shadow:0 6px 0 rgba(29,43,79,.18)">Til start</button></div>
   </div>`;
   speak(`Bra jobba, ${NAME}! Du fikk ${R.got} stjerner.`);
-  document.getElementById('again').onclick = ()=> R.lekse ? lekseScreen() : newRound();
+  document.getElementById('again').onclick = ()=> R.lekse ? lekseScreen() : R.skriv ? skrivRound() : newRound();
   document.getElementById('home').onclick = startScreen;
   checkCelebrate();
 }
