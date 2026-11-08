@@ -110,11 +110,12 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .mode small{display:block;font-family:var(--font-read);font-size:14px;font-weight:700;opacity:.7;margin-top:2px}
 .mode:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
 .mode:focus-visible{outline:4px solid var(--chalk);outline-offset:3px}
-.pts{width:100%;max-width:520px;background:#050d09;border:3px solid #24392e;border-radius:12px;padding:12px;display:grid;gap:10px;box-sizing:border-box}
-.pts-total{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-size:22px}
+.pts{width:100%;max-width:520px;background:#050d09;border:3px solid #24392e;border-radius:12px;padding:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;box-sizing:border-box;overflow:hidden}
+.pts-total{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--font-display);font-size:22px;min-width:0}
 .pts-total b{font-family:var(--font-board);font-weight:400;font-size:40px;color:var(--led);text-shadow:0 0 12px rgba(255,210,63,.55)}
-.pts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
-.pts-row span{display:block;font-size:15px;opacity:.75}
+.pts-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center}
+@media (max-width:480px){.pts-row{grid-template-columns:repeat(3,minmax(0,1fr))}.pts-total b{font-size:34px}}
+.pts-row span{display:block;font-size:15px;opacity:.75;overflow-wrap:anywhere;hyphens:auto}
 .pts-row b{font-family:var(--font-board);font-weight:400;font-size:24px}
 
 
@@ -178,7 +179,7 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .task:focus-visible{outline:4px solid var(--led);outline-offset:3px}
 .task.pending{background:#fff3c4;box-shadow:0 5px 0 #d9c376;cursor:default}
 .task.approved{background:#c9f7c3;box-shadow:0 5px 0 #6cbf63;cursor:default}
-.pts-bonus{display:flex;justify-content:space-between;border-top:1px solid #24392e;padding-top:8px;font-size:15px}
+.pts-bonus{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #24392e;padding-top:8px;font-size:15px;min-width:0}
 .pts-bonus b{font-family:var(--font-board);font-weight:400;font-size:20px;color:var(--led)}
 .pill{display:inline-block;background:var(--red);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:6px}
 .acts button.ok{background:var(--grass)}
