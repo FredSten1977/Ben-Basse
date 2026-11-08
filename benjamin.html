@@ -1232,7 +1232,8 @@ const MODES = {
 };
 
 /* ---------- Poengregler ----------
-   Riktig på første forsøk: +4 i norsk og historie, +3 i engelsk, +2 i fotball og matte. Hvert feil svar: −1 (og Gjettelaget scorer).
+   Riktig på første forsøk: +4 i norsk og historie, +3 i engelsk, +2 i fotball og matte. Feil svar: Gjettelaget scorer.
+   Første feil på et spørsmål er gratis (gult kort). Andre feil på samme spørsmål gir −1 (rødt kort).
    Å gjette blindt blant fire svar gir i snitt minus, å lese gir pluss. */
 const WRONG = -1;
 const RIGHT_OF = () => MODES[S.mode].right;
@@ -1657,7 +1658,7 @@ function startScreen(){
     <div class="rules">
       <div class="rule"><i>1</i><span>Hør på spørsmålet.</span></div>
       <div class="rule"><i>2</i><span>Les svarene selv. I norsk skriver du ordet selv.</span></div>
-      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie, <b class="plus">+3</b> i engelsk og gangetabell og <b class="plus">+2</b> i fotball og matte. Feil svar gir <b class="minus">−1</b>, og Gjettelaget scorer. I norsk mister du aldri poeng for å skrive feil.</span></div>
+      <div class="rule"><i>3</i><span>Riktig svar gir <b class="plus">+4</b> i norsk og historie, <b class="plus">+3</b> i engelsk og gangetabell og <b class="plus">+2</b> i fotball og matte. Feil svar gir gult kort, og Gjettelaget scorer. Første feil er gratis, men bommer du igjen på samme spørsmål, blir det rødt kort og <b class="minus">−1</b>. I norsk mister du aldri poeng for å skrive feil.</span></div>
     </div>
     <button class="pts pts-btn" id="prog">
       <div class="pts-total"><span>${LEVELS[levelOf(PROG.best)][1]}</span><b>${total(PROG)}</b></div>
@@ -2245,7 +2246,8 @@ function boardHTML(){
     <div class="meta"><span>${MODES[S.mode].name.toUpperCase()} · <b>${S.i+1}</b>/${S.qs.length}</span><span><b>${minute}'</b></span></div>
   </div>`;
 }
-function scoreWrong(){ S.away++; S.delta+=WRONG; changePts(S.mode, WRONG); app.querySelector('.board').outerHTML = boardHTML(); }
+// Første feil på et spørsmål koster ingen poeng (bare gult kort). Minus først på andre feil.
+function scoreWrong(minus){ S.away++; if(minus){ S.delta+=WRONG; changePts(S.mode, WRONG); } else { PROG.wrong++; save("prog"); } app.querySelector('.board').outerHTML = boardHTML(); }
 function scoreRight(){ S.home++; S.delta+=RIGHT_OF(); const q=S.cur.item.q; if(S.mode==='historie' && !(PROG.learned||[]).includes(q)) PROG.learned=[...(PROG.learned||[]), q]; changePts(S.mode, RIGHT_OF()); }
 
 function question(){
@@ -2335,10 +2337,10 @@ async function pick(btn){
     finishChoice(my, true);
   } else {
     btn.classList.add('wrong');
-    scoreWrong(); sfxFart();
+    scoreWrong(S.cur.tries>1); sfxFart();
     if(S.cur.tries===1){
       S.cur.wrongPicked = o;
-      await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div>${ptsTag(WRONG)}</div>`, 1800);
+      await showFlash(`<div class="col"><div class="card y"></div><div class="sub">Gult kort! Gjettelaget scoret.</div><div class="sub">Du mister ingen poeng denne gangen.</div></div>`, 1800);
       if(my!==token) return;
       // Bytt plass på svarene så han må lese igjen, ikke bare trykke på knappen ved siden av.
       S.cur.opts = shuffle(S.cur.opts);
