@@ -174,6 +174,23 @@ h3{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0}
 .bed.orden:not(.pending):not(.approved){background:linear-gradient(135deg,#ff8a5c,#e0533b);box-shadow:0 6px 0 #9c3322}
 .pill{display:inline-block;background:var(--coral);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:6px}
 .acts button.ok{background:var(--leaf);color:#fff}
+.form textarea{font:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:2px solid rgba(29,43,79,.25);background:#fff;color:var(--ink);width:100%;box-sizing:border-box;resize:vertical}
+.bed.lekser:not(.pending):not(.approved){background:linear-gradient(135deg,#ffb703,#f08a00);box-shadow:0 6px 0 #a85f00;color:var(--ink)}
+.bed.lekser:not(.pending):not(.approved) small{color:var(--ink)}
+.lekse-beskjed{display:flex;gap:12px;align-items:center;width:100%;max-width:560px;box-sizing:border-box;text-align:left;font:inherit;font-size:19px;background:var(--chalk);color:var(--ink);border:0;border-radius:20px;padding:12px 16px;box-shadow:0 4px 0 rgba(29,43,79,.12);cursor:pointer}
+.lyd{flex:none;width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--sun);display:grid;place-items:center}
+.lyd svg,.lekse-hør svg{width:24px;height:24px}
+.lekse-list{display:grid;gap:12px;width:100%;max-width:560px}
+.lekse-row{display:flex;gap:10px;align-items:stretch}
+.lekse-hør{flex:none;width:56px;border:0;border-radius:18px;background:var(--ink);color:var(--sun);display:grid;place-items:center;cursor:pointer}
+.lekse-gj{flex:1;min-width:0;display:flex;gap:12px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--chalk);border:0;border-radius:18px;padding:12px 14px;box-shadow:0 5px 0 rgba(29,43,79,.15);cursor:pointer}
+.lekse-gj:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(29,43,79,.15)}
+.lekse-pic{font-size:44px;line-height:1;flex:none}
+.lekse-txt{flex:1;min-width:0;font-family:var(--font-display);font-weight:700;font-size:21px;line-height:1.2}
+.lekse-box{flex:none;width:44px;height:44px;border-radius:12px;border:4px solid rgba(29,43,79,.3);display:grid;place-items:center;font-size:30px;font-weight:700;color:#fff}
+.lekse-row.ok .lekse-gj{background:#dcf7e2}
+.lekse-row.ok .lekse-box{background:var(--leaf);border-color:var(--leaf)}
+.lekse-row.ok .lekse-txt{opacity:.7}
 @keyframes boom{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .pbar{position:relative;height:16px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
@@ -316,6 +333,7 @@ let PROG = {stars:0, best:0, right:0, wrong:0, rounds:0, claims:[]};
 const TASKS = {
   sove:  {label:"Jeg var flink til å legge meg", short:"Flink til å legge seg", pic:"🛏️", zzz:true, stars:5},
   orden: {label:"Jeg har holdt orden", short:"Holdt orden", pic:"🧹", zzz:false, stars:5},
+  lekser: {label:"Jeg har gjort leksene", short:"Gjort leksene", pic:"📚", zzz:false, stars:10, skjult:true},
 };
 const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const claimToday = kind => (PROG.claims||[]).find(c=>c.kind===kind && c.day===today() && c.status!=='rejected');
@@ -671,6 +689,53 @@ function wireImageButtons(rerender){
   });
 }
 
+/* ---------- Lekser ----------
+   Leksen fra skolen ligger i PRIZES.lekse (samme dokument som premiene), så en ny lekse trenger ingen ny kode.
+   Format: {id, dato, aktiv, tittel, beskjed, gjoremal:[{pic, tekst, si}] eller ["tekst", ...], ordNavn, ord:[["🧥","Jakke"], ...]}
+   Kryssene lagres i PROG.lekseKryss[id] = [indekser]. */
+// Leksen Claude har bygget inn i appen. En lekse lagt inn i foreldresonen vinner hvis den er like ny eller nyere.
+const INNEBYGD_LEKSE = {"id": "bastian-2026-uke46", "dato": "2026-11-08", "aktiv": true, "tittel": "Lekser uke 46", "beskjed": "Denne uka skal du lese i leseboka, finne blader til læreren og øve på å kle på deg selv. Trykk på en lekse når du er ferdig med den.", "gjoremal": [{"pic": "📖", "tekst": "Les side 48 og 49", "si": "Les side 48 og 49 i leseboka."}, {"pic": "📖", "tekst": "Les side 50 og 51", "si": "Les side 50 og 51 i leseboka."}, {"pic": "📰", "tekst": "Finn blader og ta dem med til læreren", "si": "Let etter magasiner og blader hjemme, og ta dem med til læreren. Klassen skal lage collage."}, {"pic": "🧥", "tekst": "Jeg kler av og på meg yttertøy selv, og henger opp klærne mine", "si": "Snakk med mamma eller pappa om målet: Jeg kler av og på meg yttertøy selv, og henger opp klærne mine."}], "ordNavn": "Klær og blader", "ord": [["🧥", "Jakke"], ["🧤", "Votter"], ["🧣", "Skjerf"], ["🧦", "Sokk"], ["👖", "Bukse"], ["👢", "Støvel"], ["👟", "Sko"], ["🧢", "Caps"], ["📖", "Bok"], ["📰", "Avis"]]};
+const lekseAlle = () => { const p = PRIZES.lekse; return p && (p.dato||'') >= (INNEBYGD_LEKSE.dato||'') ? p : INNEBYGD_LEKSE; };
+const lekse = () => { const L = lekseAlle(); return L && L.aktiv ? L : null; };
+const gjItem = g => typeof g === 'string' ? {pic:'✏️', tekst:g, si:g} : {pic:g.pic||'✏️', tekst:g.tekst||'', si:g.si||g.tekst||''};
+const lekseKryss = L => ((PROG.lekseKryss||{})[L.id]) || [];
+const lekseGjort = L => lekseKryss(L).length;
+const lekseOrd = L => (L.ord||[]).map(o => Array.isArray(o) ? {pic:o[0], word:o[1]} : o).filter(o=>o && o.pic && o.word).map(o=>({...o, letter:o.word[0].toUpperCase()}));
+// forhand: pappa ser leksen fra foreldresonen før Bastian ser den.
+function lekseScreen(forhand){
+  token++; screen = "lekse"; keyHandler = null;
+  const L = lekseAlle(); if(!L){ startScreen(); return; }
+  const gj = (L.gjoremal||[]).map(gjItem), kryss = lekseKryss(L), ord = lekseOrd(L), c = claimToday('lekser');
+  app.innerHTML = `
+  <div class="screen">
+    <button class="back" id="back">‹ ${forhand ? 'Tilbake' : 'Til start'}</button>
+    <h1 style="font-size:clamp(34px,9vw,50px)">📚 ${esc(L.tittel || 'Lekser')}</h1>
+    ${forhand && !L.aktiv ? `<p class="note"><b>Forhåndsvisning.</b> ${esc(NAME)} ser ikke leksen før du trykker «Vis for ${esc(NAME)}» i foreldresonen.</p>` : ''}
+    ${L.beskjed ? `<button class="lekse-beskjed" id="beskjed"><span class="lyd">${SPEAKER}</span><span>${esc(L.beskjed)}</span></button>` : ''}
+    <div class="lekse-list">${gj.map((g,i)=>{ const ok = kryss.includes(i); return `
+      <div class="lekse-row ${ok?'ok':''}">
+        <button class="lekse-hør" data-si="${i}" aria-label="Hør leksen">${SPEAKER}</button>
+        <button class="lekse-gj" data-gj="${i}" aria-pressed="${ok}"><span class="lekse-pic">${g.pic}</span><span class="lekse-txt">${esc(g.tekst)}</span><span class="lekse-box">${ok?'✓':''}</span></button>
+      </div>`; }).join('')}</div>
+    ${ord.length ? `<button class="btn" id="lekseOrd">Bokstavjakt: ${esc(L.ordNavn || 'ukens ord')}</button>` : ''}
+    ${forhand ? '' : `<button class="bed lekser ${c ? (c.status==='pending'?'pending':'approved') : ''}" id="lekseFerdig" ${c?'disabled':''}><span class="bed-pic">${TASKS.lekser.pic}</span><span class="bed-text"><b>${TASKS.lekser.label}</b><small>${!c ? `+${TASKS.lekser.stars} stjerner` : c.status==='pending' ? '⏳ Venter på pappa' : '✅ Pappa sa ja!'}</small></span></button>`}
+  </div>`;
+  document.getElementById('back').onclick = forhand ? ()=>parentScreen() : startScreen;
+  const b = document.getElementById('beskjed'); if(b) b.onclick = ()=>speak(L.beskjed);
+  app.querySelectorAll('[data-si]').forEach(x=>x.onclick=()=>speak(gj[+x.dataset.si].si));
+  app.querySelectorAll('[data-gj]').forEach(x=>x.onclick=()=>{
+    const i = +x.dataset.gj, k = {...(PROG.lekseKryss||{})}, liste = k[L.id] || [];
+    const på = !liste.includes(i);
+    k[L.id] = på ? [...liste, i] : liste.filter(n=>n!==i);
+    PROG.lekseKryss = k; save("prog");
+    if(på){ ding(); speak(k[L.id].length === gj.length ? 'Alle leksene er ferdige! Trykk på knappen nederst, så sjekker pappa.' : 'Ferdig! Bra jobba.'); }
+    lekseScreen(forhand);
+  });
+  const o = document.getElementById('lekseOrd'); if(o) o.onclick = ()=>newRound(shuffle(ord), true);
+  const f = document.getElementById('lekseFerdig');
+  if(f) f.onclick = ()=>{ claimTask('lekser'); speak('Bra! Nå sjekker pappa.'); lekseScreen(); };
+}
+
 /* ---------- Startside ---------- */
 function startScreen(){
   token++; screen="start"; keyHandler=null;
@@ -685,7 +750,8 @@ function startScreen(){
     <p style="font-size:22px;margin:0">Hei, ${esc(NAME)}! Se på bildet og finn bokstaven ordet begynner på.</p>
     <button class="stars" id="starsBtn" aria-label="Stjernene dine">${STAR}<span>${PROG.stars}</span></button>
     <button class="btn" id="go">Spill</button>
-    ${Object.entries(TASKS).map(([k,t])=>{ const c = claimToday(k); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
+    ${lekse() ? `<button class="bed lekser" id="lekseBtn" aria-label="Lekser"><span class="bed-pic">📚</span><span class="bed-text"><b>${esc(lekse().tittel || 'Lekser')}</b><small>${lekseGjort(lekse())} av ${(lekse().gjoremal||[]).length} ferdig</small></span></button>` : ''}
+    ${Object.entries(TASKS).filter(([k,t])=>!t.skjult).map(([k,t])=>{ const c = claimToday(k); const st = !c ? '' : c.status==='pending' ? 'pending' : 'approved';
       return `<button class="bed ${k} ${st}" data-t="${k}" ${c?'disabled':''} aria-label="${t.label}">
         <span class="bed-pic">${t.pic}${t.zzz?'<span class="zzz"><i>z</i><i>z</i><i>z</i></span>':''}</span>
         <span class="bed-text"><b>${t.label}</b><small>${!c ? `+${t.stars} stjerner` : c.status==='pending' ? '⏳ Venter på pappa' : '✅ Pappa sa ja!'}</small></span>
@@ -693,7 +759,8 @@ function startScreen(){
     <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
     <button class="parent-link" id="parent">Foreldresone${pendingClaims().length?` <span class="pill">${pendingClaims().length} venter</span>`:''}</button>
   </div>`;
-  document.getElementById('go').onclick = newRound;
+  document.getElementById('go').onclick = ()=>newRound();
+  const lb = document.getElementById('lekseBtn'); if(lb) lb.onclick = ()=>lekseScreen();
   app.querySelectorAll('.bed[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Bra! Nå sjekker pappa.'); startScreen(); });
   document.getElementById('starsBtn').onclick = ()=>speak(`Du har ${PROG.stars} stjerner`);
   document.getElementById('parent').onclick = parentLogin;
@@ -701,12 +768,12 @@ function startScreen(){
 }
 
 /* ---------- Spill ---------- */
-function newRound(){
-  R = {items: freshFirst(WORDS).slice(0, ROUND), i:0, res:[], got:0};
+function newRound(items, fraLekse){
+  R = {items: items || freshFirst(WORDS).slice(0, ROUND), i:0, res:[], got:0, lekse:!!fraLekse};
   showPicture();
 }
 function dotsHTML(){
-  return `<div class="dots" aria-label="Bilde ${R.i+1} av ${ROUND}">${R.items.map((_,k)=>`<i class="${R.res[k]===true?'ok':R.res[k]===false?'miss':k===R.i?'now':''}"></i>`).join('')}</div>`;
+  return `<div class="dots" aria-label="Bilde ${R.i+1} av ${R.items.length}">${R.items.map((_,k)=>`<i class="${R.res[k]===true?'ok':R.res[k]===false?'miss':k===R.i?'now':''}"></i>`).join('')}</div>`;
 }
 function showPicture(){
   const my = ++token; screen="play";
@@ -773,7 +840,7 @@ function showWord(it){
   speak(`${it.letter} for ${it.word.toLowerCase()}`);
 }
 function nextButton(){
-  const last = R.i === ROUND-1;
+  const last = R.i === R.items.length-1;
   document.getElementById('after').innerHTML = `<button class="btn" id="nx">${last?'Ferdig!':'Neste bilde'}</button>`;
   const nx = document.getElementById('nx');
   nx.onclick = ()=>{ if(last) endScreen(); else { R.i++; showPicture(); } };
@@ -799,13 +866,13 @@ function endScreen(){
   app.innerHTML = `
   <div class="screen">
     <h1>Bra jobba!</h1>
-    <p style="font-size:24px;margin:0">Du fant <b>${right}</b> av ${ROUND} bokstaver.</p>
+    <p style="font-size:24px;margin:0">Du fant <b>${right}</b> av ${R.items.length} bokstaver.</p>
     <div class="stars" style="cursor:default">${STAR}<span>+${R.got}</span></div>
     <div class="night">${ladderHTML(true) || '<p class="note">Samle stjerner! Pappa kan legge inn premier du kan vinne.</p>'}</div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">Spill igjen</button><button class="btn" id="home" style="background:#fff;box-shadow:0 6px 0 rgba(29,43,79,.18)">Til start</button></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn" id="again">${R.lekse ? 'Tilbake til leksene' : 'Spill igjen'}</button><button class="btn" id="home" style="background:#fff;box-shadow:0 6px 0 rgba(29,43,79,.18)">Til start</button></div>
   </div>`;
   speak(`Bra jobba, ${NAME}! Du fikk ${R.got} stjerner.`);
-  document.getElementById('again').onclick = newRound;
+  document.getElementById('again').onclick = ()=> R.lekse ? lekseScreen() : newRound();
   document.getElementById('home').onclick = startScreen;
   checkCelebrate();
 }
@@ -857,6 +924,16 @@ function parentScreen(confirmReset){
       ${prizes.map(p=>`<div class="prow"><span class="at">${p.at}</span><b>${esc(p.text)}</b>
         ${imgTag(p,'pthumb')}<div class="acts"><label class="imgbtn">${imgSrc(p)?'Bytt bilde':'Legg til bilde'}<input type="file" accept="image/*" data-img="${p.id}" hidden></label><button data-g="${p.id}">${p.given?'Angre mottatt':'Marker mottatt'}</button><button data-d="${p.id}">Slett</button></div></div>`).join('') || '<p class="note">Ingen premier ennå.</p>'}
     </div>
+    <h3>Lekser</h3>
+    ${lekseAlle() ? `<p class="note"><b>${esc(lekseAlle().tittel || 'Lekse')}</b> · ${lekseAlle().aktiv ? `${esc(NAME)} ser leksen nå.` : `Skjult for ${esc(NAME)}.`} Avkrysset: ${lekseGjort(lekseAlle())} av ${(lekseAlle().gjoremal||[]).length}.</p>
+    <div class="acts"><button id="lekseSe">Se leksen</button><button id="lekseVis" class="${lekseAlle().aktiv ? '' : 'ok'}">${lekseAlle().aktiv ? `Skjul for ${esc(NAME)}` : `Vis for ${esc(NAME)}`}</button></div>`
+      : '<p class="note">Ingen lekse lagt inn ennå.</p>'}
+    <p class="note">Ny lekse: send ukeplanen fra skolen til Claude og lim inn lekse-koden du får tilbake her. Leksen er skjult for ${esc(NAME)} til du trykker «Vis for ${esc(NAME)}».</p>
+    <form id="leksef" class="form add">
+      <label class="grow">Lekse-kode<textarea id="leksekode" rows="2" placeholder='{"tittel": "Lekser uke 47", ...}'></textarea></label>
+      <button class="btn" type="submit">Legg inn lekse</button>
+    </form>
+    <p class="err" id="lekseErr"></p>
     <h3>Lagring</h3>
     <p class="note">${FQ.family ? `Denne enheten lagrer i databasen, så poengene blir like på alle enheter. ${window.__sistLagret ? 'Sist lagret: kl. ' + new Date(window.__sistLagret).toLocaleTimeString('no',{hour:'2-digit',minute:'2-digit'}) + '.' : 'Ikke lagret ennå i denne økten.'}` : '<b>Denne enheten lagrer bare lokalt.</b> Skriv inn familiekoden for å lagre i databasen. Poengene på denne enheten blir da sendt opp og gjelder for alle enheter.'}</p>
     ${FQ.family ? '' : `<form id="famf" class="form add"><label class="grow">Familiekode<input id="famkode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label><button class="next" type="submit">Koble til</button></form><p class="err" id="famErr"></p>`}
@@ -880,6 +957,17 @@ function parentScreen(confirmReset){
   wireImageButtons(()=>parentScreen());
   app.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.ok, true); parentScreen(); }); });
   app.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{ b.disabled=true; FQ.fresh().then(()=>{ decideClaim(b.dataset.no, false); parentScreen(); }); });
+  const lSe = document.getElementById('lekseSe'); if(lSe) lSe.onclick = ()=>lekseScreen(true);
+  const lVis = document.getElementById('lekseVis'); if(lVis) lVis.onclick = ()=>{ const L = lekseAlle(); PRIZES.lekse = {...L, aktiv:!L.aktiv, dato: L.dato || new Date().toISOString()}; save("prizes"); parentScreen(); };
+  document.getElementById('leksef').onsubmit = e => {
+    e.preventDefault();
+    try{
+      const L = JSON.parse(document.getElementById('leksekode').value.trim());
+      if(!L || typeof L!=='object' || !(L.gjoremal||L.ord)) throw 0;
+      PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), dato: new Date().toISOString(), aktiv:false};
+      save("prizes"); lekseScreen(true);
+    }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
+  };
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={stars:0,best:0,right:0,wrong:0,rounds:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
   const famf = document.getElementById('famf');
