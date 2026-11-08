@@ -1816,7 +1816,7 @@ function parentScreen(confirmReset){
     e.preventDefault();
     try{
       const L = JSON.parse(document.getElementById('leksekode').value.trim());
-      if(!L || typeof L!=='object' || !(L.ord||L.tekst||L.oppgaver||L.engelsk)) throw 0;
+      if(!L || typeof L!=='object' || !(L.ord||L.tekst||L.oppgaver||L.engelsk||L.gjoremal)) throw 0;
       PRIZES.lekse = {...L, id: L.id || Date.now().toString(36), dato: new Date().toISOString(), aktiv:false};
       save("prizes"); lekseScreen(true);
     }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
@@ -1893,7 +1893,7 @@ function lekseScreen(forhand){
   lekseTekstSync(true);
   const t = TEKSTER.find(x=>x.id===lekseTekstId()), c = claimToday('lekser');
   const deler = [
-    (L.ord||[]).length && {k:'ord', navn:'Norske diktatord', info:`${L.ord.length} ord · hør ordet og skriv det`},
+    (L.ord||[]).length && {k:'ord', navn:L.ordNavn || 'Norske diktatord', info:`${L.ord.length} ord · hør ordet og skriv det`},
     t && {k:'tekst', navn:t.navn, info:`Lesetekst · ${ordTall(t)} ord`},
     (L.oppgaver||[]).length && {k:'oppgaver', navn:L.oppgaveNavn || 'Oppgaver', info:`${L.oppgaver.length} oppgaver`},
     (L.engelsk||[]).length && {k:'engskriv', navn:'Engelske diktatord', info:`${L.engelsk.length} ord · hør ordet og skriv det på engelsk`},
@@ -1905,7 +1905,8 @@ function lekseScreen(forhand){
     <h2>${esc(L.tittel || 'Ukens lekse')}</h2>
     ${forhand && !L.aktiv ? '<p class="note"><b>Forhåndsvisning.</b> Benjamin ser ikke leksen før du trykker «Vis for Benjamin» i foreldresonen.</p>' : ''}
     ${L.beskjed ? `<p class="beskjed">${esc(L.beskjed)}</p>` : ''}
-    <p class="note">+${MODES.lekse.right} per riktig. Gjør delene i den rekkefølgen du vil.</p>
+    ${(L.gjoremal||[]).length ? `<h3>Dette skal du gjøre</h3><div class="tasks">${L.gjoremal.map((g,i)=>{ const ok = ((PROG.lekseKryss||{})[L.id]||[]).includes(i); return `<button class="task ${ok?'approved':''}" data-gj="${i}"><span>${esc(g)}</span><b>${ok?'✓':'○'}</b></button>`; }).join('')}</div>` : ''}
+    ${deler.length ? `<p class="note">Øv i appen: +${MODES.lekse.right} per riktig. Gjør delene i den rekkefølgen du vil.</p>` : ''}
     <div class="tasks">
       ${deler.map(d=>`<button class="task" data-del="${d.k}"><span>${esc(d.navn)}</span><b>▶</b><small>${esc(d.info)}</small></button>`).join('')}
     </div>
@@ -1913,6 +1914,12 @@ function lekseScreen(forhand){
   </div>`;
   document.getElementById('back').onclick = forhand ? ()=>{ lekseTekstSync(); parentScreen(); } : startScreen;
   app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=> b.dataset.del==='tekst' ? tekstMeny(lekseTekstId()) : newMatch('lekse', b.dataset.del));
+  // Avkrysning av gjøremål fra ukeplanen. Gir ingen poeng, bare oversikt.
+  app.querySelectorAll('[data-gj]').forEach(b=>b.onclick=()=>{
+    const i = +b.dataset.gj, k = {...(PROG.lekseKryss||{})}, liste = k[L.id] || [];
+    k[L.id] = liste.includes(i) ? liste.filter(x=>x!==i) : [...liste, i];
+    PROG.lekseKryss = k; save("prog"); lekseScreen(forhand);
+  });
   const f = document.getElementById('lekseFerdig');
   if(f) f.onclick = ()=>{ claimTask('lekser'); speak('Sendt til pappa for godkjenning'); lekseScreen(); };
 }
