@@ -1093,11 +1093,21 @@ const TABELL_TRIKS = {
   10:"10-gangen: sett en null bak. 10 · 7 = 70.",
 };
 const erTabell = n => typeof n==='string' && n[0]==='t';
-const kanTabell = t => Array.from({length:10},(_,i)=>boks(t,i+1)).filter(x=>x>=3).length;
+// Hver tabell har sin egen telling (PROG.tabellBoks[t][b]), så den kan nullstilles uten å røre de andre tabellene.
+// Har tabellen ingen egen telling ennå, brukes den felles boksen for stykket.
+const tabBoks = (t,b) => { const tb = (PROG.tabellBoks||{})[t]; return tb ? (tb[b]||0) : boks(t,b); };
+const kanTabell = t => Array.from({length:10},(_,i)=>tabBoks(t,i+1)).filter(x=>x>=3).length;
+function settTabBoks(item, riktigForste){
+  const t = item.tab, b = item.fa===t ? item.fb : item.fa, alle = {...(PROG.tabellBoks||{})};
+  const tb = alle[t] ? {...alle[t]} : Object.fromEntries(Array.from({length:10},(_,i)=>[i+1, boks(t,i+1)]));
+  tb[b] = riktigForste ? Math.min(4, (tb[b]||0) + 1) : 0;
+  alle[t] = tb; PROG.tabellBoks = alle;
+}
+function nullstillTabell(t){ PROG.tabellBoks = {...(PROG.tabellBoks||{}), [t]:{}}; save("prog"); }
 function tabellItems(t){
   // Åtte av de ti stykkene i tabellen, de han kan minst først. Tallet fra tabellen står først oftest.
-  const list = shuffle(Array.from({length:10},(_,i)=>[t,i+1])).sort((x,y)=>boks(...x)-boks(...y)).slice(0,8);
-  return shuffle(list).map(([a,b])=>{ const [x,y] = Math.random()<.7 ? [a,b] : [b,a]; return {q:`${x} · ${y} = ?`, say:`Hva er ${x} ganger ${y}?`, a:String(x*y), tall:true, fa:x, fb:y, steg:null}; });
+  const list = shuffle(Array.from({length:10},(_,i)=>[t,i+1])).sort((x,y)=>tabBoks(...x)-tabBoks(...y)).slice(0,8);
+  return shuffle(list).map(([a,b])=>{ const [x,y] = Math.random()<.7 ? [a,b] : [b,a]; return {q:`${x} · ${y} = ?`, say:`Hva er ${x} ganger ${y}?`, a:String(x*y), tall:true, fa:x, fb:y, steg:null, tab:t}; });
 }
 const faktumKey = (a,b) => `${Math.min(a,b)}x${Math.max(a,b)}`;
 const boks = (a,b) => (PROG.gange||{})[faktumKey(a,b)] || 0;
@@ -1340,7 +1350,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-09-1";
+const APP_VERSION = "2026-11-09-2";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1910,7 +1920,7 @@ function parentScreen(confirmReset){
   const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
     // Rekorden kan ikke gå ned ellers, men her trekkes testpoengene fra igjen.
     const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0) + (PROG.pts.silhuett||0) + (PROG.pts.fyllinn||0) + (PROG.pts.gange||0);
-    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, sisteTekst:null, ord:{}, gange:{}, gangeSteg:0, pts:{...PROG.pts, lydlek:0, lesespm:0, silhuett:0, fyllinn:0, gange:0}};
+    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, sisteTekst:null, ord:{}, gange:{}, tabellBoks:{}, gangeSteg:0, pts:{...PROG.pts, lydlek:0, lesespm:0, silhuett:0, fyllinn:0, gange:0}};
     PROG.best = Math.max(total(PROG), PROG.best - fjernet);
     save("prog"); parentScreen();
   };
@@ -2194,10 +2204,16 @@ function gangeIntro(n){
     <button class="back" id="back">‹ Gangetabell</button>
     <h2>${esc(g.navn)}</h2>
     <p class="fact" style="margin:0">${esc(g.triks)}</p>
-    ${vis.map(t=>`<div class="tabell"><button class="quit" data-t="${t}">Hør ${t}-gangen</button><div class="rader">${Array.from({length:10},(_,i)=>`<span class="${boks(t,i+1)>=3?'kan':''}">${t} · ${i+1} = <b>${t*(i+1)}</b></span>`).join('')}</div></div>`).join('')}
+    ${vis.map(t=>`<div class="tabell"><button class="quit" data-t="${t}">Hør ${t}-gangen</button><div class="rader">${Array.from({length:10},(_,i)=>`<span class="${(erTabell(n) ? tabBoks(t,i+1) : boks(t,i+1))>=3?'kan':''}">${t} · ${i+1} = <b>${t*(i+1)}</b></span>`).join('')}</div></div>`).join('')}
     <button class="next" id="go">Start kamp</button>
+    ${erTabell(n) ? `<p class="note" style="margin:0">Kan ${kanTabell(g.tab[0])} av 10. Et stykke sitter når det er riktig på første forsøk tre ganger.</p><button class="quit" id="nullstill" style="align-self:flex-start">Nullstill ${esc(g.navn)}</button>` : ''}
   </div>`;
   document.getElementById('back').onclick = gangeScreen;
+  const nb = document.getElementById('nullstill');
+  if(nb) nb.onclick = ()=>{
+    if(!nb.dataset.sikker){ nb.dataset.sikker = "1"; nb.textContent = `Trykk igjen for å nullstille ${g.navn}`; return; }
+    nullstillTabell(g.tab[0]); gangeIntro(n);
+  };
   app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.t; speak(Array.from({length:10},(_,i)=>t*(i+1)).join(', ')); });
   document.getElementById('go').onclick = ()=>newMatch('gange', n);
 }
@@ -2228,6 +2244,7 @@ function tallKey(my, k){
   drawTall();
 }
 function settBoks(item, riktigForste){
+  if(item.tab) settTabBoks(item, riktigForste); // før den felles boksen endres, så første kamp ikke teller dobbelt
   const key = faktumKey(item.fa, item.fb), g = {...(PROG.gange||{})};
   g[key] = riktigForste ? Math.min(4, (g[key]||0) + 1) : 0;
   PROG.gange = g;
