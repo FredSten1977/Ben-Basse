@@ -981,6 +981,34 @@ const TEKSTER = [
    ove:["var","hadde","ikke","tok","sokk","papir","ble","best"],
    linjer:["Pelé var liten.","Pelé var liten og hadde ikke en ball.","Han tok en sokk.","Han tok en sokk og fylte den med papir.","Nå hadde han en ball!","Pelé ble stor.","Pelé ble best av alle."],
    spm:[SU("Pelé hadde en ball.", false), SU("Pelé fylte en sokk med papir.", true), SU("Pelé ble best av alle.", true)]},
+  {id:"ronaldo", navn:"Ronaldo", hjelp:["Ronaldo"],
+   ove:["øy","trener","hver","dag","hoppe","høyt","hodet","roper"],
+   linjer:["Ronaldo er fra en liten øy.","Ronaldo trener mye.","Ronaldo trener hver dag.","Ronaldo kan hoppe høyt.","Ronaldo hopper høyt og tar ballen med hodet.","Ballen går i mål.","Ronaldo roper høyt!"],
+   spm:[SU("Ronaldo er fra en stor by.", false), SU("Ronaldo trener hver dag.", true), SU("Ronaldo tar ballen med hodet.", true)]},
+  {id:"odegaard", navn:"Ødegaard", hjelp:["Ødegaard"],
+   ove:["kaptein","bind","armen","ser","venn","sender","vennen","skårer"],
+   linjer:["Ødegaard er fra Norge.","Ødegaard er kaptein.","Ødegaard er kaptein for Norge.","Han har et bind på armen.","Ødegaard ser en venn.","Han sender ballen til vennen.","Vennen skårer mål!"],
+   spm:[SU("Ødegaard er fra Norge.", true), SU("Ødegaard har et bind på foten.", false), SU("Ødegaard sender ballen til vennen.", true)]},
+  {id:"mbappe", navn:"Mbappé", hjelp:["Mbappé"],
+   ove:["rask","vind","får","løper","fortere","enn","ingen","roper"],
+   linjer:["Mbappé er rask.","Mbappé er rask som vind.","Mbappé får ballen.","Mbappé løper fort.","Mbappé løper fortere enn alle.","Ingen tar ham.","Mbappé skårer, og alle roper hurra!"],
+   spm:[SU("Mbappé er rask som vind.", true), SU("Mbappé løper sakte.", false), SU("Alle roper hurra.", true)]},
+  {id:"ada", navn:"Ada Hegerberg", hjelp:[],
+   ove:["spiller","mange","dag","får","pris","prisen","gull","første"],
+   linjer:["Ada spiller fotball.","Ada er fra Norge.","Ada skårer mange mål.","En dag får Ada en pris.","Prisen er en ball av gull.","Ada er den første jenta som får den!"],
+   spm:[SU("Ada er fra Norge.", true), SU("Ada får en sko av gull.", false), SU("Prisen er en ball av gull.", true)]},
+  {id:"salah", navn:"Salah", hjelp:["Egypt","Liverpool"],
+   ove:["spiller","venstre","fot","god","inn","sparker","går"],
+   linjer:["Salah er fra Egypt.","Salah spiller i Liverpool.","Salah har en god venstre fot.","Salah tar ballen inn.","Salah sparker med venstre fot.","Ballen går i mål!"],
+   spm:[SU("Salah er fra Norge.", false), SU("Salah har en god venstre fot.", true), SU("Ballen går i mål.", true)]},
+  {id:"zlatan", navn:"Zlatan", hjelp:["Zlatan"],
+   ove:["lang","karate","høyt","lufta","hopper","bakover","hodet","mål"],
+   linjer:["Zlatan er lang.","Zlatan kan karate.","Han kan sparke høyt.","Ballen kommer høyt i lufta.","Zlatan hopper opp.","Han sparker ballen bakover over hodet.","Ballen går i mål. For et mål!"],
+   spm:[SU("Zlatan kan karate.", true), SU("Zlatan er liten.", false), SU("Ballen går i mål.", true)]},
+  {id:"yamal", navn:"Yamal", hjelp:["Yamal"],
+   ove:["ung","men","god","står","langt","fra","bue","alle"],
+   linjer:["Yamal er ung.","Yamal er ung, men han er god.","Yamal spiller for Spania.","Yamal står langt fra mål.","Han sparker ballen.","Ballen går i en bue.","Ballen går i mål! Alle ser på Yamal."],
+   spm:[SU("Yamal er gammel.", false), SU("Yamal står langt fra mål.", true), SU("Ballen går i en bue.", true)]},
 ];
 const ordAvTekst = t => t.linjer.join(' ').split(/\s+/).map(w=>w.replace(/[.,!?]/g,'')).filter(Boolean);
 // Fyll inn: én setning om gangen med et øveord tatt bort. Han leser setningen selv og velger ord fra ordbanken.
@@ -1350,7 +1378,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-09-2";
+const APP_VERSION = "2026-11-11-1";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
