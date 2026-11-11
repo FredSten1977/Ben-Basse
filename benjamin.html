@@ -1378,7 +1378,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-11-1";
+const APP_VERSION = "2026-11-11-2";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1844,7 +1844,7 @@ function parentScreen(confirmReset){
     <h2>Premier</h2>
     <p class="note">Premiene vises for Benjamin som en stige på forsiden og under Min fremgang. Han vinner en premie når rekorden hans når poenggrensen. Rekorden går aldri ned, selv om han mister poeng for feil svar.</p>
     <form id="addf" class="form add">
-      <label>Poeng<input id="pat" type="number" inputmode="numeric" min="1" max="9999" required placeholder="50"></label>
+      <label>Poeng<input id="pat" type="number" inputmode="numeric" min="1" max="99999" required placeholder="50"></label>
       <label class="grow">Premie<input id="ptx" type="text" maxlength="60" required placeholder="Is på butikken"></label>
       <label class="grow">Bilde (valgfritt)<input id="pimgNew" type="file" accept="image/*"></label>
       <button class="next" type="submit">Legg til</button>

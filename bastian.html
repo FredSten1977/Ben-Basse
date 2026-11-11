@@ -334,7 +334,7 @@ function markSeen(it){ SEEN[it.word] = Date.now(); try{ localStorage.setItem(SEE
 const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[x.word]||0)-(SEEN[y.word]||0));
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-08-2";
+const APP_VERSION = "2026-11-11-1";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1039,7 +1039,7 @@ function parentScreen(confirmReset){
     <h2>Premier</h2>
     <p class="note">${esc(NAME)} vinner en premie når rekorden hans når antall stjerner du skriver. Han får 2 stjerner for riktig bokstav på første forsøk og 1 på andre. En runde har ${ROUND} bilder, så en god runde gir rundt 15 stjerner.</p>
     <form id="addf" class="form">
-      <label>Stjerner<input id="pat" type="number" inputmode="numeric" min="1" max="9999" required placeholder="30"></label>
+      <label>Stjerner<input id="pat" type="number" inputmode="numeric" min="1" max="99999" required placeholder="30"></label>
       <label class="grow">Premie<input id="ptx" type="text" maxlength="60" required placeholder="Is på butikken"></label>
       <label class="grow">Bilde (valgfritt)<input id="pimgNew" type="file" accept="image/*"></label>
       <button class="btn" type="submit">Legg til</button>
