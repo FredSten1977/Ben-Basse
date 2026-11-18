@@ -105,7 +105,7 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .rule i{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--font-board);font-size:15px;background:var(--led);color:var(--ink)}
 .final{font-family:var(--font-board);font-size:clamp(40px,12vw,64px);color:var(--led);text-shadow:0 0 18px rgba(255,210,63,.5)}
 .note{font-size:15px;opacity:.7;max-width:440px}
-.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:520px}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;max-width:520px}
 .mode{font-family:var(--font-display);font-size:26px;color:var(--ink);background:var(--c);border:0;border-radius:16px;padding:18px 12px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.35)}
 .mode small{display:block;font-family:var(--font-read);font-size:14px;font-weight:700;opacity:.7;margin-top:2px}
 .mode:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
@@ -295,7 +295,19 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .form textarea{font:inherit;font-size:20px;padding:10px 12px;border-radius:10px;border:2px solid #24392e;background:#050d09;color:var(--chalk);width:100%;box-sizing:border-box}
 /* Større tekst og mer luft mellom bokstavene, for dårlig syn og dysleksi. Slås på fra forsiden. */
 body.big .wrap{zoom:1.15}
+body.big .mode{font-size:clamp(19px,5.6vw,26px);overflow-wrap:anywhere;padding-inline:8px}
 body.big .qtext,body.big .ans,body.big .typed,body.big .fact,body.big .answer-word{letter-spacing:.06em;word-spacing:.2em;line-height:1.6}
+body.big .lestekst,body.big .kino,body.big .ove{letter-spacing:.07em;word-spacing:.25em}
+body.big .lestekst{line-height:1.7}
+/* Les sammen: linjen som leses nå er tydelig, de andre er dempet. Ordet som sies nå får gul bakgrunn. */
+.lestekst.sammen li{opacity:.35;transition:opacity .25s}
+.lestekst.sammen li.na{opacity:1;background:#fff6c7;border-radius:8px;margin:0 -10px;padding:6px 10px}
+.lestekst.sammen li.ferdig{opacity:.6}
+.lw.sies{background:var(--led);color:#000}
+.sammen-tur{font-family:var(--font-display);font-size:26px;text-align:center;min-height:1.3em;margin:4px 0}
+.logg{width:100%;border-collapse:collapse;font-size:15px}
+.logg th,.logg td{text-align:left;padding:4px 6px;border-bottom:1px solid #24392e}
+.logg td.n{text-align:right;font-variant-numeric:tabular-nums}
 .pbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
 .rung.given .pbar i{background:linear-gradient(90deg,#7dd08f,#3fae5c);box-shadow:none}
 </style>
@@ -1341,6 +1353,10 @@ let PRIZES = {pin:"", list:[]};
 const LS = "benjaminfc-v2";
 const BIG = "benjaminfc-big";
 try{ if(localStorage.getItem(BIG)) document.body.classList.add('big'); }catch(e){}
+// Rolig tale: litt langsommere og tydeligere stemme (dren i øret). Lagres per enhet, som Større tekst.
+const ROLIG = "benjaminfc-rolig";
+let roligTale = false;
+try{ roligTale = !!localStorage.getItem(ROLIG); }catch(e){}
 try{ const c=JSON.parse(localStorage.getItem(LS)||"null"); if(c){ PROG=Object.assign(PROG,c.prog); PROG.pts=Object.assign(zero(),PROG.pts); PRIZES=Object.assign(PRIZES,c.prizes); } }catch(e){}
 let db = null;
 const total = p => Object.keys(MODES).reduce((s,k)=>s+(p.pts[k]||0),0) + (p.bonus||0) + (p.lesing||0);
@@ -1378,7 +1394,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-11-2";
+const APP_VERSION = "2026-11-18-1";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1413,15 +1429,15 @@ if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = 
 let speechChain = 0;
 function speak(text, onEnd, en, keepChain){
   if(!keepChain) speechChain++;
-  const fallbackMs = 900 + text.length*70;
+  const fallbackMs = 900 + text.length*(roligTale ? 90 : 70);
   let done=false; const finish=()=>{ if(!done){done=true; onEnd&&onEnd();} };
   if(!('speechSynthesis' in window)){ setTimeout(finish, 400); return; }
   const busy = speechSynthesis.speaking || speechSynthesis.pending;
   if(busy) speechSynthesis.cancel();
   if(!voice || !voiceEn) pickVoice(); // iPad laster stemmene sent
   const u = new SpeechSynthesisUtterance(text);
-  if(en){ u.lang = 'en-GB'; if(voiceEn) u.voice = voiceEn; u.rate = .8; u.pitch = 1; }
-  else { u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = .92; u.pitch = 1.05; }
+  if(en){ u.lang = 'en-GB'; if(voiceEn) u.voice = voiceEn; u.rate = roligTale ? .7 : .8; u.pitch = 1; }
+  else { u.lang = 'nb-NO'; if(voice) u.voice = voice; u.rate = roligTale ? .78 : .92; u.pitch = 1.05; }
   u.onend = finish; u.onerror = finish;
   window.__utt = u; try{ speechSynthesis.resume(); }catch(e){}
   if(busy) setTimeout(()=>speechSynthesis.speak(u), 150); else speechSynthesis.speak(u);
@@ -1761,8 +1777,10 @@ function startScreen(){
     ${ladderHTML(true)}
     <p class="note">Skru på lyden. Hver kamp har ${MATCH_LEN} spørsmål.</p>
     <button class="parent-link" id="bigtxt">${document.body.classList.contains('big') ? 'Vanlig tekst' : 'Større tekst'}</button>
+    <button class="parent-link" id="roligtale">${roligTale ? 'Vanlig tale' : 'Roligere tale'}</button>
   </div>`;
   document.getElementById('bigtxt').onclick = () => { const on = document.body.classList.toggle('big'); try{ localStorage.setItem(BIG, on?'1':''); }catch(e){} startScreen(); };
+  document.getElementById('roligtale').onclick = () => { roligTale = !roligTale; try{ localStorage.setItem(ROLIG, roligTale?'1':''); }catch(e){} speak(roligTale ? 'Nå snakker jeg litt roligere.' : 'Nå snakker jeg som vanlig.'); startScreen(); };
   const sperret = k => { speak(lasValg(k)==='last' ? 'Pappa har låst denne.' : 'Spill en norskkamp først, så åpner den seg.'); return true; };
   app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : b.dataset.m==='gange' ? gangeScreen() : newMatch(b.dataset.m));
   document.getElementById('rekord').onclick = ()=> erLast('rekord') ? sperret('rekord') : lesListe();
@@ -1863,6 +1881,10 @@ function parentScreen(confirmReset){
     <p class="note">Fra Ordkino og lesetekstene. Et ord er sikkert når han har lest det riktig tre ganger på rad.</p>
     ${(()=>{ const o = Object.entries(PROG.ord||{}), grupper = [['sikker','Mestrer sikkert'],['ove','Øver på'],['vanskelig','For vanskelig foreløpig']];
       return o.length ? grupper.map(([k,n])=>{ const ws = o.filter(([w,x])=>ordStatus(x)===k).map(([w])=>w).sort(); return `<p class="note"><b>${n} (${ws.length}):</b> ${ws.length ? esc(ws.join(', ')) : '–'}</p>`; }).join('') : '<p class="note">Ingen ord ennå.</p>'; })()}
+    <h3>Leselogg</h3>
+    <p class="note">Hver gang han leser en tekst for deg. «Riktige ord/min» er ord i teksten minus feil, delt på tiden. Fint å ta med til skolen og PPT. Følg samme tekst over tid: tallet skal gå opp mens feilene går ned.</p>
+    ${(()=>{ const L = (PROG.leselogg||[]).slice(-20).reverse();
+      return L.length ? `<table class="logg"><tr><th>Dato</th><th>Tekst</th><th class="n">Feil</th><th class="n">Tid</th><th class="n">Riktige ord/min</th></tr>${L.map(x=>`<tr><td>${esc(x.d.slice(5).split('-').reverse().join('.'))}</td><td>${esc(x.navn)}</td><td class="n">${x.feil}</td><td class="n">${x.sek} s</td><td class="n">${Math.round(Math.max(0,x.ord-x.feil)*60/Math.max(1,x.sek))}</td></tr>`).join('')}</table>` : '<p class="note">Ingen lesinger logget ennå.</p>'; })()}
     <h3>Ukens lekse</h3>
     ${lekseAlle() ? `<p class="note"><b>${esc(lekseAlle().tittel || 'Lekse')}</b> · ${lekseAlle().aktiv ? 'Benjamin ser leksen nå.' : 'Skjult for Benjamin.'}</p>
     <div class="acts"><button id="lekseSe">Se leksen</button><button id="lekseVis" class="${lekseAlle().aktiv ? '' : 'ok'}">${lekseAlle().aktiv ? 'Skjul for Benjamin' : 'Vis for Benjamin'}</button></div>`
@@ -1948,7 +1970,7 @@ function parentScreen(confirmReset){
   const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
     // Rekorden kan ikke gå ned ellers, men her trekkes testpoengene fra igjen.
     const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0) + (PROG.pts.silhuett||0) + (PROG.pts.fyllinn||0) + (PROG.pts.gange||0);
-    PROG = {...PROG, rekord:{}, lesing:0, lesDag:null, norskNiva:0, sisteTekst:null, ord:{}, gange:{}, tabellBoks:{}, gangeSteg:0, pts:{...PROG.pts, lydlek:0, lesespm:0, silhuett:0, fyllinn:0, gange:0}};
+    PROG = {...PROG, rekord:{}, leselogg:[], lesing:0, lesDag:null, norskNiva:0, sisteTekst:null, ord:{}, gange:{}, tabellBoks:{}, gangeSteg:0, pts:{...PROG.pts, lydlek:0, lesespm:0, silhuett:0, fyllinn:0, gange:0}};
     PROG.best = Math.max(total(PROG), PROG.best - fjernet);
     save("prog"); parentScreen();
   };
@@ -2054,6 +2076,7 @@ function tekstMeny(id){
     <div class="ovebar">${t.ove.map(w=>`<button class="ove" data-w="${esc(w)}">${esc(w)}</button>`).join('')}</div>
     <p class="note">Les øveordene sammen først. Trykk på et ord for å høre det etter at han har prøvd. Velg så 2–3 øvelser.</p>
     <div class="tasks">
+      <button class="task" data-a="sammen"><span>Les sammen</span><b>👂</b><small>Hør én linje, les den samme linjen selv. Fint før du leser alene.</small></button>
       <button class="task" data-a="les"><span>Les teksten</span><b>▶</b><small>Pappa krysser av for ord han leser feil</small></button>
       <button class="task" data-a="kino"><span>Ordkino</span><b>👀</b><small>Ett ord om gangen, først i rekkefølge, så blandet</small></button>
       <button class="task" data-a="fyll"><span>Fyll inn</span><b>✏️</b><small>Finn ordet som mangler</small></button>
@@ -2063,7 +2086,7 @@ function tekstMeny(id){
   </div>`;
   document.getElementById('back').onclick = lesListe;
   app.querySelectorAll('.ove').forEach(b=>b.onclick=()=>speak(b.dataset.w));
-  const go = {les:()=>lesTekst(id), kino:()=>ordkino(id), fyll:()=>newMatch('fyllinn', id), spm:()=>newMatch('lesespm', id), sil:()=>newMatch('silhuett', id)};
+  const go = {sammen:()=>lesSammen(id), les:()=>lesTekst(id), kino:()=>ordkino(id), fyll:()=>newMatch('fyllinn', id), spm:()=>newMatch('lesespm', id), sil:()=>newMatch('silhuett', id)};
   app.querySelectorAll('[data-a]').forEach(b=>b.onclick=go[b.dataset.a]);
 }
 // Hvert ord kan trykkes på for å merke det som feil. Navn som ikke er lydrette, er merket som hjelpeord.
@@ -2105,12 +2128,93 @@ function lesTekst(id){
     lesFerdig(t, Math.max(1, Math.round((Date.now()-start)/1000)), feilOrd);
   };
 }
+// Riktige ord i minuttet, som i leseflyt-kartlegginger.
+const ordPerMin = (t, sek, feil=0) => Math.round(Math.max(0, ordTall(t) - feil) * 60 / Math.max(1, sek));
+
+/* ---------- Les sammen (ekkolesing) ----------
+   Benjamin forstår godt det han hører. Appen leser én linje høyt mens linjen er uthevet,
+   så leser han samme linje selv. Slik hører han hvordan teksten skal flyte før han leser alene.
+   +2 poeng når hele teksten er lest, og det teller som én av dagens lesinger. */
+const SAMMEN_PTS = 2;
+function lesSammen(id){
+  const my = ++token; screen = "lesing"; keyHandler = null;
+  const t = TEKSTER.find(x=>x.id===id);
+  let n = 0, fase = 'hor';
+  app.innerHTML = `
+  <div class="screen left">
+    <button class="back" id="back">‹ ${esc(t.navn)}</button>
+    <p class="note">Hør linjen, og les den samme linjen høyt etterpå. Les i samme tempo som stemmen.</p>
+    <ol class="lestekst sammen">${lesOrdHTML(t)}</ol>
+    <p class="sammen-tur" id="tur"></p>
+    <div class="lesbar">
+      <button class="quit" id="igjen">Hør linjen igjen</button>
+      <span class="klokke" id="teller"></span>
+    </div>
+    <button class="next" id="go">Jeg har lest linjen</button>
+  </div>`;
+  const lis = [...app.querySelectorAll('.lestekst li')], tur = document.getElementById('tur'), go = document.getElementById('go');
+  const stopp = ()=>{ if('speechSynthesis' in window) speechSynthesis.cancel(); };
+  document.getElementById('back').onclick = ()=>{ stopp(); tekstMeny(id); };
+  const hor = ()=>{
+    if(my!==token) return;
+    fase = 'hor'; go.disabled = true; tur.textContent = '👂 Lytt …';
+    lis.forEach((li,i)=>{ li.classList.toggle('na', i===n); li.classList.toggle('ferdig', i<n); });
+    lis[n].scrollIntoView({block:'nearest', behavior:'smooth'});
+    document.getElementById('teller').textContent = `${n+1} / ${lis.length}`;
+    const linje = t.linjer[n], ordEl = [...lis[n].querySelectorAll('.lw')];
+    // Start på hvert ord i linjen, så ordet som sies kan utheves der nettleseren støtter det.
+    const starter = []; linje.replace(/\S+/g, (m, i)=>{ starter.push(i); return m; });
+    speak(linje, ()=>{
+      if(my!==token) return;
+      ordEl.forEach(e=>e.classList.remove('sies'));
+      fase = 'din'; go.disabled = false; tur.textContent = '📖 Din tur! Les linjen høyt.';
+    });
+    const u = window.__utt;
+    if(u) u.onboundary = e => {
+      if(my!==token || e.name==='sentence') return;
+      let k = 0; while(k+1 < starter.length && starter[k+1] <= e.charIndex) k++;
+      ordEl.forEach((el,i)=>el.classList.toggle('sies', i===k));
+    };
+  };
+  document.getElementById('igjen').onclick = hor;
+  app.querySelectorAll('.lw.hjelp').forEach(s=>s.onclick=()=>speak(s.dataset.w));
+  go.onclick = ()=>{
+    if(fase!=='din') return;
+    n++;
+    if(n < lis.length) return hor();
+    stopp(); sammenFerdig(t);
+  };
+  hor();
+}
+function sammenFerdig(t){
+  token++; screen = "lesing";
+  const bestBefore = PROG.best, poeng = lesIDag() < LES_MAKS ? SAMMEN_PTS : 0;
+  PROG.lesDag = {day: today(), n: lesIDag() + 1}; PROG.sisteTekst = t.id;
+  if(poeng){ PROG.lesing = (PROG.lesing||0) + poeng; PROG.best = Math.max(PROG.best, total(PROG)); }
+  save("prog");
+  app.innerHTML = `
+  <div class="screen">
+    <h1>Bra lest sammen!</h1>
+    ${poeng ? `<p class="delta plus">+${poeng} poeng</p>` : ''}
+    <p style="font-size:22px">Nå kan du lese hele teksten selv. Prøv å lese like fint som stemmen.</p>
+    <div class="modes">
+      <button class="mode" id="selv" style="--c:#ffd23f">Les teksten selv</button>
+      <button class="mode" id="meny" style="--c:#7fd3ff">Flere øvelser</button>
+    </div>
+  </div>`;
+  speak('Bra lest sammen! Nå kan du lese hele teksten selv.');
+  if(sortedPrizes().some(p=>bestBefore < p.at && PROG.best >= p.at)) checkCelebrate();
+  document.getElementById('selv').onclick = ()=>lesTekst(t.id);
+  document.getElementById('meny').onclick = ()=>tekstMeny(t.id);
+}
 function lesFerdig(t, sek, feilOrd){
   const rek = {...(PROG.rekord||{})}, gammel = rek[t.id], antall = feilOrd.length;
   const forsteFeilfri = antall===0 && !(gammel && gammel.feilfri);
   rek[t.id] = {best: gammel && gammel.best ? Math.min(gammel.best, sek) : sek, n: (gammel ? gammel.n : 0) + 1,
                minFeil: Math.min(antall, gammel && gammel.minFeil!=null ? gammel.minFeil : antall), feilfri: (gammel && gammel.feilfri || 0) + (antall===0 ? 1 : 0)};
   PROG.rekord = rek; PROG.sisteTekst = t.id;
+  const opm = ordPerMin(t, sek, antall);
+  PROG.leselogg = [...(PROG.leselogg||[]), {d: today(), t: t.id, navn: t.navn, ord: ordTall(t), sek, feil: antall}].slice(-150);
   const feilSett = new Set(feilOrd.map(w=>w.toLowerCase()));
   ordAvTekst(t).filter(w=>!t.hjelp.includes(w)).forEach(w=>ordMerk(w, !feilSett.has(w.toLowerCase())));
   const poeng = lesIDag() < LES_MAKS ? LES_PTS + (antall===0 ? FEILFRI_PTS : 0) : 0;
@@ -2125,7 +2229,7 @@ function lesFerdig(t, sek, feilOrd){
     <h1>${tittel}</h1>
     ${antall ? `<p style="font-size:22px;margin:0">Øv litt mer på:</p><div class="ovebar">${[...new Set(feilOrd)].map(w=>`<button class="ove" data-w="${esc(w)}">${esc(w)}</button>`).join('')}</div>` : `<p class="final">★</p>`}
     ${poeng ? `<p class="delta plus">+${poeng} poeng</p>` : ''}
-    <p class="note">Lest ${rek[t.id].n} ${rek[t.id].n===1?'gang':'ganger'}${rek[t.id].feilfri ? `, uten feil ${rek[t.id].feilfri} ${rek[t.id].feilfri===1?'gang':'ganger'}` : ''}. Tid: ${sek} s${gammel && gammel.best ? ` (beste ${rek[t.id].best} s)` : ''}.</p>
+    <p class="note">Lest ${rek[t.id].n} ${rek[t.id].n===1?'gang':'ganger'}${rek[t.id].feilfri ? `, uten feil ${rek[t.id].feilfri} ${rek[t.id].feilfri===1?'gang':'ganger'}` : ''}. Tid: ${sek} s${gammel && gammel.best ? ` (beste ${rek[t.id].best} s)` : ''} · ${opm} riktige ord i minuttet.</p>
     <div class="modes">
       <button class="mode" id="igjen" style="--c:#ffd23f">Les igjen</button>
       <button class="mode" id="meny" style="--c:#7fd3ff">Flere øvelser</button>
