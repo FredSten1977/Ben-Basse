@@ -342,8 +342,9 @@ body.big .lestekst{line-height:1.7}
 .st-toast b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(42px,12vw,78px);line-height:1;color:var(--led);text-shadow:0 4px 24px rgba(0,0,0,.7);text-wrap:balance}
 .st-toast span{display:inline-block;margin-top:8px;background:rgba(5,13,9,.9);border:2px solid #24392e;border-radius:12px;padding:8px 12px;font-weight:700;font-size:18px;line-height:1.35}
 .st-laster{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--font-display);font-size:28px;padding:16px}
-.st-slutt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,10,8,.72);padding:16px;box-sizing:border-box;overflow:auto}
-.st-slutt .kort{width:100%;max-width:460px;background:#0f2a1e;border:3px solid #24392e;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.st-slutt{position:absolute;inset:0;display:grid;justify-items:center;background:rgba(4,10,8,.72);box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px))}
+.st-slutt .kort{margin:auto 0;width:100%;max-width:460px;box-sizing:border-box;background:#0f2a1e;border:3px solid #24392e;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
 .st-slutt h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(30px,8vw,42px);line-height:1.05;color:var(--led);text-wrap:balance}
 .st-slutt p{margin:0}
 @media (prefers-reduced-motion: reduce){.st-toast{transition:none}}
@@ -1446,7 +1447,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-22-1";
+const APP_VERSION = "2026-11-22-2";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -2804,7 +2805,10 @@ function sjekkNyeKort(){
   if(nye.length){ PROG.kortSett = sett; save("prog"); }
   return nye;
 }
-const nyeKortHTML = nye => nye.map(k=>`<p class="unlock">Nytt ${KORTNIVA[k.tier]}: <b>${esc(KORT[k.t])}</b> (${k.t}-gangen)</p>`).join('');
+// Alle nye kort i én linje, så sluttskjermen ikke blir lang (første gang kan mange kort komme samtidig).
+const nyeKortHTML = nye => !nye.length ? '' : nye.length===1
+  ? `<p class="unlock">Nytt ${KORTNIVA[nye[0].tier]}: <b>${esc(KORT[nye[0].t])}</b> (${nye[0].t}-gangen)</p>`
+  : `<p class="unlock">Nye spillerkort: ${nye.map(k=>`<b>${esc(KORT[k.t])}</b> (${['','bronse','sølv','gull'][k.tier]})`).join(', ')}</p>`;
 
 /* ---------- Straffekonk ----------
    En 3D-straffekonkurranse (Babylon.js) mot Gjettelaget, fem straffer hver og så avgjørelse.
