@@ -375,6 +375,10 @@ body.big .lestekst{line-height:1.7}
 @keyframes stSmell{0%{transform:scale(.2) rotate(-8deg);opacity:0}60%{transform:scale(1.15) rotate(2deg);opacity:1}100%{transform:scale(1)}}
 .st-flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.55),rgba(255,210,63,0) 60%);opacity:0}
 .st-flash.vis{animation:stBlink .5s ease}
+.st-reprise{position:absolute;left:16px;top:calc(env(safe-area-inset-top,0px) + 96px);display:none;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:10px;background:rgba(10,14,28,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+.st-reprise i{width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 10px #ef4444;animation:stRec 1s infinite}
+.st-reprise.vis{display:flex}
+@keyframes stRec{50%{opacity:.25}}
 @keyframes stBlink{20%{opacity:1}}
 .st-laster{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--font-display);font-size:28px;padding:16px;
   background:radial-gradient(ellipse at 50% 30%,#16305a,#060b14 70%)}
@@ -1498,7 +1502,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-22-3";
+const APP_VERSION = "2026-11-22-5";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -2872,8 +2876,10 @@ let babylonLaster = null;
 function lastBabylon(){
   if(window.BABYLON) return Promise.resolve();
   if(!babylonLaster) babylonLaster = new Promise((ok, feil)=>{
-    const s = document.createElement('script'); s.src = "https://cdn.jsdelivr.net/npm/babylonjs@7.31.0/babylon.js";
-    s.onload = ok; s.onerror = ()=>{ babylonLaster = null; feil(); }; document.head.appendChild(s);
+    const last = src => new Promise((ja, nei)=>{ const s = document.createElement('script'); s.src = src; s.onload = ja; s.onerror = nei; document.head.appendChild(s); });
+    last("https://cdn.jsdelivr.net/npm/babylonjs@7.31.0/babylon.js")
+      .then(()=>last("https://cdn.jsdelivr.net/npm/babylonjs-loaders@7.31.0/babylonjs.loaders.min.js").catch(()=>{})) // uten loader brukes de enkle figurene
+      .then(ok, ()=>{ babylonLaster = null; feil(); });
   });
   return babylonLaster;
 }
@@ -2928,12 +2934,13 @@ async function straffekonk(kind, arg){
   catch(e){ div.querySelector('#st-laster').innerHTML = `<div>Fant ikke stadion. Sjekk nettet og prøv igjen.<br><br><button class="next" id="st-ut">Tilbake</button></div>`;
     div.querySelector('#st-ut').onclick = ()=>lukk(tilbake); return; }
   if(!document.body.contains(div)) return;
-  try{ byggStraffe(div, kind, arg, ()=>lukk(tilbake)); }
+  try{ await byggStraffe(div, kind, arg, ()=>lukk(tilbake)); }
   catch(e){ div.querySelector('#st-laster').innerHTML = `<div>Denne enheten klarte ikke å vise 3D.<br><br><button class="next" id="st-ut">Tilbake</button></div>`;
     div.querySelector('#st-ut').onclick = ()=>lukk(tilbake); }
 }
 
-function byggStraffe(div, kind, arg, avslutt){
+const STRAFFE_FILER = 'assets/straffe/';
+async function byggStraffe(div, kind, arg, avslutt){
   const B = window.BABYLON, $ = id => div.querySelector('#'+id);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = $('st-c');
@@ -2946,6 +2953,8 @@ function byggStraffe(div, kind, arg, avslutt){
   const mat = (name, hex, o={}) => { const m = new B.StandardMaterial(name, scene); m.diffuseColor = C(hex);
     m.specularColor = new B.Color3(o.spec ?? .12, o.spec ?? .12, o.spec ?? .12); m.specularPower = o.power ?? 32;
     if(o.emis) m.emissiveColor = C(o.emis); m.ambientColor = C(hex).scale(.6); return m; };
+  scene.animationPropertiesOverride = new B.AnimationPropertiesOverride(); scene.animationPropertiesOverride.enableBlending = true; scene.animationPropertiesOverride.blendingSpeed = .08;
+  try{ scene.environmentTexture = B.CubeTexture.CreateFromPrefilteredData(STRAFFE_FILER+'environment.env', scene); scene.environmentIntensity = .5; }catch(e){}
   const tex = (name, w, h, draw, opt={}) => { const t = new B.DynamicTexture(name, {width:w, height:h}, scene, opt.mip ?? true); if(opt.alpha) t.hasAlpha = true; draw(t.getContext(), w, h); t.update(); return t; };
 
   /* ----- Kamera med myk bevegelse og risting ----- */
@@ -2960,6 +2969,7 @@ function byggStraffe(div, kind, arg, avslutt){
     const a = shake.amp; shake.amp *= Math.pow(.02, dt);
     cam.position.set(camBase.x + sx + (Math.random()-.5)*a, camBase.y + sy + (Math.random()-.5)*a, camBase.z);
     cam.setTarget(camLook);
+    if(pipe && pipe.depthOfFieldEnabled && typeof ball !== 'undefined'){ const f = B.Vector3.Lerp(ball.position, camLook, .45); pipe.depthOfField.focusDistance = B.Vector3.Distance(cam.position, f)*1000; }
   });
 
   /* ----- Lys og etterbehandling ----- */
@@ -2974,8 +2984,13 @@ function byggStraffe(div, kind, arg, avslutt){
     pipe.bloomEnabled = true; pipe.bloomThreshold = .82; pipe.bloomWeight = .32; pipe.bloomKernel = 48; pipe.bloomScale = .5;
     pipe.imageProcessingEnabled = true;
     const ip = pipe.imageProcessing; ip.toneMappingEnabled = true; ip.toneMappingType = B.ImageProcessingConfiguration.TONEMAPPING_ACES;
-    ip.exposure = 1.25; ip.contrast = 1.18; ip.vignetteEnabled = true; ip.vignetteWeight = 2.2; ip.vignetteColor = new B.Color4(0,0,.05,0);
+    ip.exposure = 1.1; ip.contrast = 1.15; ip.vignetteEnabled = true; ip.vignetteWeight = 2.2; ip.vignetteColor = new B.Color4(0,0,.05,0);
     pipe.chromaticAberrationEnabled = false;
+    pipe.sharpenEnabled = true; pipe.sharpen.edgeAmount = .25;
+    pipe.grainEnabled = true; pipe.grain.intensity = 5; pipe.grain.animated = true;
+    // Dybdeskarphet som i TV-bilder: publikum blir mykt, spillerne skarpe
+    pipe.depthOfFieldEnabled = true; pipe.depthOfFieldBlurLevel = B.DepthOfFieldEffectBlurLevel.Low;
+    pipe.depthOfField.focalLength = 150; pipe.depthOfField.fStop = 1.6;
   }catch(e){ pipe = null; }
 
   /* ----- Himmel ----- */
@@ -2987,12 +3002,17 @@ function byggStraffe(div, kind, arg, avslutt){
 
   /* ----- Gressbane med klippestriper ----- */
   const ground = B.MeshBuilder.CreateGround('g',{width:90,height:90},scene); ground.position.z = -12; ground.receiveShadows = true;
-  { const gm = mat('gm','#ffffff',{spec:.05});
-    gm.diffuseTexture = tex('gt',1024,1024,(x,w,h)=>{ const n=16; for(let i=0;i<n;i++){ x.fillStyle = i%2 ? '#2e8a3c' : '#3aa24a'; x.fillRect(0,i*h/n,w,h/n+1); }
-      for(let i=0;i<26000;i++){ const l=Math.random(); x.fillStyle = l<.5 ? `rgba(0,40,0,${Math.random()*.12})` : `rgba(180,255,150,${Math.random()*.07})`; x.fillRect(Math.random()*w, Math.random()*h, 2, 3); } });
-    gm.diffuseTexture.uScale = 1; gm.diffuseTexture.vScale = 1;
-    gm.bumpTexture = tex('gb',256,256,(x,w,h)=>{ x.fillStyle='rgb(128,128,255)'; x.fillRect(0,0,w,h); for(let i=0;i<5000;i++){ x.fillStyle=`rgb(${100+Math.random()*56|0},${100+Math.random()*56|0},255)`; x.fillRect(Math.random()*w,Math.random()*h,1,2); } });
-    gm.bumpTexture.uScale = gm.bumpTexture.vScale = 30; gm.bumpTexture.level = .4;
+  { const gm = new B.PBRMaterial('gm', scene); gm.metallic = 0; gm.roughness = .82; gm.environmentIntensity = .35;
+    // Klippestriper, flekker og gresstrå tegnet i høy oppløsning
+    gm.albedoTexture = tex('gt',2048,2048,(x,w,h)=>{ const n=18;
+      for(let i=0;i<n;i++){ const g = x.createLinearGradient(0,i*h/n,0,(i+1)*h/n); const lys = i%2;
+        g.addColorStop(0, lys ? '#3f8f3a' : '#2f7530'); g.addColorStop(.5, lys ? '#45973f' : '#327a33'); g.addColorStop(1, lys ? '#3c8a37' : '#2d702e'); x.fillStyle = g; x.fillRect(0,i*h/n,w,h/n+1); }
+      for(let i=0;i<70;i++){ const r = 60+Math.random()*220, gx = Math.random()*w, gy = Math.random()*h, g = x.createRadialGradient(gx,gy,0,gx,gy,r);
+        const c = Math.random()<.5 ? '20,45,10' : '120,150,60'; g.addColorStop(0,`rgba(${c},${.05+Math.random()*.06})`); g.addColorStop(1,`rgba(${c},0)`); x.fillStyle = g; x.fillRect(gx-r,gy-r,2*r,2*r); }
+      for(let i=0;i<160000;i++){ const l=Math.random(); x.fillStyle = l<.45 ? `rgba(10,40,8,${Math.random()*.16})` : l<.9 ? `rgba(150,210,110,${Math.random()*.1})` : `rgba(210,230,150,${Math.random()*.08})`;
+        x.fillRect(Math.random()*w, Math.random()*h, 1+Math.random()*1.5, 2+Math.random()*3); } });
+    gm.bumpTexture = tex('gb',512,512,(x,w,h)=>{ x.fillStyle='rgb(128,128,255)'; x.fillRect(0,0,w,h); for(let i=0;i<14000;i++){ x.fillStyle=`rgb(${96+Math.random()*64|0},${96+Math.random()*64|0},255)`; x.fillRect(Math.random()*w,Math.random()*h,1,2+Math.random()*2); } });
+    gm.bumpTexture.uScale = gm.bumpTexture.vScale = 40; gm.bumpTexture.level = .5;
     ground.material = gm; }
   const lineMat = mat('line','#ffffff',{emis:'#8f948f', spec:0});
   const line = (x,z,w,d) => { const b=B.MeshBuilder.CreateGround('l',{width:w,height:d},scene); b.position.set(x,.008,z); b.material=lineMat; b.receiveShadows = true; };
@@ -3063,12 +3083,16 @@ function byggStraffe(div, kind, arg, avslutt){
     const back = B.MeshBuilder.CreateBox('adb',{width:w,height:.95,depth:.2},scene); back.position = pos.add(V(Math.sin(rotY)*.12,0,Math.cos(rotY)*.12)); back.rotation.y = rotY; back.material = mat('adbm','#0b1020'); };
   adBoard(34, V(0,.46,4.2), 0); adBoard(34, V(0,.46,-28), Math.PI); adBoard(30, V(-24,.46,-12), -Math.PI/2); adBoard(30, V(24,.46,-12), Math.PI/2);
   scene.onBeforeRenderObservable.add(()=>{ adT.uOffset = (adT.uOffset + engine.getDeltaTime()/1000*.04) % 1; });
-  // Lysmaster
+  // Lysmaster med linsereflekser
+  const flareBilde = (()=>{ const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); const g = x.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0,'rgba(255,255,255,.9)'); g.addColorStop(.25,'rgba(255,255,255,.35)'); g.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0,0,128,128); return c.toDataURL(); })();
   const flMat = mat('flm','#ffffff',{emis:'#fff8e1'});
   for(const [x,z] of [[-34,8],[34,8],[-34,-32],[34,-32]]){
     const pole=B.MeshBuilder.CreateCylinder('pole',{diameterTop:.5,diameterBottom:.9,height:26,tessellation:10},scene); pole.position.set(x,13,z); pole.material=mat('pm','#2a3248',{spec:.3});
     const head=B.MeshBuilder.CreateBox('fh',{width:6,height:3,depth:.5},scene); head.position.set(x,26.5,z); head.lookAt(V(0,0,-8)); head.material=mat('fhm','#1c2233');
-    for(let i=0;i<3;i++) for(let j=0;j<2;j++){ const l=B.MeshBuilder.CreatePlane('fl',{size:1.4},scene); l.parent=head; l.position.set(-1.8+i*1.8,-.7+j*1.4,-.27); l.material=flMat; glow.addIncludedOnlyMesh(l); } }
+    for(let i=0;i<3;i++) for(let j=0;j<2;j++){ const l=B.MeshBuilder.CreatePlane('fl',{size:1.4},scene); l.parent=head; l.position.set(-1.8+i*1.8,-.7+j*1.4,-.27); l.material=flMat; glow.addIncludedOnlyMesh(l); }
+    try{ const ls = new B.LensFlareSystem('lf', head, scene); ls.borderLimit = 120;
+      [[.5,0,'#fff6e0'],[.18,.25,'#9fc6ff'],[.09,.5,'#ffd9a0'],[.26,.8,'#a8ffcf'],[.12,1.1,'#ffffff']].forEach(([sz,pos,c])=>new B.LensFlare(sz*.28, pos, C(c).scale(.7), flareBilde, ls)); }catch(e){} }
 
   /* ----- Ball med ekte panelmønster ----- */
   const ball = B.MeshBuilder.CreateSphere('ball',{diameter:.24,segments:32},scene);
@@ -3082,26 +3106,134 @@ function byggStraffe(div, kind, arg, avslutt){
   shadows.addShadowCaster(ball);
   const SPOT = V(0,.12,-11); ball.position.copyFrom(SPOT);
 
-  /* ----- Spillere: myke former, ledd som animeres i koden ----- */
+  let figur = null;
+  if(B.SceneLoader && B.SceneLoader.IsPluginForExtensionAvailable && B.SceneLoader.IsPluginForExtensionAvailable('.glb')){
+    try{ figur = await B.SceneLoader.LoadAssetContainerAsync(STRAFFE_FILER, 'spiller.glb', scene); }catch(e){ figur = null; }
+    if(!document.body.contains(div)) return;
+  }
+  /* ----- Spillere: ekte animerte 3D-figurer (Mixamo-rigg i glTF). Drakt, nummer og hår males i shaderen. ----- */
   const navnTekst = (navn, nr, farge) => tex('nr'+nr+navn,256,256,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle=farge; x.textAlign='center';
     x.font='38px "Lilita One", "Arial Rounded MT Bold", sans-serif'; x.fillText(navn, w/2, 62); x.font='150px "Lilita One", "Arial Rounded MT Bold", sans-serif'; x.fillText(nr, w/2, 210); }, {alpha:true});
-  function spiller(id, o){
+  const POSER = {
+    ned:   {LeftArm:[0,-.1,-1.2], RightArm:[0,.1,1.2], LeftForeArm:[0,-.3,0], RightForeArm:[0,.3,0]},
+    klar:  {Spine:[.32,0,0], Spine1:[.1,0,0], Head:[-.35,0,0], LeftUpLeg:[-.95,0,-.28], RightUpLeg:[-.95,0,.28], LeftLeg:[1.35,0,0], RightLeg:[1.35,0,0],
+            LeftArm:[0,-.75,-.55], RightArm:[0,.75,.55], LeftForeArm:[0,-.7,0], RightForeArm:[0,.7,0]},
+    stup:  {Spine:[-.1,0,0], Spine1:[0,0,0], Head:[0,0,0], LeftUpLeg:[-.15,0,-.12], RightUpLeg:[.1,0,.1], LeftLeg:[.35,0,0], RightLeg:[.15,0,0],
+            LeftArm:[0,-.2,1.25], RightArm:[0,.2,-1.25], LeftForeArm:[0,-.1,0], RightForeArm:[0,.1,0]},
+    hopp:  {Spine:[-.05,0,0], Spine1:[0,0,0], Head:[-.1,0,0], LeftUpLeg:[-.35,0,-.15], RightUpLeg:[-.35,0,.15], LeftLeg:[.7,0,0], RightLeg:[.7,0,0],
+            LeftArm:[0,0,1.35], RightArm:[0,0,-1.35], LeftForeArm:[0,0,0], RightForeArm:[0,0,0]},
+    bak:   {Spine:[.12,0,0], RightUpLeg:[.75,0,.05], RightLeg:[1.6,0,0], LeftUpLeg:[-.25,0,0], LeftLeg:[.35,0,0],
+            LeftArm:[0,-.35,-.25], RightArm:[0,.6,.6], LeftForeArm:[0,-.3,0], RightForeArm:[0,.6,0]},
+    spark: {Spine:[-.18,0,0], RightUpLeg:[-1.35,0,-.05], RightLeg:[.1,0,0], LeftUpLeg:[.1,0,0], LeftLeg:[.25,0,0],
+            LeftArm:[0,.3,-.15], RightArm:[0,-.5,.9], LeftForeArm:[0,-.2,0], RightForeArm:[0,.4,0]},
+    jubel: {Spine:[-.2,0,0], Head:[-.3,0,0], LeftArm:[0,.15,1.0], RightArm:[0,-.15,-1.0], LeftForeArm:[0,0,.25], RightForeArm:[0,0,-.25]},
+    skuff: {Spine:[.45,0,0], Spine1:[.15,0,0], Head:[.45,0,0], LeftArm:[0,-.2,-1.3], RightArm:[0,.2,1.3], LeftForeArm:[0,-.2,0], RightForeArm:[0,.2,0]}
+  };
+  const blandPose = (a, b, e) => { const o = {}; for(const k of new Set([...Object.keys(a), ...Object.keys(b)])){ const x = a[k] || [0,0,0], y = b[k] || [0,0,0]; o[k] = [x[0]+(y[0]-x[0])*e, x[1]+(y[1]-x[1])*e, x[2]+(y[2]-x[2])*e]; } return o; };
+  class KitPlugin extends B.MaterialPluginBase {
+    constructor(material, kit){ super(material, 'Kit', 200, {KIT:false}); this.kit = kit; this._enable(true); }
+    prepareDefines(d){ d.KIT = true; }
+    getClassName(){ return 'KitPlugin'; }
+    getSamplers(s){ s.push('kitNr'); }
+    getUniforms(){ return {ubo:[{name:'kitShirt',size:3,type:'vec3'},{name:'kitShorts',size:3,type:'vec3'},{name:'kitSocks',size:3,type:'vec3'},{name:'kitSkin',size:3,type:'vec3'},{name:'kitTrim',size:3,type:'vec3'},{name:'kitHair',size:3,type:'vec3'},{name:'kitOpt',size:4,type:'vec4'}],
+      fragment:'uniform vec3 kitShirt; uniform vec3 kitShorts; uniform vec3 kitSocks; uniform vec3 kitSkin; uniform vec3 kitTrim; uniform vec3 kitHair; uniform vec4 kitOpt;'}; }
+    bindForSubMesh(ubo){ const k = this.kit; ubo.updateColor3('kitShirt',k.shirt); ubo.updateColor3('kitShorts',k.shorts); ubo.updateColor3('kitSocks',k.socks); ubo.updateColor3('kitSkin',k.skin);
+      ubo.updateColor3('kitTrim',k.trim); ubo.updateColor3('kitHair',k.hair); ubo.updateFloat4('kitOpt', k.longSleeve?1:0, k.gloves?1:0, this.joint?1:0, 0); ubo.setTexture('kitNr', k.nr); }
+    getCustomCode(type){
+      if(type==='vertex') return {CUSTOM_VERTEX_DEFINITIONS:'varying vec3 vKit;',
+        CUSTOM_VERTEX_UPDATE_POSITION:`vKit = position; { float ax = abs(position.x), m = 1.-smoothstep(.15,.24,ax), y = position.y;
+          float waist = smoothstep(.92,1.1,y)*(1.-smoothstep(1.12,1.34,y)), hip = smoothstep(.80,.9,y)*(1.-smoothstep(.93,1.,y)), chest = smoothstep(1.2,1.3,y)*(1.-smoothstep(1.4,1.48,y));
+          positionUpdated.x *= 1. + m*(.17*waist - .08*hip + .06*chest); positionUpdated.z *= 1. + m*(.1*waist - .06*hip); }`};
+      return {CUSTOM_FRAGMENT_DEFINITIONS:'varying vec3 vKit; uniform sampler2D kitNr;',
+        CUSTOM_FRAGMENT_UPDATE_ALBEDO:`{
+          vec3 p = vKit; float ax = abs(p.x); vec3 col = kitSkin; float sleeve = kitOpt.x>.5 ? .70 : .40;
+          if(p.y>1.47 && ax<.14){ col = kitSkin; if(p.y>1.70 || (p.y>1.57 && p.z<-.035) || (p.y>1.64 && ax>.075)) col = kitHair; }
+          else if(p.y>.97 && ax<sleeve){ col = kitShirt;
+            if(ax>.25 && ax>sleeve-.035) col = kitTrim;
+            if(p.y>1.41 && ax<.075) col = kitTrim;
+            col *= .93 + .07*smoothstep(.97,1.45,p.y);
+            vec2 uv = vec2((p.x+.17)/.34, (p.y-1.06)/.34);
+            if(p.z<0. && uv.x>0. && uv.x<1. && uv.y>0. && uv.y<1.){ vec4 t = texture2D(kitNr, vec2(1.-uv.x, 1.-uv.y)); col = mix(col, t.rgb, t.a); }
+            if(p.z>0. && length(vec2(p.x+.075, p.y-1.33))<.028) col = kitTrim; }
+          else if(p.y>.97) col = (kitOpt.y>.5 && ax>.69) ? vec3(.93) : kitSkin;
+          else if(p.y>.60){ col = kitShorts; if(abs(ax-.165)<.012 && p.y>.66) col = kitTrim; }
+          else if(p.y>.43) col = kitSkin;
+          else if(p.y>.075){ col = kitSocks; if(p.y>.395) col = kitTrim; }
+          else col = vec3(.035);
+          if(kitOpt.z>.5) col *= .82;
+          surfaceAlbedo = col*col; }`};
+    }
+  }
+  function figurSpiller(id, o){
+    const root = new B.TransformNode(id, scene), dive = new B.TransformNode(id+'dv', scene); dive.parent = root; dive.position.y = 1;
+    const flip = new B.TransformNode(id+'fl', scene); flip.parent = dive; flip.position.y = -1;
+    const inst = figur.instantiateModelsToScene(n=>id+n, false, {doNotInstantiate:true});
+    inst.rootNodes.forEach(n=>n.parent = flip);
+    const kit = {shirt:C(o.shirt), shorts:C(o.shorts), socks:C(o.socks), skin:C(o.skin||'#e0ac7e'), trim:C(o.trim||'#ffffff'), hair:C(o.hair||'#5a3a1e'), longSleeve:!!o.longSleeve, gloves:!!o.gloves, nr:navnTekst(o.navn||'', o.nr||'', o.nrFarge||'#ffffff')};
+    const bones = {};
+    flip.getChildMeshes(false).forEach(m=>{ if(!m.material) return; const mm = m.material.clone(id+m.name); mm.metallic = 0; mm.roughness = /Joint/.test(m.name) ? .55 : .7;
+      if(mm.albedoColor) mm.albedoColor = new B.Color3(1,1,1); const pl = new KitPlugin(mm, kit); pl.joint = /Joint/.test(m.name); m.material = mm;
+      shadows.addShadowCaster(m); m.receiveShadows = false; m.alwaysSelectAsActiveMesh = true; });
+    flip.getDescendants(false).forEach(n=>{ if(/mixamorig/.test(n.name)) bones[n.name.replace(/^.*mixamorig:?/,'')] = n; });
+    const anims = {}; inst.animationGroups.forEach(g=>{ g.stop(); anims[g.name.slice(id.length)] = g; });
+    let cur = null;
+    const P = {root, dive, kit, w:0, pose:POSER.ned, figur:true, backMat:{}};
+    P.play = (n, speed=1) => { const g = anims[n]; if(!g) return; if(cur===g){ g.speedRatio = speed; return; } if(cur) cur.stop(); cur = g; g.start(true, speed, g.from, g.to); };
+    scene.onAfterAnimationsObservable.add(()=>{
+      if(!root.isEnabled()) return;
+      if(sparker){ bones.Hips.computeWorldMatrix(true); sisteHofte = bones.Hips.getAbsolutePosition().clone(); }
+      if(P.w < .001) return;
+      for(const k in P.pose){ const n = bones[k]; if(!n || !n.rotationQuaternion) continue; const [x,y,z] = P.pose[k];
+        B.Quaternion.SlerpToRef(n.rotationQuaternion, B.Quaternion.FromEulerAngles(x,y,z), P.w, n.rotationQuaternion); }
+      if(P.drop) bones.Hips.position.y -= P.drop*P.w;
+    });
+    // Straffesparket fra Mixamo: tilløp, spark og etterslag. Ballen treffes etter 0,75 s.
+    P.hasKick = !!anims.kick; let sparker = false, etterSpark = null, sisteHofte = null;
+    const KICK_OFF = new B.Vector3(KICK_X, 0, KICK_Z), KICK_T = .75;
+    P.startPos = (yaw=0) => { const c = Math.cos(yaw), s = Math.sin(yaw); return new B.Vector3(SPOT.x - (KICK_OFF.x*c + KICK_OFF.z*s), 0, SPOT.z - (-KICK_OFF.x*s + KICK_OFF.z*c)); };
+    P.kickAnim = (side, fart=1) => new Promise(res => { const g = anims.kick, yaw = side*.12; root.rotation.y = yaw; root.position.copyFrom(P.startPos(yaw));
+      P.w = 0; P.drop = 0; sparker = true; etterSpark = null; if(cur) cur.stop(); cur = g; g.start(false, fart, g.from, g.to);
+      g.onAnimationGroupEndObservable.addOnce(()=>{ if(cur!==g) return;
+        if(sisteHofte){ root.position.x = sisteHofte.x; root.position.z = sisteHofte.z; } sisteHofte = null; // flytt figuren dit hoftene endte
+        const o = scene.animationPropertiesOverride; o.enableBlending = false; cur = null; sparker = false; P.play('idle'); setTimeout(()=>o.enableBlending = true, 60);
+        if(etterSpark){ const f = etterSpark; etterSpark = null; f(); } });
+      setTimeout(res, KICK_T*1000/fart); });
+    P.etter = f => { if(sparker) etterSpark = f; else f(); };
+    P.idle = () => { if(sparker) return; P.play('idle'); P.w = .5; P.pose = POSER.ned; P.drop = 0; };
+    P.hasDive = !!(anims.kidle && anims.dive);
+    P.ready = (t) => { if(anims.kidle){ P.play('kidle'); P.w = 0; P.drop = 0; return; } P.play('idle', .8); P.pose = POSER.klar; P.w = .92; P.drop = 26 + Math.sin(t*4)*2; };
+    // Keeperstup fra Mixamo: hopper mot modellens venstre, speiles for den andre siden. Hendene er lengst ute ved bilde 60.
+    P.diveAnim = (side, dur) => { const g = anims.dive; root.scaling.x = side>0 ? 1 : -1; P.w = 0; P.drop = 0;
+      if(cur) cur.stop(); cur = g; g.start(false, 1/Math.max(.3,dur), 30, 125);
+      setTimeout(()=>{ if(cur===g) g.speedRatio = 1; }, dur*1000); };
+    P.runPose = () => { P.play('run', 1.25); P.w = 0; P.drop = 0; };
+    P.kickBack = k => { P.pose = POSER.bak; P.w = k; };
+    P.kickSwing = e => { P.pose = blandPose(POSER.bak, POSER.spark, e); P.w = 1; };
+    P.cheer = k => { if(sparker) return; P.play('idle'); P.pose = POSER.jubel; P.w = Math.min(1, k*4); };
+    P.sad = () => P.etter(()=>{ P.play('idle', .6); P.pose = POSER.skuff; P.w = .95; });
+    P.diveSide = (side, k, e) => { if(P.hasDive) return; P.pose = POSER.stup; P.w = Math.min(1, k*3); P.drop = 26*(1-Math.min(1,k*3)); };
+    P.diveUp = (k) => { P.pose = POSER.hopp; P.w = Math.min(1, k*3); P.drop = 0; };
+    P.setColors = (shirt, nr) => { kit.shirt = C(shirt); kit.socks = C(shirt); if(nr) kit.nr = nr; };
+    P.idle();
+    return P;
+  }
+  /* Reserve hvis modellen ikke lastes: de enkle figurene fra før */
+  function enkelSpiller(id, o){
     const root = new B.TransformNode(id, scene), dive = new B.TransformNode(id+'dv', scene); dive.parent = root;
     const hips = new B.TransformNode(id+'hips', scene); hips.parent = dive; hips.position.y = .92;
     const shirt = mat(id+'s', o.shirt, {spec:.18}), shorts = mat(id+'sh', o.shorts, {spec:.15}), socks = mat(id+'so', o.socks, {spec:.1});
     const skin = mat(id+'k', o.skin || '#f1c9a5', {spec:.2}), hair = mat(id+'ha', o.hair || '#5a3a1e', {spec:.3}), boot = mat(id+'b', '#111318', {spec:.6, power:64});
-    const glove = o.gloves ? mat(id+'g', o.gloves, {spec:.3}) : skin;
+    const glove = o.gloves ? mat(id+'g', '#f8fafc', {spec:.3}) : skin;
     const cap = (n, r, len, m, parent, y, rt) => { const c = B.MeshBuilder.CreateCapsule(n,{radius:r, height:len, radiusTop:rt||r, tessellation:14, subdivisions:2},scene); c.parent = parent; c.position.y = y; c.material = m; return c; };
     const pelvis = cap(id+'pv', .15, .36, shorts, hips, .02); pelvis.scaling.z = .78;
     const torso = new B.TransformNode(id+'t', scene); torso.parent = hips; torso.position.y = .12;
     const chest = cap(id+'ch', .17, .66, shirt, torso, .3, .23); chest.scaling.z = .72;
-    const back = B.MeshBuilder.CreatePlane(id+'bk',{size:.36},scene); back.parent = torso; back.position.set(0,.34,-.2); back.rotation.y = o.backZ>0 ? Math.PI : 0;
+    const back = B.MeshBuilder.CreatePlane(id+'bk',{size:.36},scene); back.parent = torso; back.position.set(0,.34,-.2);
     { const m = new B.StandardMaterial(id+'bkm',scene); m.diffuseTexture = navnTekst(o.navn||'', o.nr||'', o.nrFarge||'#fff'); m.useAlphaFromDiffuseTexture = true; m.emissiveColor = new B.Color3(.25,.25,.25); m.specularColor=new B.Color3(0,0,0); back.material = m; }
-    const neck = cap(id+'nk', .06, .14, skin, torso, .66);
+    cap(id+'nk', .06, .14, skin, torso, .66);
     const headN = new B.TransformNode(id+'hn', scene); headN.parent = torso; headN.position.y = .8;
     const head = B.MeshBuilder.CreateSphere(id+'h',{diameter:.25, segments:20},scene); head.parent = headN; head.material = skin; head.scaling.y = 1.08;
     const hr = B.MeshBuilder.CreateSphere(id+'hr',{diameter:.265, segments:20, slice:.55},scene); hr.parent = headN; hr.position.y = .015; hr.rotation.x = -.35; hr.material = hair;
-    for(const s of [-1,1]){ const e = B.MeshBuilder.CreateSphere(id+'e',{diameter:.03},scene); e.parent = headN; e.position.set(s*.045,.02,o.face ?? .115); e.material = mat(id+'em','#151515'); }
     const sh=[], el=[], hp=[], kn=[];
     for(const s of [-1,1]){
       const shoulder = new B.TransformNode(id+'sh'+s, scene); shoulder.parent = torso; shoulder.position.set(s*.25,.55,0);
@@ -3118,31 +3250,46 @@ function byggStraffe(div, kind, arg, avslutt){
       hp.push(hip); kn.push(knee);
     }
     root.getChildMeshes().forEach(m=>{ shadows.addShadowCaster(m); m.receiveShadows = false; });
-    const P = {root, dive, hips, torso, headN, sh, el, hp, kn, shirt, backMat:back.material};
-    // Grunnstilling: armene litt ut
-    P.pose = (p={}) => { hips.position.y = .92 + (p.dy||0); hips.rotation.x = p.lean||0; torso.rotation.x = p.bend||0; torso.rotation.z = p.tilt||0;
+    const P = {root, dive};
+    const pose = (p={}) => { hips.position.y = .92 + (p.dy||0); hips.rotation.x = p.lean||0; torso.rotation.x = p.bend||0;
       [0,1].forEach(i=>{ const s = i ? 1 : -1;
         sh[i].rotation.x = (p.armX && p.armX[i]) || 0; sh[i].rotation.z = s*((p.armOut && p.armOut[i]) ?? .18); el[i].rotation.x = (p.elbow && p.elbow[i]) ?? -.25;
         hp[i].rotation.x = (p.leg && p.leg[i]) || 0; hp[i].rotation.z = s*((p.legOut && p.legOut[i]) || 0); kn[i].rotation.x = (p.knee && p.knee[i]) || 0; }); };
-    P.pose();
+    let runT = 0;
+    P.idle = () => pose({dy:Math.sin(tid*2.2)*.012, bend:.04, armOut:[.15,.15], elbow:[-.3,-.3]});
+    P.ready = t => pose({dy:-.12+Math.sin(t*4)*.02, lean:.25, bend:.15, armOut:[.75,.75], elbow:[-.5,-.5], armX:[-.4,-.4], leg:[-.45,-.45], knee:[.7,.7], legOut:[.12,.12]});
+    P.runPose = () => { runT += engine.getDeltaTime()/1000; const c = Math.sin(runT*14);
+      pose({dy:Math.abs(c)*.04, lean:.18, bend:.1, leg:[c*.7,-c*.7], knee:[Math.max(0,-c)*1.1, Math.max(0,c)*1.1], armX:[-c*.6,c*.6], armOut:[.2,.2], elbow:[-1,-1]}); };
+    P.kickBack = k => pose({lean:.1, bend:.05, leg:[-.2, .9*k], knee:[.2, 1.4*k], armOut:[.9,.6], elbow:[-.4,-.4], armX:[.3,-.4]});
+    P.kickSwing = e => pose({lean:-.05, bend:-.08, leg:[-.15, .9 - 2.3*e], knee:[.2, 1.4*(1-e)], armOut:[1.1,.8], elbow:[-.3,-.3], armX:[-.3,.5]});
+    P.cheer = k => pose({dy:Math.abs(Math.sin(k*Math.PI*3))*.12, armOut:[2.7,2.7], elbow:[-.2,-.2]});
+    P.sad = () => pose({bend:.25, armOut:[2.4,2.4], elbow:[-2.3,-2.3], armX:[-.4,-.4]});
+    P.diveSide = (side, k, e) => { const near = side>0 ? 0 : 1; pose({armOut: near ? [2.2,2.9] : [2.9,2.2], elbow:[0,0], leg: near ? [-.1,.3] : [.3,-.1], knee:[.2,.2], legOut:[.1,.1]}); };
+    P.diveUp = () => pose({dy:-.05, armOut:[2.9,2.9], elbow:[0,0], leg:[-.2,-.2], knee:[.4,.4]});
+    P.setColors = (c, nr) => { shirt.diffuseColor = C(c); if(nr) back.material.diffuseTexture = nr; };
+    P.etter = f => f();
+    P.idle();
     return P;
   }
-  const keeper = spiller('keeper', {shirt:'#22c55e', shorts:'#0b1220', socks:'#22c55e', gloves:'#f8fafc', longSleeve:true, hair:'#1f1410', skin:'#c68642', navn:'', nr:'1', backZ:-.135, face:.115});
+  const KICK_X = .78, KICK_Z = 2.33;
+  const spiller = (id, o) => figur ? figurSpiller(id, o) : enkelSpiller(id, o);
+  const keeper = spiller('keeper', {shirt:'#22c55e', shorts:'#0b1220', socks:'#22c55e', trim:'#0b1220', gloves:true, longSleeve:true, hair:'#1f1410', skin:'#c68642', navn:'', nr:'1', nrFarge:'#0b1220'});
   keeper.root.position.set(0,0,.3); keeper.root.rotation.y = Math.PI;
-  const helt = spiller('helt', {shirt:'#3fb3f0', shorts:'#ffffff', socks:'#3fb3f0', hair:'#7a4a22', navn:'BENJAMIN', nr:'10', nrFarge:'#ffffff', backZ:-.135, face:.115});
-  const skytter = spiller('skytter', {shirt:'#f0645a', shorts:'#1e293b', socks:'#f0645a', hair:'#2b1b10', navn:'', nr:'9', backZ:-.135, face:.115});
+  const helt = spiller('helt', {shirt:'#3fb3f0', shorts:'#ffffff', socks:'#3fb3f0', trim:'#ffffff', hair:'#7a4a22', navn:'BENJAMIN', nr:'10', nrFarge:'#ffffff'});
+  const skytter = spiller('skytter', {shirt:'#f0645a', shorts:'#1e293b', socks:'#f0645a', trim:'#1e293b', hair:'#2b1b10', skin:'#8d5524', navn:'', nr:'9', nrFarge:'#ffffff'});
   skytter.root.setEnabled(false);
-  const ryggBen = navnTekst('BENJAMIN','1','#10221a'), ryggMot = keeper.backMat.diffuseTexture;
-  const keeperFarger = mine => { keeper.shirt.diffuseColor = C(mine ? '#ffd23f' : '#22c55e'); keeper.backMat.diffuseTexture = mine ? ryggBen : ryggMot; };
+  const ryggBen = navnTekst('BENJAMIN','1','#10221a'), ryggMot = navnTekst('','1','#0b1220');
+  const keeperFarger = mine => keeper.setColors(mine ? '#ffd23f' : '#22c55e', mine ? ryggBen : ryggMot);
 
   // Animasjoner i koden
   let idleMode = {keeper:'ready', helt:'idle', skytter:'idle'};
   scene.onBeforeRenderObservable.add(()=>{
     const t = tid;
-    if(idleMode.keeper==='ready'){ const b = Math.sin(t*4)*.02, sway = Math.sin(t*1.6)*.25;
-      keeper.root.position.x = sway; keeper.pose({dy:-.12+b, lean:.25, bend:.15, armOut:[.75,.75], elbow:[-.5,-.5], armX:[-.4,-.4], leg:[-.45,-.45], knee:[.7,.7], legOut:[.12,.12]}); }
-    if(idleMode.helt==='idle'){ const b = Math.sin(t*2.2)*.012; helt.pose({dy:b, bend:.04, armOut:[.15,.15], elbow:[-.3,-.3], leg:[0,0]}); }
-    if(idleMode.skytter==='idle'){ const b = Math.sin(t*2.4)*.012; skytter.pose({dy:b, bend:.06, armOut:[.2,.2], elbow:[-.3,-.3]}); }
+    if(idleMode.keeper==='ready'){ if(!keeper.hasDive) keeper.root.position.x = Math.sin(t*1.6)*.25; keeper.ready(t); }
+    if(idleMode.helt==='idle') helt.idle();
+    if(idleMode.skytter==='idle') skytter.idle();
+    if(idleMode.helt==='run') helt.runPose();
+    if(idleMode.skytter==='run') skytter.runPose();
   });
 
   /* ----- Sikteskiver i målet ----- */
@@ -3213,27 +3360,26 @@ function byggStraffe(div, kind, arg, avslutt){
     if(slow && k>.72 && timeScale===1 && !reduce) timeScale = .28; }).then(()=>ball.scaling.set(1,1,1));
   const moveCam = (pos, look, dur) => { const p0=camBase.clone(), l0=camLook.clone();
     return tween(dur, k=>{ const e=easeIO(k); B.Vector3.LerpToRef(p0,pos,e,camBase); B.Vector3.LerpToRef(l0,look,e,camLook); }); };
-  const dive = (side, dur) => { const r=keeper.root, d=keeper.dive; idleMode.keeper = 'dive'; const x0 = r.position.x;
+  const dive = (side, dur) => { const r=keeper.root, d=keeper.dive, fig = !!keeper.figur; idleMode.keeper = 'dive'; const x0 = r.position.x;
+    if(keeper.hasDive && side!==0){ keeper.diveAnim(side, dur); return wait(dur*1000); }
     return tween(dur, k=>{ const e=ease(k);
-      if(side===0){ r.position.x = x0*(1-e); r.position.y = .6*Math.sin(Math.PI*Math.min(1,k*1.15)); d.rotation.z = 0;
-        keeper.pose({dy:-.05, armOut:[2.9,2.9], elbow:[0,0], leg:[-.2,-.2], knee:[.4,.4]}); }
-      else { r.position.x = x0 + (side*1.95 - x0)*e; r.position.y = .45*Math.sin(Math.PI*Math.min(1,k*1.05)); d.rotation.z = side*1.3*e;
-        const near = side>0 ? 0 : 1; // armen mot ballen strekkes mest (keeperen er snudd)
-        keeper.pose({dy:0, tilt:0, armOut: near ? [2.2,2.9] : [2.9,2.2], elbow:[0,0], leg: near ? [-.1,.3] : [.3,-.1], knee:[.2,.2], legOut:[.1,.1]}); } }); };
-  const resetKeeper = () => { keeper.root.position.set(0,0,.3); keeper.dive.rotation.z = 0; idleMode.keeper = 'ready'; };
+      if(side===0){ r.position.x = x0*(1-e); r.position.y = .6*Math.sin(Math.PI*Math.min(1,k*1.15)); d.rotation.z = 0; keeper.diveUp(k); }
+      else { r.position.x = x0 + (side*1.95 - x0)*e; r.position.y = (fig ? .5 : .45)*Math.sin(Math.PI*Math.min(1,k*1.05)) - (fig ? .45*e : 0); d.rotation.z = side*1.3*e; keeper.diveSide(side, k, e); } }); };
+  const resetKeeper = () => { keeper.root.position.set(0,0,.3); keeper.root.scaling.x = 1; keeper.dive.rotation.z = 0; idleMode.keeper = 'ready'; };
   // Tilløp og skudd
   async function tilloep(P, from, to, kickSide){
-    const key = P===helt ? 'helt' : 'skytter'; idleMode[key] = 'run';
+    const key = P===helt ? 'helt' : 'skytter';
+    if(P.hasKick){ idleMode[key] = 'kick'; await P.kickAnim(kickSide); dust.emitter = SPOT.clone(); if(!reduce) dust.manualEmitCount = 40; return; }
+    idleMode[key] = 'run';
     P.root.position.copyFrom(from); P.root.rotation.y = Math.atan2(to.x-from.x, to.z-from.z);
-    await tween(.55, k=>{ B.Vector3.LerpToRef(from,to,k,P.root.position); const c = Math.sin(k*Math.PI*4);
-      P.pose({dy:Math.abs(c)*.04, lean:.18, bend:.1, leg:[c*.7,-c*.7], knee:[Math.max(0,-c)*1.1, Math.max(0,c)*1.1], armX:[-c*.6,c*.6], armOut:[.2,.2], elbow:[-1,-1]}); });
-    P.root.rotation.y = kickSide*.15;
-    await tween(.14, k=>{ P.pose({lean:.1, bend:.05, leg:[-.2, .9*k], knee:[.2, 1.4*k], armOut:[.9,.6], elbow:[-.4,-.4], armX:[.3,-.4]}); });
-    const swing = tween(.22, k=>{ const e = ease(k); P.pose({lean:-.05, bend:-.08, leg:[-.15, .9 - 2.3*e], knee:[.2, 1.4*(1-e)], armOut:[1.1,.8], elbow:[-.3,-.3], armX:[-.3,.5]}); });
+    await tween(.6, k=>{ B.Vector3.LerpToRef(from,to,k,P.root.position); });
+    idleMode[key] = 'kick'; P.root.rotation.y = kickSide*.15;
+    await tween(.16, k=>P.kickBack(k));
+    tween(.24, k=>P.kickSwing(ease(k)));
     await wait(70); dust.emitter = SPOT.clone(); if(!reduce) dust.manualEmitCount = 40;
   }
   const view = shoot => { const p = fitCam();
-    return shoot ? {pos:V(1.25,1.95,-16.4), look:V(-.25, p ? -.4 : 1.15, 0)} : {pos:V(0,3.0,6.4), look:V(0, p ? -.9 : .45, -11)}; };
+    return shoot ? {pos:V(1.7,2.15,-17.8), look:V(-.3, p ? -.5 : 1.1, 0)} : {pos:V(0,3.0,6.4), look:V(0, p ? -.9 : .45, -11)}; };
 
   /* ----- Lyd (appens lydsystem) ----- */
   let amb = null;
@@ -3273,6 +3419,7 @@ function byggStraffe(div, kind, arg, avslutt){
   /* ----- Skjermelementer ----- */
   div.insertAdjacentHTML('beforeend', `
     <div class="st-flash" id="st-flash"></div>
+    <div class="st-reprise" id="st-reprise"><i></i>REPRISE</div>
     <div class="st-hud" id="st-hud">
       <div class="st-top">
         <div class="st-toprow">
@@ -3325,8 +3472,8 @@ function byggStraffe(div, kind, arg, avslutt){
     stopTrail(); ball.position.copyFrom(SPOT); ball.rotation.set(0,0,0); ball.scaling.set(1,1,1); resetKeeper(); keeperFarger(!shoot);
     nets.forEach(n=>n.setEnabled(shoot));
     helt.root.setEnabled(shoot); skytter.root.setEnabled(!shoot);
-    helt.root.position.set(-.75,0,-12.9); helt.root.rotation.y = .5; idleMode.helt = 'idle';
-    skytter.root.position.set(-.75,0,-12.9); skytter.root.rotation.y = .5; idleMode.skytter = 'idle';
+    for(const P of [helt, skytter]){ if(P.hasKick){ P.root.position.copyFrom(P.startPos(0)); P.root.rotation.y = 0; } else { P.root.position.set(-.75,0,-12.9); P.root.rotation.y = .5; } }
+    idleMode.helt = 'idle'; idleMode.skytter = 'idle';
     const sd = G.us.length>=5 && G.them.length>=5;
     const turn = $('st-turn'); turn.className = 'st-turn' + (shoot ? '' : ' keep');
     turn.textContent = (sd ? 'Avgjørelse · ' : '') + (shoot ? `Straffe ${G.us.length+1} · Du skyter` : `Straffe ${G.them.length+1} · Du står i mål`);
@@ -3352,6 +3499,25 @@ function byggStraffe(div, kind, arg, avslutt){
   const malJubel = async (x, y) => {
     netHit(x, y); swish(); shake.amp = .22; timeScale = 1; blink(); feiring(); jubel = 1; roar(1); sfxRight(false);
   };
+  // Reprise av målet i sakte film, filmet bak nettet
+  async function reprise(side, target, keeperSide){
+    if(reduce || !document.body.contains(div)) return;
+    const tag = $('st-reprise'); tag.classList.add('vis'); blink();
+    stopTrail(); ball.position.copyFrom(SPOT); ball.scaling.set(1,1,1); showPlates(false); resetKeeper(); idleMode.keeper = 'ready';
+    helt.root.position.y = 0; helt.w = 0; idleMode.helt = 'kick';
+    const sx = side>0 ? -1 : 1; // kamera på motsatt side av skuddet, i gresshøyde
+    camBase.set(sx*6.5, 1.15, -9.5); camLook.set(0, .95, -11.5);
+    await wait(500);
+    timeScale = .5;
+    moveCam(V(sx*5.2, 1.3, -4.5), V(side*1.2, 1.0, -1), 2.2);
+    await helt.kickAnim(side, .5);
+    kick(); squash(1.35,.7,.15); startTrail();
+    await Promise.all([flyBall(SPOT, target, .6, .45, false), wait(280).then(()=>dive(keeperSide, 1.1))]);
+    netHit(target.x, target.y); swish(); shake.amp = .12;
+    await flyBall(ball.position.clone(), V(target.x*.92, Math.max(.3,target.y-.5), 1.75), .22, .02);
+    stopTrail(); flyBall(ball.position.clone(), V(target.x*.9,.12,1.6), .35, 0);
+    await wait(1100); timeScale = 1; tag.classList.remove('vis');
+  }
   async function answer(i){
     if(G.busy) return; G.busy = true;
     const riktig = G.cur.opts[i]===G.cur.a, ri = G.cur.opts.indexOf(G.cur.a);
@@ -3363,24 +3529,25 @@ function byggStraffe(div, kind, arg, avslutt){
       const keeperSide = riktig ? [-1,0,1].filter(s=>s!==side)[Math.random()*2|0] : side;
       const target = TARGETS[i].clone(); target.z = .4;
       await wait(250); visPanel(false);
-      moveCam(V(1.1,1.7,-15.4), V(-.1,1.1,0), .7);
+      moveCam(V(2.3,1.9,-17.6), V(-.2,1.05,0), .7);
       await tilloep(helt, V(-.75,0,-12.9), V(-.28,0,-11.45), side);
-      kick(); squash(1.35,.7,.15); startTrail(); helt.root.rotation.y = side*.2;
+      kick(); squash(1.35,.7,.15); startTrail(); if(!helt.hasKick) helt.root.rotation.y = side*.2;
       if(riktig){
         await Promise.all([flyBall(SPOT, target, .6, .45, true), wait(140).then(()=>dive(keeperSide,.55))]);
         showPlates(false); malJubel(target.x, target.y);
         await flyBall(ball.position.clone(), V(target.x*.92, Math.max(.3,target.y-.5), 1.75), .22, .02);
         stopTrail(); squash(1.3,.75,.2); flyBall(ball.position.clone(), V(target.x*.9,.12,1.6), .35, 0);
         G.us.push(true); renderBoard(true);
-        idleMode.helt = 'jubel'; tween(1.2, k=>{ helt.pose({dy:Math.abs(Math.sin(k*Math.PI*3))*.12, armOut:[2.7,2.7], elbow:[-.2,-.2], leg:[0,0]}); });
+        idleMode.helt = 'jubel'; helt.etter(()=>tween(1.2, k=>{ helt.cheer(k); if(helt.figur) helt.root.position.y = Math.abs(Math.sin(k*Math.PI*3))*.16; }));
         await toast('MÅÅÅL!', `+${POENG} poeng`, 1700);
+        if(helt.hasKick) await reprise(side, target, keeperSide);
       } else {
-        const save = V(side*1.7, side===0?1.9:1.05, .2);
+        const save = V(side*1.75, side===0?1.9:1.02, keeper.hasDive && side ? -.1 : .2);
         await Promise.all([flyBall(SPOT, save, .58, .4), wait(90).then(()=>dive(keeperSide,.5))]);
         stopTrail(); thud(); squash(.75,1.3,.18); showPlates(false); shake.amp = .06;
         await flyBall(ball.position.clone(), V(side*2.6+.4,.12,-4.5), .55, .9);
         ooh(); G.us.push(false); renderBoard(true); speak(fasitTale());
-        idleMode.helt = 'skuffet'; helt.pose({bend:.25, armOut:[2.4,2.4], elbow:[-2.3,-2.3], armX:[-.4,-.4]});
+        idleMode.helt = 'skuffet'; helt.sad();
         await toast('Reddet!', fasitTekst(), 3500, true);
       }
     } else {
@@ -3390,7 +3557,7 @@ function byggStraffe(div, kind, arg, avslutt){
       await tilloep(skytter, V(-.75,0,-12.9), V(-.28,0,-11.45), side);
       kick(); squash(1.35,.7,.15); startTrail();
       if(riktig){
-        const save = V(side*1.75, side===0?1.95:1.15, .05);
+        const save = V(side*1.8, side===0?1.95:1.05, keeper.hasDive && side ? -.1 : .05);
         await Promise.all([flyBall(SPOT, save, .62, .4), wait(70).then(()=>dive(side,.52))]);
         stopTrail(); thud(); squash(.7,1.3,.2); shake.amp = .1; blink(); feiring(); jubel = .8; roar(.8); sfxRight(false);
         await flyBall(ball.position.clone(), V(side*1.4,.12,-1.4), .45, .5);
