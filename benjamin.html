@@ -310,6 +310,58 @@ body.big .lestekst{line-height:1.7}
 .logg td.n{text-align:right;font-variant-numeric:tabular-nums}
 .pbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
 .rung.given .pbar i{background:linear-gradient(90deg,#7dd08f,#3fae5c);box-shadow:none}
+
+/* Straffekonk (3D med Babylon.js) og spillerkort-albumet */
+.straffe{position:fixed;inset:0;z-index:15;background:#081018;color:var(--chalk);font-family:var(--font-read)}
+.straffe canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
+.st-hud{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(12px, env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px, env(safe-area-inset-left,0px))}
+.st-top{display:flex;flex-direction:column;align-items:center;gap:6px}
+.st-top .board{pointer-events:auto;width:100%;max-width:560px;box-sizing:border-box}
+.st-dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.team.away .st-dots{justify-content:flex-end}
+.st-dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(244,247,239,.35);box-sizing:border-box}
+.st-dot.mal{background:#5fe08a;border-color:#5fe08a}.st-dot.bom{background:var(--red);border-color:var(--red)}
+.st-turn{font-family:var(--font-board);font-size:12px;letter-spacing:.08em;color:var(--led);background:rgba(5,13,9,.85);border:2px solid #24392e;border-radius:999px;padding:4px 12px}
+.st-quit{pointer-events:auto;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(12px, env(safe-area-inset-left,0px));font:inherit;font-size:15px;font-weight:700;color:var(--chalk);background:rgba(5,13,9,.8);border:2px solid #24392e;border-radius:999px;padding:6px 12px;cursor:pointer;z-index:2}
+@media (max-width:700px){.st-quit{position:static;align-self:flex-start;margin-bottom:4px}}
+.st-bottom{pointer-events:auto;width:100%;max-width:560px;align-self:center;display:flex;flex-direction:column;gap:10px}
+.st-q{background:var(--chalk);color:var(--ink);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.st-q .st-tekst{flex:1;min-width:0}
+.st-q b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(30px,8vw,44px);line-height:1.05;font-variant-numeric:tabular-nums}
+.st-q small{display:block;font-size:15px;font-weight:700;color:#3d5446}
+.st-svar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.st-svar button{font-family:var(--font-display);font-size:clamp(26px,7vw,38px);color:var(--ink);background:var(--chalk);border:0;border-radius:14px;padding:10px 4px;cursor:pointer;box-shadow:0 5px 0 #9fae99;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.st-svar.ord button{font-family:var(--font-read);font-weight:700;font-size:clamp(21px,5.6vw,30px);text-transform:lowercase}
+.st-svar button small{display:block;font-family:var(--font-read);font-size:12px;font-weight:700;color:#5d7064;letter-spacing:.06em;text-transform:none}
+.st-svar button:active{transform:translateY(3px);box-shadow:0 2px 0 #9fae99}
+.st-svar button:disabled{opacity:.6;cursor:default}
+.st-svar button.riktig{background:#9ff0b4;opacity:1}.st-svar button.feil{background:#ffb3ad}
+.st-toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.9);opacity:0;transition:opacity .2s,transform .2s;text-align:center;width:min(92vw,520px);pointer-events:none}
+.st-toast.vis{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.st-toast b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(42px,12vw,78px);line-height:1;color:var(--led);text-shadow:0 4px 24px rgba(0,0,0,.7);text-wrap:balance}
+.st-toast span{display:inline-block;margin-top:8px;background:rgba(5,13,9,.9);border:2px solid #24392e;border-radius:12px;padding:8px 12px;font-weight:700;font-size:18px;line-height:1.35}
+.st-laster{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--font-display);font-size:28px;padding:16px}
+.st-slutt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,10,8,.72);padding:16px;box-sizing:border-box;overflow:auto}
+.st-slutt .kort{width:100%;max-width:460px;background:#0f2a1e;border:3px solid #24392e;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.st-slutt h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(30px,8vw,42px);line-height:1.05;color:var(--led);text-wrap:balance}
+.st-slutt p{margin:0}
+@media (prefers-reduced-motion: reduce){.st-toast{transition:none}}
+.straffeknapp{font:inherit;font-family:var(--font-display);font-size:24px;color:var(--ink);background:var(--led);border:0;border-radius:14px;padding:14px 16px;cursor:pointer;box-shadow:0 5px 0 #a8851d;display:grid;gap:2px;text-align:left}
+.straffeknapp small{font-family:var(--font-read);font-size:15px;font-weight:700}
+
+.album{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media (max-width:480px){.album{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.spkort{position:relative;aspect-ratio:3/4;max-width:100%;border-radius:12px;padding:6px 4px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  color:#3a3f3c;background:linear-gradient(160deg,#5b6660,#39423d);border:2px solid #6f7a73;overflow:hidden;text-align:center}
+.spkort .nr{font-family:var(--font-board);font-size:clamp(22px,6vw,34px);line-height:1;opacity:.55}
+.spkort .navn{font-family:var(--font-display);font-size:clamp(13px,3.4vw,17px);line-height:1.05;word-break:break-word}
+.spkort .tab{font-size:12px;font-weight:700}
+.spkort.t1{color:#3b210b;background:linear-gradient(160deg,#e3a36b,#a8662f);border-color:#f0c08e}
+.spkort.t2{color:#1f2a33;background:linear-gradient(160deg,#eef3f7,#9fb0bf);border-color:#ffffff}
+.spkort.t3{color:#3a2a00;background:linear-gradient(160deg,#fff1a6,#e2b10f);border-color:#fff7c9;box-shadow:0 0 16px rgba(255,210,63,.55)}
+.spkort.t1 .nr,.spkort.t2 .nr,.spkort.t3 .nr{opacity:1}
+.spkort.t0 .navn,.spkort.t0 .tab{color:#c9d2cc}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -1394,7 +1446,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-18-1";
+const APP_VERSION = "2026-11-22-1";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1997,6 +2049,7 @@ function norskScreen(){
     <button class="back" id="back">‹ Tilbake</button>
     <h2>Norsk</h2>
     <p class="note">Ett stavemønster om gangen. Få 6 av 8 riktige på første forsøk for å låse opp neste nivå.</p>
+    <button class="straffeknapp" id="straffe">⚽ Straffekonk med ord<small>Hør ordet og skyt på det som er skrevet riktig</small></button>
     <div class="tasks">
       ${uke ? `<button class="task niva" data-n="uke"><span>Ukens ord fra skolen</span><b>${uke}</b><small>Ordene pappa har lagt inn</small></button>` : ''}
       ${NIVAER.map((l,i)=>`<button class="task niva ${i>open?'locked':''}" data-n="${i}" ${i>open?'disabled':''}><span>${i+1}. ${l.navn}</span><b>${i<open?'✓':i===open?'▶':'🔒'}</b><small>${esc(l.tips)}</small></button>`).join('')}
@@ -2004,6 +2057,7 @@ function norskScreen(){
   </div>`;
   document.getElementById('back').onclick = startScreen;
   app.querySelectorAll('.niva:not([disabled])').forEach(b=>b.onclick=()=>newMatch('norsk', b.dataset.n==='uke' ? 'uke' : +b.dataset.n));
+  document.getElementById('straffe').onclick = ()=>straffekonk('ord');
 }
 
 /* ---------- Ukens lekse ---------- */
@@ -2316,7 +2370,11 @@ function gangeScreen(){
     <button class="back" id="back">‹ Tilbake</button>
     <h2>Gangetabell</h2>
     <p class="note">Velg en tabell du vil øve på, eller gå steg for steg. Få 7 av 8 riktige på første forsøk for å låse opp neste steg. Ingen klokke, og feil koster ingen poeng.</p>
+    <button class="straffeknapp" id="straffe">⚽ Straffekonk<small>Alle tabellene. Svar riktig for å score og redde.</small></button>
     <div class="tasks">
+      <h3>Spillerkortene dine</h3>
+      <p class="note" style="margin:0;text-align:center">Kan du 5 av 10 i en tabell, får du bronse. 8 gir sølv, og alle 10 gir gull.</p>
+      ${albumHTML()}
       <h3>Øv på én tabell</h3>
       <div class="tabellvalg">${Array.from({length:10},(_,i)=>i+1).map(t=>`<button class="tabellknapp ${kanTabell(t)>=10?'kan':''}" data-tab="${t}">${t}-gangen<small>${kanTabell(t)} av 10</small></button>`).join('')}</div>
       <h3>Steg for steg</h3>
@@ -2326,6 +2384,7 @@ function gangeScreen(){
   document.getElementById('back').onclick = startScreen;
   app.querySelectorAll('.task[data-n]:not([disabled])').forEach(b=>b.onclick=()=>gangeIntro(+b.dataset.n));
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>gangeIntro('t'+b.dataset.tab));
+  document.getElementById('straffe').onclick = ()=>straffekonk('gange');
 }
 // Før kampen: trikset og tabellen, så han ser mønsteret og kan høre den telles opp.
 function gangeIntro(n){
@@ -2338,6 +2397,7 @@ function gangeIntro(n){
     <p class="fact" style="margin:0">${esc(g.triks)}</p>
     ${vis.map(t=>`<div class="tabell"><button class="quit" data-t="${t}">Hør ${t}-gangen</button><div class="rader">${Array.from({length:10},(_,i)=>`<span class="${(erTabell(n) ? tabBoks(t,i+1) : boks(t,i+1))>=3?'kan':''}">${t} · ${i+1} = <b>${t*(i+1)}</b></span>`).join('')}</div></div>`).join('')}
     <button class="next" id="go">Start kamp</button>
+    <button class="straffeknapp" id="straffe">⚽ Straffekonk i ${esc(g.navn)}<small>Fem straffer hver mot Gjettelaget</small></button>
     ${erTabell(n) ? `<p class="note" style="margin:0">Kan ${kanTabell(g.tab[0])} av 10. Et stykke sitter når det er riktig på første forsøk tre ganger.</p><button class="quit" id="nullstill" style="align-self:flex-start">Nullstill ${esc(g.navn)}</button>` : ''}
   </div>`;
   document.getElementById('back').onclick = gangeScreen;
@@ -2348,6 +2408,7 @@ function gangeIntro(n){
   };
   app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ const t=+b.dataset.t; speak(Array.from({length:10},(_,i)=>t*(i+1)).join(', ')); });
   document.getElementById('go').onclick = ()=>newMatch('gange', n);
+  document.getElementById('straffe').onclick = ()=>straffekonk('gange', n);
 }
 
 /* ----- Svar med tall (gangetabell) ----- */
@@ -2697,6 +2758,7 @@ function endScreen(){
   // Nytt gangesteg: minst 7 av 8 riktige på første forsøk på det høyeste åpne steget.
   const nyttSteg = S.mode==='gange' && !S.quit && S.arg===gangeSteg() && S.home>=7 && S.arg<GANGE_STEG.length-1;
   if(nyttSteg){ PROG.gangeSteg = S.arg+1; save("prog"); }
+  const nyeKort = S.mode==='gange' ? sjekkNyeKort() : [];
   app.innerHTML = `
   <div class="screen">
     <h1>${title}</h1>
@@ -2705,6 +2767,7 @@ function endScreen(){
     ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
     ${nyttNiva ? `<p class="unlock">Nytt i norsk: <b>${NIVAER[PROG.norskNiva].navn}</b></p>` : ''}
     ${nyttSteg ? `<p class="unlock">Nytt i gangetabellen: <b>${GANGE_STEG[PROG.gangeSteg].navn}</b></p>` : ''}
+    ${nyeKortHTML(nyeKort)}
     ${aapnet.length ? `<p class="unlock">Nå er det åpent: <b>${aapnet.map(k=>LASBARE[k]).join(', ')}</b></p>` : ''}
     ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
     <p style="font-size:22px;max-width:440px;margin:0">${line}</p>
@@ -2720,6 +2783,386 @@ function endScreen(){
   const arg = nyttNiva ? PROG.norskNiva : nyttSteg ? PROG.gangeSteg : S.arg;
   document.getElementById('again').onclick = ()=> mode==='lekse' ? lekseScreen() : TEKSTMODUS.includes(mode) ? tekstMeny(arg) : mode==='gange' ? gangeIntro(arg) : newMatch(mode, arg);
   document.getElementById('menu').onclick = startScreen;
+}
+
+
+/* ---------- Spillerkort-album ----------
+   Hver gangetabell er et spillerkort. Kortet blir bronse når han kan 5 av 10 stykker, sølv ved 8 og gull ved 10
+   (samme «kan»-telling som tabellknappene: riktig på første forsøk tre ganger). PROG.kortSett husker hvilke kort han
+   allerede har fått beskjed om, så et nytt kort bare feires én gang. */
+const KORT = {1:"Pelé", 2:"Messi", 3:"Ronaldo", 4:"Mbappé", 5:"Salah", 6:"Zlatan", 7:"Haaland", 8:"Ødegaard", 9:"Yamal", 10:"Ada Hegerberg"};
+const KORTNIVA = ["", "bronsekort", "sølvkort", "gullkort"];
+const kortTier = t => { const k = kanTabell(t); return k>=10 ? 3 : k>=8 ? 2 : k>=5 ? 1 : 0; };
+function albumHTML(){
+  return `<div class="album">${Object.keys(KORT).map(Number).map(t=>{ const tier = kortTier(t);
+    return `<div class="spkort t${tier}" role="img" aria-label="${esc(KORT[t])}, ${t}-gangen, ${tier ? KORTNIVA[tier] : 'ikke signert ennå'}"><span class="nr">${t}</span><span class="navn">${esc(KORT[t])}</span><span class="tab">${kanTabell(t)} av 10</span></div>`; }).join('')}</div>`;
+}
+// Gir en liste med kort som har gått opp et nivå siden sist, og husker dem.
+function sjekkNyeKort(){
+  const sett = {...(PROG.kortSett||{})}, nye = [];
+  Object.keys(KORT).map(Number).forEach(t=>{ const tier = kortTier(t); if(tier > (sett[t]||0)){ nye.push({t, tier}); sett[t] = tier; } });
+  if(nye.length){ PROG.kortSett = sett; save("prog"); }
+  return nye;
+}
+const nyeKortHTML = nye => nye.map(k=>`<p class="unlock">Nytt ${KORTNIVA[k.tier]}: <b>${esc(KORT[k.t])}</b> (${k.t}-gangen)</p>`).join('');
+
+/* ---------- Straffekonk ----------
+   En 3D-straffekonkurranse (Babylon.js) mot Gjettelaget, fem straffer hver og så avgjørelse.
+   Når han skyter, står tre svar i målet: riktig svar = mål, feil = keeperen redder.
+   Når han står i mål, redder han ved å svare riktig.
+   Gangetabell: stykkene velges med boks-systemet (de han kan minst først), og hvert svar oppdaterer boksen, +3 per riktig.
+   Les ord: appen sier ordet, han velger riktig skrevet ord blant to som ligner, +2 per riktig (teller som norsk).
+   Feil gir aldri minus. Babylon.js lastes først når straffekonken åpnes, så resten av appen er like rask. */
+let babylonLaster = null;
+function lastBabylon(){
+  if(window.BABYLON) return Promise.resolve();
+  if(!babylonLaster) babylonLaster = new Promise((ok, feil)=>{
+    const s = document.createElement('script'); s.src = "https://cdn.jsdelivr.net/npm/babylonjs@7.31.0/babylon.js";
+    s.onload = ok; s.onerror = ()=>{ babylonLaster = null; feil(); }; document.head.appendChild(s);
+  });
+  return babylonLaster;
+}
+// Ord som ligner: bytt vokal, bytt b/d, p/b osv., dobbel/enkel konsonant, eller to bokstaver som bytter plass.
+const VOK = {a:"eo", e:"ai", i:"ey", o:"åu", u:"oy", y:"iø", æ:"ae", ø:"ey", å:"oa"};
+const KONS = {b:"dp", d:"bt", p:"bq", t:"d", g:"k", k:"g", m:"n", n:"m", f:"v", v:"f", l:"r", r:"l", s:"z"};
+function lignendeOrd(w){
+  const ut = new Set(), L = [...w];
+  L.forEach((c,i)=>{ (VOK[c]||"").split('').forEach(v=>v && ut.add(w.slice(0,i)+v+w.slice(i+1))); });
+  L.forEach((c,i)=>{ (KONS[c]||"").split('').forEach(v=>v && v!=='q' && v!=='z' && ut.add(w.slice(0,i)+v+w.slice(i+1))); });
+  const dobbel = w.match(/([bdfgklmnprst])\1/);
+  if(dobbel) ut.add(w.replace(dobbel[0], dobbel[1]));
+  else { const m = w.match(/[aeiouyæøå]([bdfgklmnprst])$/); if(m) ut.add(w + m[1]); }
+  for(let i=1;i<L.length-1;i++){ if(!VOK[L[i]] || !VOK[L[i+1]]){ const a=[...L]; [a[i],a[i+1]]=[a[i+1],a[i]]; ut.add(a.join('')); } }
+  ut.delete(w);
+  return shuffle([...ut]).filter(x=>x.length>1);
+}
+// Fotballord med håndplukkede lure alternativer, pluss ordene fra norsk-nivåene han har åpnet.
+const STRAFFE_ORD = [["ball","bal","pall"],["mål","mel","mor"],["sko","ski","sky"],["katt","kat","kart"],["gutt","gul","kutt"],
+  ["sol","sal","sel"],["lag","lak","lav"],["fot","fet","for"],["spiss","spill","spis"],["kamp","kam","lamp"],
+  ["hopp","hop","topp"],["løp","løk","lør"],["vant","vann","vent"],["skudd","skum","skutt"],["keeper","kipper","kepper"],
+  ["hode","hage","hule"],["trener","tre","trenger"],["drakt","drikk","dratt"],["dommer","domer","sommer"],["spark","spak","sparke"]];
+function straffeOrdListe(){
+  const egne = NIVAER.slice(0, norskNiva()+1).filter(l=>!l.alle).flatMap(l=>l.ord).map(w=>w.replace(/-/g,'').toLowerCase())
+    .filter(w=>w.length>=2 && w.length<=7);
+  const fra = egne.map(w=>{ const l = lignendeOrd(w); return l.length>=2 ? [w, l[0], l[1]] : null; }).filter(Boolean);
+  const kjente = new Set(STRAFFE_ORD.map(o=>o[0]));
+  return shuffle([...STRAFFE_ORD, ...fra.filter(o=>!kjente.has(o[0]))]);
+}
+// Gangestykker: de han kan minst først, og ingen stykker to ganger før alle er brukt.
+function straffeGangeListe(n){
+  const etterBoks = list => shuffle(list).sort((x,y)=>x[2]-y[2]);
+  let fakta;
+  if(erTabell(n)){ const t = +n.slice(1); fakta = Array.from({length:10},(_,i)=>[t, i+1, tabBoks(t,i+1), t]); }
+  else fakta = stegFakta(n).map(([a,b])=>[a, b, boks(a,b), null]);
+  return etterBoks(fakta);
+}
+function gangeAlternativer(x, y){
+  const a = x*y;
+  const kand = shuffle([...new Set([x*(y+1), x*(y-1), (x+1)*y, (x-1)*y, a+1, a-1, a+2, a+10, a-10, a-2])].filter(v=>v>0 && v!==a));
+  return shuffle([String(a), String(kand[0]), String(kand[1])]);
+}
+
+async function straffekonk(kind, arg){
+  token++; screen = "match"; keyHandler = null;
+  const div = document.createElement('div'); div.className = 'straffe';
+  div.innerHTML = `<canvas id="st-c" aria-label="Fotballstadion med mål og keeper"></canvas><div class="st-laster" id="st-laster">Gjør klar stadion …</div>`;
+  document.body.appendChild(div);
+  const lukk = (tilbake)=>{ try{ if(div._engine) div._engine.dispose(); }catch(e){} div.remove(); try{ speechSynthesis.cancel(); }catch(e){} tilbake(); };
+  const tilbake = ()=> kind==='ord' ? norskScreen() : (arg===undefined ? gangeScreen() : gangeIntro(arg));
+  try{ await lastBabylon(); }
+  catch(e){ div.querySelector('#st-laster').innerHTML = `<div>Fant ikke stadion. Sjekk nettet og prøv igjen.<br><br><button class="next" id="st-ut">Tilbake</button></div>`;
+    div.querySelector('#st-ut').onclick = ()=>lukk(tilbake); return; }
+  if(!document.body.contains(div)) return;
+  try{ byggStraffe(div, kind, arg, ()=>lukk(tilbake)); }
+  catch(e){ div.querySelector('#st-laster').innerHTML = `<div>Denne enheten klarte ikke å vise 3D.<br><br><button class="next" id="st-ut">Tilbake</button></div>`;
+    div.querySelector('#st-ut').onclick = ()=>lukk(tilbake); }
+}
+
+function byggStraffe(div, kind, arg, avslutt){
+  const B = window.BABYLON, $ = id => div.querySelector('#'+id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = $('st-c');
+  const engine = new B.Engine(canvas, true, {stencil:true, adaptToDeviceRatio:true}); div._engine = engine;
+  const scene = new B.Scene(engine);
+  scene.clearColor = new B.Color4(0.03,0.06,0.08,1);
+  const V = (x,y,z) => new B.Vector3(x,y,z), C = h => B.Color3.FromHexString(h);
+  const mat = (name, hex, emis) => { const m = new B.StandardMaterial(name, scene); m.diffuseColor=C(hex); m.specularColor=new B.Color3(.08,.08,.08); if(emis) m.emissiveColor=C(emis); return m; };
+
+  const cam = new B.UniversalCamera('cam', V(0,1.7,-17), scene); cam.minZ=.05; cam.inputs.clear();
+  const camTarget = V(0,1.1,0); cam.setTarget(camTarget);
+  const fitCam = () => { const p = engine.getRenderWidth() < engine.getRenderHeight(); cam.fovMode = p ? B.Camera.FOVMODE_HORIZONTAL_FIXED : B.Camera.FOVMODE_VERTICAL_FIXED; cam.fov = p ? 1.05 : .85; return p; };
+  fitCam();
+  const hemi = new B.HemisphericLight('h', V(0,1,0), scene); hemi.intensity=.7; hemi.groundColor=new B.Color3(.18,.22,.2);
+  const sun = new B.DirectionalLight('d', V(-.35,-1,.45), scene); sun.position=V(12,25,-25); sun.intensity=.85;
+  const shadows = new B.ShadowGenerator(1024, sun); shadows.useBlurExponentialShadowMap=true; shadows.blurKernel=16;
+  const glow = new B.GlowLayer('glow', scene); glow.intensity=.3;
+
+  // Bane
+  const ground = B.MeshBuilder.CreateGround('g',{width:70,height:70},scene); ground.position.z=-12; ground.receiveShadows=true;
+  { const dt = new B.DynamicTexture('gt',{width:512,height:512},scene), x=dt.getContext();
+    for(let i=0;i<14;i++){ x.fillStyle = i%2 ? '#2f8f3e' : '#37a148'; x.fillRect(0,i*512/14,512,512/14+1); }
+    for(let i=0;i<3000;i++){ x.fillStyle=`rgba(0,0,0,${Math.random()*.06})`; x.fillRect(Math.random()*512,Math.random()*512,2,2); }
+    dt.update(); const gm = mat('gm','#ffffff'); gm.diffuseTexture=dt; gm.specularColor=new B.Color3(0,0,0); ground.material=gm; }
+  const white = mat('white','#ffffff','#9a9a9a');
+  const line = (x,z,w,d) => { const b=B.MeshBuilder.CreateBox('l',{width:w,height:.012,depth:d},scene); b.position.set(x,.006,z); b.material=white; };
+  line(0,0,70,.12); line(0,-5.5,18.32,.12); line(-9.16,-2.75,.12,5.5); line(9.16,-2.75,.12,5.5);
+  line(0,-16.5,40.32,.12); line(-20.16,-8.25,.12,16.5); line(20.16,-8.25,.12,16.5);
+  { const s=B.MeshBuilder.CreateDisc('spot',{radius:.13,tessellation:24},scene); s.rotation.x=Math.PI/2; s.position.set(0,.008,-11); s.material=white; }
+
+  // Mål og nett
+  const postMat = mat('post','#ffffff','#8a8a8a');
+  for(const x of [-3.66,3.66]){ const p=B.MeshBuilder.CreateCylinder('p',{diameter:.12,height:2.44},scene); p.position.set(x,1.22,0); p.material=postMat; shadows.addShadowCaster(p); glow.addExcludedMesh(p); }
+  { const bar=B.MeshBuilder.CreateCylinder('bar',{diameter:.12,height:7.44},scene); bar.rotation.z=Math.PI/2; bar.position.set(0,2.44,0); bar.material=postMat; shadows.addShadowCaster(bar); glow.addExcludedMesh(bar); }
+  const netMat = (u,v) => { const t = new B.DynamicTexture('nt',{width:256,height:256},scene); t.hasAlpha=true; const x=t.getContext();
+    x.clearRect(0,0,256,256); x.strokeStyle='rgba(255,255,255,.75)'; x.lineWidth=3;
+    for(let i=0;i<=256;i+=32){ x.beginPath(); x.moveTo(i,0); x.lineTo(i,256); x.stroke(); x.beginPath(); x.moveTo(0,i); x.lineTo(256,i); x.stroke(); }
+    t.update(); t.uScale=u; t.vScale=v; t.wrapU=t.wrapV=B.Texture.WRAP_ADDRESSMODE;
+    const m=new B.StandardMaterial('nm',scene); m.diffuseTexture=t; m.emissiveColor=new B.Color3(.35,.35,.35); m.useAlphaFromDiffuseTexture=true; m.backFaceCulling=false; m.specularColor=new B.Color3(0,0,0); return m; };
+  const netBack = B.MeshBuilder.CreatePlane('nb',{width:7.32,height:2.44},scene); netBack.position.set(0,1.22,1.9); netBack.material=netMat(14,5);
+  const netTop = B.MeshBuilder.CreatePlane('ntop',{width:7.32,height:1.9},scene); netTop.rotation.x=Math.PI/2; netTop.position.set(0,2.44,.95); netTop.material=netMat(14,4);
+  const nets=[netBack,netTop];
+  for(const s of [-1,1]){ const n=B.MeshBuilder.CreatePlane('ns',{width:1.9,height:2.44},scene); n.rotation.y=Math.PI/2; n.position.set(s*3.66,1.22,.95); n.material=netMat(4,5); nets.push(n); }
+
+  // Tribuner, publikum og lyskastere
+  const crowdTex = w => { const dt=new B.DynamicTexture('ct',{width:1024,height:256},scene), x=dt.getContext();
+    x.fillStyle='#14231c'; x.fillRect(0,0,1024,256);
+    const cols=['#ffd23f','#ffb3ad','#7fd3ff','#ffffff','#a8f0a0','#ffb3ec','#2b4a3b','#2b4a3b'];
+    for(let r=0;r<16;r++) for(let c=0;c<96;c++){ x.fillStyle=cols[Math.random()*cols.length|0]; x.beginPath(); x.arc(c*10.7+5+(r%2)*5, r*16+8, 4.2, 0, 7); x.fill(); }
+    dt.update(); dt.uScale=w/40; dt.wrapU=B.Texture.WRAP_ADDRESSMODE; return dt; };
+  const stand = (w,pos,rotY) => { const p=B.MeshBuilder.CreatePlane('st',{width:w,height:12},scene); p.position=pos; p.rotation.y=rotY;
+    const m=new B.StandardMaterial('sm',scene); m.diffuseTexture=crowdTex(w); m.emissiveColor=new B.Color3(.22,.24,.22); m.specularColor=new B.Color3(0,0,0); m.backFaceCulling=false; p.material=m; };
+  stand(80,V(0,6,14),0); stand(80,V(0,6,-40),Math.PI); stand(70,V(-32,6,-12),-Math.PI/2); stand(70,V(32,6,-12),Math.PI/2);
+  for(const [x,z] of [[-26,10],[26,10],[-26,-36],[26,-36]]){
+    const m=B.MeshBuilder.CreateBox('fl',{width:3,height:1.2,depth:.3},scene); m.position.set(x,17,z); m.lookAt(V(0,0,-8)); m.material=mat('flm','#ffffff','#fff6d0');
+    const pole=B.MeshBuilder.CreateCylinder('pole',{diameter:.4,height:17},scene); pole.position.set(x,8.5,z); pole.material=mat('pm','#39405a'); }
+
+  // Ball
+  const ball = B.MeshBuilder.CreateSphere('ball',{diameter:.24,segments:20},scene);
+  { const dt=new B.DynamicTexture('bt',{width:256,height:128},scene), x=dt.getContext(); x.fillStyle='#ffffff'; x.fillRect(0,0,256,128); x.fillStyle='#111111';
+    for(const [cx,cy] of [[32,64],[96,30],[96,98],[160,64],[224,30],[224,98],[32,4],[160,124]]){ x.beginPath(); for(let k=0;k<5;k++){ const a=k/5*Math.PI*2-Math.PI/2; x.lineTo(cx+13*Math.cos(a), cy+13*Math.sin(a)); } x.fill(); }
+    dt.update(); const m=mat('bm','#ffffff','#222222'); m.diffuseTexture=dt; ball.material=m; }
+  shadows.addShadowCaster(ball);
+  const SPOT = V(0,.12,-11); ball.position.copyFrom(SPOT);
+
+  // Spillere
+  const player = (name, shirt, shorts) => {
+    const root = new B.TransformNode(name, scene), sm = mat(name+'s', shirt), skin = mat(name+'k','#f1c9a5'), sh = mat(name+'h', shorts);
+    const body = B.MeshBuilder.CreateCapsule(name+'b',{radius:.24,height:.95},scene); body.position.y=1.12; body.material=sm; body.parent=root;
+    const hips = B.MeshBuilder.CreateCapsule(name+'hp',{radius:.22,height:.5},scene); hips.position.y=.72; hips.material=sh; hips.parent=root;
+    const head = B.MeshBuilder.CreateSphere(name+'he',{diameter:.3},scene); head.position.y=1.78; head.material=skin; head.parent=root;
+    const arms=[]; for(const s of [-1,1]){ const a=B.MeshBuilder.CreateCapsule(name+'a',{radius:.08,height:.75},scene); a.position.set(s*.36,1.2,0); a.rotation.z=s*.5; a.material=sm; a.parent=root; arms.push(a); }
+    for(const s of [-1,1]){ const l=B.MeshBuilder.CreateCapsule(name+'l',{radius:.09,height:.75},scene); l.position.set(s*.12,.36,0); l.material=sh; l.parent=root; }
+    root.getChildMeshes().forEach(m=>shadows.addShadowCaster(m));
+    return {root, shirtMat:sm, arms};
+  };
+  const keeper = player('keeper','#ffb3ad','#10221a'); keeper.root.position.set(0,0,.25);
+  const shooter = player('shooter','#ffb3ad','#ffffff'); shooter.root.position.set(.7,0,-12.4); shooter.root.rotation.y=-.3; shooter.root.setEnabled(false);
+  const keeperArms = up => keeper.arms.forEach((a,i)=>{ const s=i?1:-1; a.rotation.z = s*(up?2.4:.5); a.position.y = up?1.5:1.2; });
+
+  // Sikteskiver i målet
+  const TARGETS = [V(-2.55,1.25,.6), V(0,1.95,.6), V(2.55,1.25,.6)];
+  const plates = TARGETS.map((p,i)=>{
+    const pl = B.MeshBuilder.CreatePlane('plate'+i,{width:1.55,height:.95},scene); pl.position.copyFrom(p);
+    const dt = new B.DynamicTexture('pt'+i,{width:256,height:160},scene); dt.hasAlpha=true;
+    const m = new B.StandardMaterial('pm'+i,scene); m.diffuseTexture=dt; m.emissiveTexture=dt; m.diffuseColor=new B.Color3(0,0,0); m.useAlphaFromDiffuseTexture=true; m.disableLighting=true; m.backFaceCulling=false;
+    pl.material=m; pl.metadata={i, dt}; glow.addExcludedMesh(pl); pl.setEnabled(false); return pl; });
+  const drawPlate = (pl, text, state) => {
+    const dt=pl.metadata.dt, x=dt.getContext(); x.clearRect(0,0,256,160);
+    x.fillStyle = state==='right' ? 'rgba(159,240,180,.97)' : state==='wrong' ? 'rgba(255,179,173,.97)' : 'rgba(255,210,63,.94)';
+    const r=26; x.beginPath(); x.moveTo(r,6); x.arcTo(250,6,250,154,r); x.arcTo(250,154,6,154,r); x.arcTo(6,154,6,6,r); x.arcTo(6,6,250,6,r); x.fill();
+    x.fillStyle='#10221a'; const fs = text.length>6 ? 52 : text.length>4 ? 66 : 92;
+    x.font = kind==='ord' ? `700 ${fs}px Andika, "Trebuchet MS", sans-serif` : `${fs}px "Lilita One", "Arial Rounded MT Bold", sans-serif`;
+    x.textAlign='center'; x.textBaseline='middle'; x.fillText(text,128,84); dt.update(); };
+  const showPlates = on => plates.forEach(p=>p.setEnabled(on));
+
+  // Konfetti
+  const confetti = new B.ParticleSystem('conf', 600, scene);
+  { const dt=new B.DynamicTexture('cf',{width:32,height:32},scene); dt.hasAlpha=true; const x=dt.getContext(); x.fillStyle='#fff'; x.fillRect(6,10,20,12); dt.update(); confetti.particleTexture=dt; }
+  confetti.emitter = V(0,2.6,.8); confetti.minEmitBox=V(-3.5,0,0); confetti.maxEmitBox=V(3.5,0,0);
+  confetti.color1=new B.Color4(1,.82,.25,1); confetti.color2=new B.Color4(.5,.85,1,1); confetti.colorDead=new B.Color4(1,.4,.7,0);
+  confetti.minSize=.08; confetti.maxSize=.16; confetti.minLifeTime=1.2; confetti.maxLifeTime=2.4; confetti.emitRate=0;
+  confetti.gravity=V(0,-3,0); confetti.direction1=V(-2,4,-3); confetti.direction2=V(2,7,-1); confetti.minAngularSpeed=-6; confetti.maxAngularSpeed=6;
+  confetti.blendMode=B.ParticleSystem.BLENDMODE_STANDARD; confetti.start();
+  const burst = () => { if(!reduce) confetti.manualEmitCount = 350; };
+
+  engine.runRenderLoop(()=>scene.render());
+  const onResize = ()=>{ engine.resize(); fitCam(); };
+  addEventListener('resize', onResize);
+  engine.onDisposeObservable.add(()=>removeEventListener('resize', onResize));
+
+  // Animasjon
+  const ease = k => 1-Math.pow(1-k,3);
+  const tween = (dur, fn) => new Promise(res=>{ let t=0; const o=scene.onBeforeRenderObservable.add(()=>{ t+=engine.getDeltaTime()/1000; const k=Math.min(1,t/dur); fn(k); if(k>=1){ scene.onBeforeRenderObservable.remove(o); res(); } }); engine.onDisposeObservable.add(()=>res()); });
+  const wait = ms => new Promise(r=>setTimeout(r,ms));
+  const flyBall = (from, to, dur, arc) => tween(dur, k=>{ B.Vector3.LerpToRef(from,to,k,ball.position); ball.position.y += 4*arc*k*(1-k); ball.rotation.x += .35; ball.rotation.y += .12; });
+  const moveCam = (pos, target, dur) => { const p0=cam.position.clone(), t0=camTarget.clone();
+    return tween(dur, k=>{ const e=ease(k); B.Vector3.LerpToRef(p0,pos,e,cam.position); B.Vector3.LerpToRef(t0,target,e,camTarget); cam.setTarget(camTarget); }); };
+  const dive = (side, dur) => { const r=keeper.root; return tween(dur, k=>{ const e=ease(k);
+    if(side===0){ r.position.x=0; r.position.y=.55*Math.sin(Math.PI*Math.min(1,k*1.2)); r.rotation.z=0; }
+    else { r.position.x=side*1.9*e; r.position.y=.35*Math.sin(Math.PI*k); r.rotation.z=-side*1.25*e; } }); };
+  const resetKeeper = () => { keeper.root.position.set(0,0,.25); keeper.root.rotation.z=0; };
+  const netShake = () => tween(.35, k=>{ netBack.position.z = 1.9 + .35*Math.sin(Math.PI*k); });
+  const view = shoot => { const p = fitCam(); return shoot ? {pos:V(0,1.55,-15.2), target:V(0, p ? -.6 : 1.0, 0)} : {pos:V(0,3.1,6.2), target:V(0, p ? -1.0 : .4, -11)}; };
+
+  // Lyd (bruker appens lydsystem)
+  const kick = () => { audioUnlock(); if(!actx) return; const t=actx.currentTime, o=actx.createOscillator(), g=actx.createGain();
+    o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(45,t+.15); g.gain.setValueAtTime(.8,t); g.gain.exponentialRampToValueAtTime(.001,t+.2); o.connect(g).connect(actx.destination); o.start(); o.stop(t+.22); };
+  const aww = () => { audioUnlock(); if(!actx) return; const t=actx.currentTime, n=actx.createBufferSource(), f=actx.createBiquadFilter(), g=actx.createGain();
+    n.buffer=noiseBuf(1.3); f.type='bandpass'; f.Q.value=.6; f.frequency.setValueAtTime(500,t); f.frequency.exponentialRampToValueAtTime(200,t+1.2);
+    g.gain.setValueAtTime(.001,t); g.gain.exponentialRampToValueAtTime(.3,t+.25); g.gain.exponentialRampToValueAtTime(.001,t+1.2); n.connect(f).connect(g).connect(actx.destination); n.start(); n.stop(t+1.3); };
+  const whistle = () => { audioUnlock(); if(!actx) return; const a=actx, o=a.createOscillator(), l=a.createOscillator(), lg=a.createGain(), g=a.createGain(), t=a.currentTime;
+    o.frequency.value=2600; l.frequency.value=28; lg.gain.value=180; l.connect(lg).connect(o.frequency);
+    g.gain.setValueAtTime(.001,t); g.gain.exponentialRampToValueAtTime(.15,t+.03); g.gain.setValueAtTime(.15,t+.55); g.gain.exponentialRampToValueAtTime(.001,t+.7);
+    o.connect(g).connect(a.destination); o.start(); l.start(); o.stop(t+.72); l.stop(t+.72); };
+
+  // Oppgaver
+  const navn = kind==='ord' ? 'Les ord' : arg===undefined ? 'Alle tabellene' : erTabell(arg) ? `${arg.slice(1)}-gangen` : GANGE_STEG[arg].navn;
+  const kilde = kind==='ord' ? straffeOrdListe() : straffeGangeListe(arg===undefined ? GANGE_STEG.length-1 : arg);
+  let kildeI = 0;
+  const nyOppgave = () => {
+    const o = kilde[kildeI++ % kilde.length];
+    if(kind==='ord') return {type:'ord', q:'Hør ordet', a:o[0], opts:shuffle(o), say:o[0]};
+    const [t,b,,tab] = o, [x,y] = Math.random()<.7 ? [t,b] : [b,t];
+    return {type:'gange', q:`${x} · ${y} = ?`, a:String(x*y), opts:gangeAlternativer(x,y), say:`Hva er ${x} ganger ${y}?`, item:{fa:x, fb:y, a:String(x*y), tab}};
+  };
+  const POENG = kind==='ord' ? 2 : 3, MODUS = kind==='ord' ? 'norsk' : 'gange';
+
+  // HUD
+  div.insertAdjacentHTML('beforeend', `
+    <div class="st-hud" id="st-hud">
+      <div class="st-top">
+        <button class="st-quit" id="st-quit">‹ Avslutt</button>
+        <div class="board"><div class="team home">Benjamin FC<div class="st-dots" id="st-du"></div></div><div class="score" id="st-score">0–0</div><div class="team away">Gjettelaget<div class="st-dots" id="st-dt"></div></div>
+          <div class="meta"><span>STRAFFEKONK · ${esc(navn.toUpperCase())}</span><span><b id="st-pts">+0</b></span></div></div>
+        <div class="st-turn" id="st-turn">DU SKYTER</div>
+      </div>
+      <div class="st-bottom">
+        <div class="st-q"><div class="st-tekst"><b id="st-qt"></b><small id="st-hint"></small></div><button class="listen" id="st-speak" aria-label="Hør oppgaven igjen">${SPEAKER}</button></div>
+        <div class="st-svar ${kind==='ord'?'ord':''}" id="st-svar"></div>
+      </div>
+    </div>
+    <div class="st-toast" id="st-toast"><b id="st-tb"></b><span id="st-ts" hidden></span></div>`);
+  $('st-laster').remove();
+
+  const G = {us:[], them:[], busy:false, cur:null, turn:'shoot', delta:0, bestBefore:PROG.best, slutt:false};
+  const goals = a => a.filter(Boolean).length;
+  const renderBoard = () => {
+    $('st-score').textContent = `${goals(G.us)}–${goals(G.them)}`;
+    const dots = arr => { let h=''; for(let i=0;i<Math.max(5,arr.length);i++) h += `<span class="st-dot ${arr[i]===true?'mal':arr[i]===false?'bom':''}"></span>`; return h; };
+    $('st-du').innerHTML = dots(G.us); $('st-dt').innerHTML = dots(G.them); $('st-pts').textContent = `+${G.delta}`;
+  };
+  const avgjort = () => {
+    const u=goals(G.us), t=goals(G.them), nu=G.us.length, nt=G.them.length;
+    if(nu<=5 && nt<=5){ if(u > t+(5-nt) || t > u+(5-nu)) return true; return nu===5 && nt===5 && u!==t; }
+    return nu===nt && (u!==t || nu>=10); // avgjørelse, men aldri mer enn 10 straffer hver
+  };
+  const toast = (big, small, ms) => { $('st-tb').textContent=big; const s=$('st-ts'); if(small){ s.textContent=small; s.hidden=false; } else s.hidden=true;
+    $('st-toast').classList.add('vis'); return wait(ms).then(()=>{ const el=$('st-toast'); if(el) el.classList.remove('vis'); }); };
+  const lesOpp = () => { if(G.cur) speak(G.cur.say); };
+  $('st-speak').onclick = lesOpp;
+  $('st-quit').onclick = () => { G.slutt = true; if(G.us.length || G.them.length) PROG.matches++; save("prog"); avslutt(); };
+
+  const nextKick = async () => {
+    if(!document.body.contains(div)) return;
+    renderBoard();
+    if(avgjort()) return finish();
+    G.turn = G.us.length===G.them.length ? 'shoot' : 'keep';
+    G.cur = nyOppgave(); G.busy = false;
+    const shoot = G.turn==='shoot';
+    ball.position.copyFrom(SPOT); ball.rotation.set(0,0,0); resetKeeper(); keeperArms(shoot);
+    keeper.shirtMat.diffuseColor = C(shoot ? '#ffb3ad' : '#7fd3ff');
+    nets.forEach(n=>n.setEnabled(shoot));
+    shooter.root.setEnabled(!shoot); shooter.root.position.set(.7,0,-12.4);
+    const sd = G.us.length>=5 && G.them.length>=5;
+    $('st-turn').textContent = (sd ? 'AVGJØRELSE · ' : '') + (shoot ? `STRAFFE ${G.us.length+1}: DU SKYTER` : `STRAFFE ${G.them.length+1}: DU STÅR I MÅL`);
+    $('st-qt').textContent = G.cur.q;
+    $('st-hint').textContent = shoot ? (kind==='ord' ? 'Skyt på ordet du hører.' : 'Trykk på svaret, så skyter du dit.') : (kind==='ord' ? 'Finn ordet du hører, så redder du.' : 'Svar riktig, så redder du.');
+    const box = $('st-svar'); box.innerHTML = '';
+    const lab = shoot ? ['Venstre','Midten','Høyre'] : ['','',''];
+    G.cur.opts.forEach((o,i)=>{ const b=document.createElement('button'); b.id='st-a'+i; b.innerHTML = `${lab[i]?`<small>${lab[i]}</small>`:''}${esc(o)}`; b.onclick=()=>answer(i); box.appendChild(b); });
+    if(shoot) G.cur.opts.forEach((o,i)=>drawPlate(plates[i],o));
+    showPlates(false);
+    const vw = view(shoot); await moveCam(vw.pos, vw.target, 1.0);
+    if(!document.body.contains(div)) return;
+    if(shoot) showPlates(true);
+    lesOpp();
+  };
+  const fasitTekst = () => kind==='ord' ? `Ordet var «${G.cur.a}».` : `${G.cur.item.fa} · ${G.cur.item.fb} = ${G.cur.a}. ${gangeHint(G.cur.item.fa, G.cur.item.fb)}`;
+  const fasitTale = () => kind==='ord' ? `Ordet var ${G.cur.a}` : `${G.cur.item.fa} ganger ${G.cur.item.fb} er ${G.cur.a}`;
+  const registrer = riktig => {
+    if(kind==='gange'){ settBoks(G.cur.item, riktig); }
+    if(riktig){ G.delta += POENG; changePts(MODUS, POENG); } else { PROG.wrong++; save("prog"); }
+  };
+  async function answer(i){
+    if(G.busy) return; G.busy = true;
+    const riktig = G.cur.opts[i]===G.cur.a, ri = G.cur.opts.indexOf(G.cur.a);
+    div.querySelectorAll('#st-svar button').forEach((b,j)=>{ b.disabled=true; if(j===ri) b.classList.add('riktig'); else if(j===i) b.classList.add('feil'); });
+    registrer(riktig);
+    if(G.turn==='shoot'){
+      plates.forEach((p,j)=>drawPlate(p, G.cur.opts[j], j===ri?'right':j===i?'wrong':null));
+      const side = [-1,0,1][i]; kick();
+      const keeperSide = riktig ? [-1,0,1].filter(s=>s!==side)[Math.random()*2|0] : side;
+      const target = TARGETS[i].clone(); target.z = .35;
+      if(riktig){
+        await Promise.all([flyBall(SPOT, target, .55, .5), wait(120).then(()=>dive(keeperSide,.5))]);
+        showPlates(false); netShake(); await flyBall(ball.position.clone(), V(target.x*.9,.12,1.6), .3, .1);
+        sfxRight(true); burst(); G.us.push(true); renderBoard();
+        await toast('MÅÅÅL!', `+${POENG} poeng`, 1500);
+      } else {
+        await Promise.all([flyBall(SPOT, V(side*1.75, side===0?1.95:1.1, .1), .55, .45), wait(80).then(()=>dive(keeperSide,.5))]);
+        showPlates(false); await flyBall(ball.position.clone(), V(side*2.5,.12,-4), .5, .9);
+        aww(); G.us.push(false); renderBoard(); speak(fasitTale());
+        await toast('Reddet!', fasitTekst(), 3400);
+      }
+    } else {
+      const side = [-1,0,1][Math.random()*3|0];
+      await tween(.45, k=>{ shooter.root.position.z = -12.4 + 1.2*k; shooter.root.position.x = .7 - .55*k; });
+      kick();
+      if(riktig){
+        await Promise.all([flyBall(SPOT, V(side*1.75, side===0?1.95:1.15, .05), .6, .45), wait(60).then(()=>dive(side,.5))]);
+        await flyBall(ball.position.clone(), V(side*1.5,.12,-1.2), .45, .5);
+        sfxRight(true); burst(); G.them.push(false); renderBoard();
+        await toast('REDNING!', `+${POENG} poeng`, 1500);
+      } else {
+        const target = V(side*2.6, side===0?1.7:1.0+Math.random()*.8, .3), feilSide = side===0 ? (Math.random()<.5?-1:1) : -side;
+        await Promise.all([flyBall(SPOT, target, .6, .45), wait(150).then(()=>dive(feilSide,.5))]);
+        netShake(); await flyBall(ball.position.clone(), V(target.x*.9,.12,1.6), .3, .1);
+        aww(); G.them.push(true); renderBoard(); speak(fasitTale());
+        await toast('Mål for Gjettelaget', fasitTekst(), 3400);
+      }
+    }
+    if(!G.slutt) nextKick();
+  }
+  function finish(){
+    G.slutt = true; whistle();
+    PROG.matches++; save("prog");
+    const u=goals(G.us), t=goals(G.them);
+    const riktige = G.us.filter(x=>x===true).length + G.them.filter(x=>x===false).length, alle = G.us.length + G.them.length;
+    const unlocked = sortedPrizes().filter(p=>G.bestBefore < p.at && PROG.best >= p.at);
+    const lvlUp = levelOf(PROG.best) > levelOf(G.bestBefore);
+    const nye = kind==='gange' ? sjekkNyeKort() : [];
+    const tittel = u>t ? 'Du vant straffekonken!' : u===t ? 'Uavgjort!' : 'Gjettelaget vant denne gangen';
+    $('st-hud').hidden = true;
+    div.insertAdjacentHTML('beforeend', `<div class="st-slutt"><div class="kort">
+      <h1>${tittel}</h1>
+      <div class="score">${u}–${t}</div>
+      <p class="delta plus">+${G.delta} poeng</p>
+      <p>Du hadde ${riktige} av ${alle} riktige.</p>
+      ${lvlUp ? `<p class="unlock">Nytt nivå: <b>${LEVELS[levelOf(PROG.best)][1]}</b></p>` : ''}
+      ${nyeKortHTML(nye)}
+      ${unlocked.map(p=>`<p class="unlock">Premie låst opp: <b>${esc(p.text)}</b></p>`).join('')}
+      <button class="next" id="st-igjen">Ny straffekonk</button>
+      <button class="quit" id="st-ferdig">Ferdig</button>
+    </div></div>`);
+    if(u>t) burst();
+    speak(tittel);
+    $('st-igjen').onclick = () => { try{ engine.dispose(); }catch(e){} div.remove(); straffekonk(kind, arg); };
+    $('st-ferdig').onclick = avslutt;
+    if(unlocked.length) setTimeout(checkCelebrate, 600);
+  }
+  // Klikk direkte på sikteskivene
+  scene.onPointerDown = () => { if(G.turn!=='shoot' || G.busy) return; const p = scene.pick(scene.pointerX, scene.pointerY, m=>m.name.startsWith('plate') && m.isEnabled()); if(p && p.hit) answer(p.pickedMesh.metadata.i); };
+  nextKick();
 }
 
 startScreen();
