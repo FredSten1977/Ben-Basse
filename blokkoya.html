@@ -234,7 +234,9 @@ try{await Promise.race([document.fonts.load('700 80px Fredoka'),new Promise(r=>s
 const canvas=$('#c');
 const COARSE=matchMedia('(pointer:coarse)').matches;
 const engine=new BABYLON.Engine(canvas,true,{stencil:true,antialias:true},true);
-engine.setHardwareScalingLevel(1/Math.min(window.devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1.5:2));
+const LITE=matchMedia('(pointer:coarse)').matches; // nettbrett/telefon: lettere grafikk
+let resK=Math.min(window.devicePixelRatio||1,LITE?1.25:2);const resMax=resK;
+engine.setHardwareScalingLevel(1/resK);
 const scene=new BABYLON.Scene(engine);
 scene.clearColor=C4('#DDF0FF');
 scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0065;scene.fogColor=C('#DDEFFF');
@@ -256,8 +258,8 @@ hemi.intensity=.5;hemi.diffuse=C('#EAF4FF');hemi.groundColor=C('#9C8C80');hemi.s
 const sun=new BABYLON.DirectionalLight('sun',V3(.38,-1,.62).normalize(),scene);
 sun.intensity=1.25;sun.diffuse=C('#FFF0D8');sun.specular=C('#FFF0D8');
 sun.autoUpdateExtends=false;sun.orthoLeft=-32;sun.orthoRight=32;sun.orthoTop=32;sun.orthoBottom=-32;sun.shadowMinZ=1;sun.shadowMaxZ=140;
-const sg=new BABYLON.ShadowGenerator(2048,sun);
-sg.usePercentageCloserFiltering=true;sg.filteringQuality=BABYLON.ShadowGenerator.QUALITY_MEDIUM;
+const sg=new BABYLON.ShadowGenerator(LITE?1024:2048,sun);
+sg.usePercentageCloserFiltering=true;sg.filteringQuality=LITE?BABYLON.ShadowGenerator.QUALITY_LOW:BABYLON.ShadowGenerator.QUALITY_MEDIUM;
 sg.bias=.0012;sg.normalBias=.02;sg.setDarkness(.25);
 const cast=m=>{if(m instanceof BABYLON.AbstractMesh)sg.addShadowCaster(m,true);else m.getChildMeshes(false).forEach(c=>sg.addShadowCaster(c,false))};
 
@@ -270,16 +272,16 @@ cam.inputs.removeByType('ArcRotateCameraKeyboardMoveInput');
 
 // bildebehandling: ACES, myk bloom, vignett
 const pipe=new BABYLON.DefaultRenderingPipeline('pipe',true,scene,[cam]);
-pipe.samples=4;pipe.fxaaEnabled=true;
-pipe.bloomEnabled=true;pipe.bloomThreshold=.82;pipe.bloomWeight=.35;pipe.bloomKernel=48;pipe.bloomScale=.5;
+pipe.samples=LITE?1:4;pipe.fxaaEnabled=true;
+pipe.bloomEnabled=true;pipe.bloomThreshold=.82;pipe.bloomWeight=.35;pipe.bloomKernel=LITE?24:48;pipe.bloomScale=.5;
 pipe.imageProcessingEnabled=true;
 const ip=pipe.imageProcessing;ip.toneMappingEnabled=true;ip.toneMappingType=BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 ip.exposure=1.0;ip.contrast=1.2;ip.vignetteEnabled=true;ip.vignetteWeight=1.6;ip.vignetteColor=new BABYLON.Color4(.1,.2,.4,0);
 ip.colorCurvesEnabled=true;{const cc=new BABYLON.ColorCurves();cc.globalSaturation=22;cc.highlightsHue=40;cc.highlightsDensity=8;cc.highlightsSaturation=10;cc.shadowsHue=220;cc.shadowsDensity=12;cc.shadowsSaturation=20;ip.colorCurves=cc}
-pipe.sharpenEnabled=true;pipe.sharpen.edgeAmount=.22;
+pipe.sharpenEnabled=!LITE;pipe.sharpen.edgeAmount=.22;
 let ssao=null;
 if(!COARSE&&engine.webGLVersion>=2){try{ssao=new BABYLON.SSAO2RenderingPipeline('ssao',scene,{ssaoRatio:.6,blurRatio:.6},[cam]);ssao.radius=1.6;ssao.totalStrength=1.15;ssao.base=.12;ssao.samples=16;ssao.maxZ=140;ssao.expensiveBlur=true;ssao.minZAspect=.3}catch(e){ssao=null}}
-const glow=new BABYLON.GlowLayer('glow',scene,{mainTextureFixedSize:512,blurKernelSize:48});glow.intensity=.75;
+const glow=new BABYLON.GlowLayer('glow',scene,{mainTextureFixedSize:LITE?256:512,blurKernelSize:LITE?24:48});glow.intensity=.75;
 const glowOnly=m=>glow.addIncludedOnlyMesh(m);
 
 // ---------- himmel, sol, hav ----------
@@ -339,7 +341,7 @@ function confetti(pos){
 }
 // svevende støv i lufta
 {
-  const ps=new BABYLON.ParticleSystem('motes',300,scene);ps.particleTexture=DOT;ps.emitter=V3(0,4,0);
+  const ps=new BABYLON.ParticleSystem('motes',LITE?90:300,scene);ps.particleTexture=DOT;ps.emitter=V3(0,4,0);
   ps.minEmitBox=V3(-70,-6,-40);ps.maxEmitBox=V3(70,10,50);ps.color1=C4('#FFFFFF',.55);ps.color2=C4('#FFF2B8',.4);ps.colorDead=C4('#FFFFFF',0);
   ps.minSize=.06;ps.maxSize=.16;ps.minLifeTime=6;ps.maxLifeTime=10;ps.emitRate=30;ps.direction1=V3(-.2,.15,-.2);ps.direction2=V3(.2,.4,.2);ps.minEmitPower=.2;ps.maxEmitPower=.5;
   ps.blendMode=BABYLON.ParticleSystem.BLENDMODE_ADD;ps.preWarmCycles=200;ps.start();
@@ -363,7 +365,7 @@ function island(x,z,top,r,o={}){
   d.position.set(x,top-1.4-depth/2,z);d.rotation.y=g.rotation.y+.2;d.material=mat(o.dirt||'#C58D5C');
   const tip=flat(BABYLON.MeshBuilder.CreateCylinder('tip',{height:depth*.5,diameterTop:r*.55,diameterBottom:0,tessellation:7},scene));
   tip.position.set(x,top-1.4-depth-depth*.25,z);tip.material=mat(o.stone||'#9A8676');
-  [g,lip,d].forEach(cast);
+  [g,lip,d].forEach(cast);[g,lip,d,tip].forEach(m=>m.freezeWorldMatrix());
   return solidCyl(x,z,r,top,top-1.4-depth,{cp:o.cp?V3(x+(o.cpx||0),top,z+(o.cpz||0)):null,name:o.name});
 }
 const foliage=[];
@@ -381,19 +383,20 @@ function tree(x,z,base,s=1,kind='round'){
   }
   cast(n);solidCyl(x,z,.42*s,base+4*s,base-.1);return n;
 }
-function rock(x,z,base,s=1){const m=BABYLON.MeshBuilder.CreateIcoSphere('rock',{radius:.6*s,subdivisions:1,flat:true},scene);m.position.set(x,base+.2*s,z);m.scaling.y=.6;m.rotation.set(rnd(),rnd(),rnd());m.material=mat(rnd()<.5?'#B3BAC4':'#A1A9B5');cast(m);if(s>1.2)solidCyl(x,z,.55*s,base+.45*s,base-1);return m}
+function rock(x,z,base,s=1){const m=BABYLON.MeshBuilder.CreateIcoSphere('rock',{radius:.6*s,subdivisions:1,flat:true},scene);m.position.set(x,base+.2*s,z);m.scaling.y=.6;m.rotation.set(rnd(),rnd(),rnd());m.material=mat(rnd()<.5?'#B3BAC4':'#A1A9B5');cast(m);m.freezeWorldMatrix();if(s>1.2)solidCyl(x,z,.55*s,base+.45*s,base-1);return m}
 const flowerBase={};
 function flowers(cx,cz,base,r,n){
   const cols=['#FF6B8A','#FFD84D','#FFFFFF','#B48CFF','#FF9F45'];
   cols.forEach(c=>{if(!flowerBase[c]){const m=BABYLON.MeshBuilder.CreateIcoSphere('fl',{radius:.13,subdivisions:1,flat:true},scene);m.material=mat(c,{em:'#222222'});m.isVisible=false;flowerBase[c]=m}});
   if(!flowerBase.g){const m=BABYLON.MeshBuilder.CreateCylinder('tuft',{height:.35,diameterTop:0,diameterBottom:.22,tessellation:4},scene);m.material=mat('#4FAF45');m.isVisible=false;flowerBase.g=m}
   for(let i=0;i<n;i++){const a=rnd()*6.28,d=Math.sqrt(rnd())*r;const x=cx+Math.cos(a)*d,z=cz+Math.sin(a)*d;
-    const g=flowerBase.g.createInstance('t');g.position.set(x,base+.17,z);g.rotation.y=rnd()*3;
-    if(rnd()<.55){const f=flowerBase[cols[Math.floor(rnd()*cols.length)]].createInstance('f');f.position.set(x+.08,base+.36,z)}}
+    const g=flowerBase.g.createInstance('t');g.position.set(x,base+.17,z);g.rotation.y=rnd()*3;g.freezeWorldMatrix();g.isPickable=false;
+    if(rnd()<.55){const f=flowerBase[cols[Math.floor(rnd()*cols.length)]].createInstance('f');f.position.set(x+.08,base+.36,z);f.freezeWorldMatrix();f.isPickable=false}}
 }
 function cloud(x,y,z,s){
   const n=new BABYLON.TransformNode('cloud',scene);n.position.set(x,y,z);n.scaling.setAll(s);
   [[0,0,0,1.6],[1.5,-.2,.2,1.15],[-1.4,-.25,-.1,1.1],[.5,.6,-.2,1.05],[-.6,.45,.3,.9]].forEach(([a,b,c,r])=>{const m=BABYLON.MeshBuilder.CreateIcoSphere('cl',{radius:r,subdivisions:2,flat:true},scene);m.parent=n;m.position.set(a,b,c);m.scaling.y=.75;m.material=mat('#FFFFFF',{em:'#B9C9DD'})});
+  const parts=n.getChildMeshes();const one=BABYLON.Mesh.MergeMeshes(parts,true,true);if(one){one.name='cl';one.parent=null;one.setParent(n)}
   return n;
 }
 // tekst-skilt i tre
@@ -1224,7 +1227,7 @@ function waterfall(cx,cz,top,r,ang){
   const ps=new BABYLON.ParticleSystem('fall',500,scene);ps.particleTexture=DOT;ps.emitter=V3(ex,top-.05,ez);
   ps.minEmitBox=V3(-.45*Math.abs(uz)-.05,0,-.45*Math.abs(ux)-.05);ps.maxEmitBox=V3(.45*Math.abs(uz)+.05,0,.45*Math.abs(ux)+.05);
   ps.direction1=V3(ux*1.2,-.2,uz*1.2);ps.direction2=V3(ux*2,.2,uz*2);ps.minEmitPower=1.2;ps.maxEmitPower=1.8;ps.gravity=V3(0,-16,0);
-  ps.color1=C4('#F2FBFF',.95);ps.color2=C4('#A6E4FF',.85);ps.colorDead=C4('#FFFFFF',0);ps.minSize=.35;ps.maxSize=.8;ps.minLifeTime=1.1;ps.maxLifeTime=1.7;ps.emitRate=220;
+  ps.color1=C4('#F2FBFF',.95);ps.color2=C4('#A6E4FF',.85);ps.colorDead=C4('#FFFFFF',0);ps.minSize=.35;ps.maxSize=.8;ps.minLifeTime=1.1;ps.maxLifeTime=1.7;ps.emitRate=LITE?110:220;
   ps.addSizeGradient(0,.6);ps.addSizeGradient(1,1.8);ps.start();
   const mist=new BABYLON.ParticleSystem('mist',80,scene);mist.particleTexture=DOT;mist.emitter=V3(ex+ux*.6,top-.6,ez+uz*.6);mist.minEmitBox=V3(-.6,-.3,-.6);mist.maxEmitBox=V3(.6,.3,.6);
   mist.color1=C4('#FFFFFF',.35);mist.color2=C4('#E6F7FF',.25);mist.colorDead=C4('#FFFFFF',0);mist.minSize=.8;mist.maxSize=1.6;mist.minLifeTime=1;mist.maxLifeTime=2;mist.emitRate=18;mist.direction1=V3(-.3,.1,-.3);mist.direction2=V3(.3,.4,.3);mist.minEmitPower=.2;mist.maxEmitPower=.5;mist.gravity=V3(0,-.5,0);mist.start();
@@ -1249,7 +1252,24 @@ const dust=new BABYLON.ParticleSystem('dust',120,scene);dust.particleTexture=DOT
 dust.color1=C4('#FFFFFF',.7);dust.color2=C4('#EFE6D8',.6);dust.colorDead=C4('#FFFFFF',0);dust.minSize=.25;dust.maxSize=.5;dust.minLifeTime=.35;dust.maxLifeTime=.6;dust.emitRate=0;
 dust.direction1=V3(-.4,.6,-.4);dust.direction2=V3(.4,1.2,.4);dust.minEmitPower=.4;dust.maxEmitPower=1;dust.gravity=V3(0,-1,0);dust.addSizeGradient(0,.5);dust.addSizeGradient(1,1.4);dust.start();
 
-scene.meshes.forEach(m=>{if(!['sky','sunP','water'].includes(m.name)&&!m.name.startsWith('card')&&m.name!=='face')m.receiveShadows=true});
+// Slå sammen ting som aldri flytter seg (øyer, stammer, steiner) til én mesh per materiale: færre tegnekall.
+const shadowKeep=[];
+{const STATIC=new Set(['grass','lip','dirt','tip','trunk','rock','pt','fern']);const groups=new Map();
+  for(const m of scene.meshes.slice()){if(!STATIC.has(m.name)||!m.material||!m.isEnabled()||m.getClassName()!=='Mesh'||m.visibility<1)continue;
+    const k=m.material.uniqueId+(m.name==='tip'?'t':'');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(m)}
+  const rl=sg.getShadowMap().renderList;
+  for(const list of groups.values()){if(list.length<2)continue;const cast_=list.some(m=>rl.includes(m));list.forEach(m=>m.computeWorldMatrix(true));
+    const one=BABYLON.Mesh.MergeMeshes(list,true,true);if(!one)continue;one.name='static';one.freezeWorldMatrix();if(cast_)shadowKeep.push(one)}}
+scene.meshes.forEach(m=>{if(!['sky','sunP','water'].includes(m.name)&&!m.name.startsWith('card')&&m.name!=='face')m.receiveShadows=true;m.isPickable=false});
+scene.skipPointerDownPicking=true;scene.skipPointerUpPicking=true;scene.skipPointerMovePicking=true;
+// Skyggekart: tegn bare kastere som er nær kameraet (sola følger spilleren, så de fjerne gir ingen synlig skygge).
+const shadowAll=sg.getShadowMap().renderList.filter(m=>!m.isDisposed());let shadowT=0;
+function updateShadowList(force){const t=cam.target,rl=sg.getShadowMap().renderList;rl.length=0;rl.push(...shadowKeep);
+  for(const m of shadowAll){if(m.isDisposed())continue;const c=m.getBoundingInfo().boundingSphere.centerWorld;if(Math.abs(c.x-t.x)<30&&Math.abs(c.z-t.z)<30)rl.push(m)}}
+scene.onBeforeRenderObservable.add(()=>{shadowT-=engine.getDeltaTime()/1000;if(shadowT<=0){shadowT=.4;updateShadowList()}});
+// Dynamisk oppløsning: senk hvis det går tregt, øk igjen når det går fint.
+let fpsT=0;scene.onAfterRenderObservable.add(()=>{fpsT+=engine.getDeltaTime()/1000;if(fpsT<2)return;fpsT=0;const f=engine.getFps();
+  if(f<40&&resK>.8){resK=Math.max(.8,resK-.15);engine.setHardwareScalingLevel(1/resK)}else if(f>57&&resK<resMax){resK=Math.min(resMax,resK+.1);engine.setHardwareScalingLevel(1/resK)}});
 
 {const skip=new Set(['waterM','skyM','sdm','sunM','streamM']);
   scene.materials.forEach(m=>{if(!(m instanceof BABYLON.StandardMaterial)||m.disableLighting||skip.has(m.name)||m.alpha<1)return;
@@ -1748,7 +1768,7 @@ document.querySelectorAll('.kid').forEach(b=>{b.setAttribute('aria-pressed',b.da
 $('#goBtn').addEventListener('click',()=>{initAudio();try{speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch(e){}
   $('#start').hidden=true;started=true;cam.alpha=-Math.PI/2;cam.beta=1.1;cam.radius=14;canvas.focus();
   toast('Blokkøya!','Velg en vei');sfx.fanfare();say('Hei '+(save.kid==='bastian'?'Bastian':'Benjamin')+'! Velkommen til Blokkøya. Gå til Ordskogen eller Vikingbyen.')});
-window.__blokk={dtMax:v=>DT_MAX=v,player,stations,chests,coins,setStarted:v=>started=v,teleport:(x,y,z)=>{player.pos.set(x,y,z);player.vel.set(0,0,0);player.vy=0;snapCam()},cam,save,openShop,closeShop,addXP,WORLDS,equip,giveCrystal,openChest,unlockWorld};
+window.__blokk={dtMax:v=>DT_MAX=v,player,stations,chests,coins,setStarted:v=>started=v,teleport:(x,y,z)=>{player.pos.set(x,y,z);player.vel.set(0,0,0);player.vy=0;snapCam()},cam,scene,engine,sg,glow,pipe,save,openShop,closeShop,addXP,WORLDS,equip,giveCrystal,openChest,unlockWorld};
 })();
 </script>
 
