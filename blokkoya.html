@@ -29,7 +29,11 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 .pill{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;
   box-shadow:0 4px 0 rgba(30,42,74,.18),0 10px 24px rgba(30,42,74,.14);padding:8px 16px;font-weight:700;font-size:22px;display:flex;align-items:center;gap:8px}
 #stars .n{font-variant-numeric:tabular-nums;min-width:1.6em}
-#stars.bump{animation:bump .45s cubic-bezier(.3,1.8,.5,1)}
+#gems .of{font-size:15px;color:var(--ink-soft);margin-left:-4px}
+.lft{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}.lft .row{display:flex;gap:8px}
+.goal{border:0;font-size:17px;font-weight:600;padding:8px 14px;max-width:min(330px,calc(100vw - 150px));text-align:left;line-height:1.2;cursor:pointer}.goal .spk{font-size:15px;opacity:.7}
+.goal.pop{animation:bump .5s cubic-bezier(.3,1.8,.5,1)}
+#gems.bump,#stars.bump{animation:bump .45s cubic-bezier(.3,1.8,.5,1)}
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
 .btns{display:flex;gap:8px}
 .ib{width:52px;height:52px;border:0;border-radius:50%;background:var(--glass);font-size:24px;
@@ -92,19 +96,52 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 .how{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:15px;color:var(--ink-soft);font-weight:500}
 @media (max-width:560px){#quiz{top:calc(env(safe-area-inset-top,0px) + 72px);width:calc(100% - 24px)}}
 @media (max-height:520px){#quiz{top:calc(env(safe-area-inset-top,0px) + 10px);width:min(460px,calc(100% - 270px))}.qcard{flex-direction:row;justify-content:center;gap:14px;padding:6px 14px}.qlabel{display:none}.qword{font-size:34px}.qtext{font-size:16px}.qrow{flex-wrap:nowrap;gap:8px}.dots{display:none}}
+
+.lvl{border:0;font-size:16px;padding:6px 12px 6px 8px;gap:8px;cursor:pointer}
+.lvl .lb{display:grid;place-items:center;min-width:34px;height:34px;border-radius:50%;background:linear-gradient(180deg,#A78BFA,#6D5BEF);color:#fff;font-size:18px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.lvl .bx{display:flex;flex-direction:column;gap:3px;align-items:flex-start;line-height:1}
+.lvl .bx small{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.04em}
+.bar{display:block;width:64px;height:9px;border-radius:9px;background:#E3E8F2;overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#8B5CF6,#4F8DF7);transition:width .5s}
+.lvl.lvup{animation:bump .6s cubic-bezier(.3,1.8,.5,1)}
+#shopBtn{position:relative}#shopBtn.new:after{content:"";position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#FF4D6D;border:2px solid #fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{transform:scale(1.3)}}
+#shop{position:fixed;z-index:7;top:0;right:0;bottom:0;width:min(430px,100%);padding:calc(env(safe-area-inset-top,0px) + 12px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) 12px;box-sizing:border-box;display:flex;pointer-events:none}
+.spanel{pointer-events:auto;flex:1;background:var(--paper);border-radius:28px;box-shadow:0 8px 0 rgba(30,42,74,.16),0 24px 60px rgba(30,42,74,.3);display:flex;flex-direction:column;overflow:hidden;animation:slidein .35s cubic-bezier(.3,1.3,.5,1)}
+@keyframes slidein{from{transform:translateX(40px);opacity:0}}
+.shead{display:flex;align-items:center;gap:10px;padding:14px 14px 6px 20px}.stitle{font-size:26px;font-weight:700;flex:1}
+.sstars{font-size:19px;padding:6px 12px;box-shadow:none;background:#FFF6D6}
+.sclose{width:46px;height:46px;font-size:20px;box-shadow:0 3px 0 rgba(30,42,74,.14);background:#F1F4FA}
+.slvl{display:flex;align-items:center;gap:8px;padding:0 20px 10px;font-weight:700;font-size:16px}.slvl .tt{color:var(--ink-soft);font-weight:600;flex:1}.slvl .bar{width:90px}
+.tabs{display:flex;gap:6px;padding:0 12px 10px;overflow-x:auto}
+.tab{border:0;flex:1;min-width:64px;background:#F1F4FA;border-radius:16px;padding:7px 4px;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}.tab span{font-size:24px}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;padding:4px 14px 16px;align-content:start;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.item{border:3px solid #E3E8F2;background:#F9FAFD;border-radius:20px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600}
+.item .ic{font-size:40px;line-height:1.1}.item .nm{font-size:15px;line-height:1.15;text-align:center;min-height:2.3em;display:flex;align-items:center}
+.item .st{font-size:14px;font-weight:700;border-radius:999px;padding:3px 10px;background:#EEF1F7;color:var(--ink-soft)}
+.item.on{border-color:var(--good);background:#EFFBF4}.item.on .st{background:var(--good);color:#fff}
+.item.owned .st{background:#E6EEFF;color:#2F5FD0}
+.item.buy .st,.item.confirm .st{background:var(--sun);color:var(--ink)}.item.confirm{border-color:var(--sun-deep);background:#FFF8E1;animation:bump .4s}
+.item.poor .st{background:#FFF1F1;color:#C0392B}.item.locked,.item.chest{opacity:.6}.item.locked .ic,.item.chest .ic{filter:grayscale(.85)}
+.item.nope{animation:nope .35s}@keyframes nope{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (max-width:699px){#shop{top:auto;width:100%;height:62%}.spanel{animation-name:slideup}}
+@keyframes slideup{from{transform:translateY(40px);opacity:0}}
+.qword .blank{color:var(--sun-deep)}.qword.math{letter-spacing:.04em}
 .fly{position:fixed;left:0;top:0;z-index:6;font-size:34px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(30,42,74,.35));will-change:transform}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-
 <canvas id="c" touch-action="none"></canvas>
 
 <div id="top" class="hud">
-  <div id="stars" class="pill" aria-live="polite"><span aria-hidden="true">⭐</span><span class="n">0</span></div>
+  <div class="lft"><div class="row"><div id="stars" class="pill" aria-live="polite"><span aria-hidden="true">⭐</span><span class="n">0</span></div>
+    <div id="gems" class="pill" aria-label="Krystaller"><span aria-hidden="true">💎</span><span class="n">0</span><span class="of">/5</span></div>
+    <button id="lvl" class="pill lvl" aria-label="Nivå"><span class="lb"><b>1</b></span><span class="bx"><small>NIVÅ</small><span class="bar"><i></i></span></span></button></div>
+    <button id="goal" class="pill goal" hidden><span aria-hidden="true">🎯</span><span class="t"></span><span aria-hidden="true" class="spk">🔊</span></button></div>
   <div class="btns">
-    <button id="hatBtn" class="ib" aria-label="Bytt hatt" hidden>🎩</button>
+    <button id="shopBtn" class="ib" aria-label="Garderobe">👕</button>
     <button id="backBtn" class="ib" aria-label="Tilbake til appen" hidden>✕</button>
     <button id="musicBtn" class="ib" aria-label="Musikk av/på">🎵</button>
   </div>
@@ -126,6 +163,10 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 <div id="help" class="hud pill">⬆️⬇️⬅️➡️ / WASD gå · Mellomrom hopp · Dra for å snu</div>
 <div id="joy" class="hud" hidden><div id="knob"></div></div>
 <button id="jump" class="hud" hidden aria-label="Hopp">HOPP</button>
+<div id="shop" hidden><div class="spanel" role="dialog" aria-label="Garderobe">
+  <div class="shead"><div class="stitle">Garderobe</div><div class="pill sstars"><span aria-hidden="true">⭐</span><span class="n">0</span></div><button class="ib sclose" aria-label="Lukk">✕</button></div>
+  <div class="slvl"><span class="lv">Nivå 1</span><span class="tt"></span><span class="bar"><i></i></span></div>
+  <div class="tabs" role="tablist"></div><div class="grid"></div></div></div>
 <div id="fade"></div>
 
 <div id="start">
@@ -137,7 +178,7 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
       <button class="kid" data-kid="bastian" style="--shirt:#FF8A3D" aria-pressed="false"><span class="av"></span>Bastian</button>
     </div>
     <button class="go" id="goBtn">Spill!</button>
-    <div class="how"><span>📖 Ordskogen: les ord</span><span>⚔️ Vikingbyen: historie</span></div>
+    <div class="how"><span>🏝️ 5 verdener</span><span>👕 Utstyr</span><span>🏅 Nivåer</span></div>
   </div>
 </div>
 
@@ -165,7 +206,7 @@ const QS=new URLSearchParams(location.search);
 const KID=['benjamin','bastian'].includes(QS.get('kid'))?QS.get('kid'):null;
 const EMBED=QS.get('embed')==='1';
 const SAVE_KEY='blokkoya-v1'+(KID?'-'+KID:'');
-let save={stars:0,hats:[],hat:'',kid:'benjamin',music:true};
+let save={stars:0,hats:[],hat:'',kid:'benjamin',music:true};let shopOpen=false;
 try{Object.assign(save,JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'))}catch(e){}
 if(KID)save.kid=KID;
 // Poeng til appen: legges i localStorage, appen henter dem (samme nettsted) og nullstiller.
@@ -415,13 +456,191 @@ const player=(()=>{
     const rim=flat(BABYLON.MeshBuilder.CreateCylinder('hr',{height:.12,diameter:1.0,tessellation:12},scene));rim.parent=n;rim.material=mat('#8A6A3C');
     const nose=BABYLON.MeshBuilder.CreateBox('hn',{width:.1,height:.4,depth:.06},scene);nose.parent=n;nose.position.set(0,-.12,.5);nose.material=steel;
     n.setEnabled(false);hats.vikinghjelm=n}
+  {const n=new BABYLON.TransformNode('wiz',scene);n.parent=headPiv;n.position.y=.8;const pm=mat('#6D5BEF');
+    const brim=flat(BABYLON.MeshBuilder.CreateCylinder('wb',{height:.08,diameter:1.3,tessellation:14},scene));brim.parent=n;brim.material=pm;
+    const cone=flat(BABYLON.MeshBuilder.CreateCylinder('wc',{height:1.2,diameterTop:0,diameterBottom:.8,tessellation:10},scene));cone.parent=n;cone.position.y=.6;cone.rotation.z=.12;cone.material=pm;
+    const st=BABYLON.MeshBuilder.CreateIcoSphere('ws',{radius:.1,subdivisions:0},scene);st.parent=n;st.position.set(.02,1.2,0);st.material=mat('#FFD84D',{em:'#FFB300'});
+    const band=flat(BABYLON.MeshBuilder.CreateCylinder('wbd',{height:.12,diameter:.82,tessellation:10},scene));band.parent=n;band.position.y=.1;band.material=mat('#FFD84D');n.setEnabled(false);hats.tryllehatt=n}
+  {const n=new BABYLON.TransformNode('space',scene);n.parent=headPiv;n.position.y=.38;
+    const g=BABYLON.MeshBuilder.CreateSphere('sg',{diameter:1.35,segments:16},scene);g.parent=n;const gm=new BABYLON.StandardMaterial('glass',scene);gm.diffuseColor=C('#CFEFFF');gm.alpha=.28;gm.specularColor=new BABYLON.Color3(1,1,1);gm.specularPower=90;g.material=gm;
+    const ring=flat(BABYLON.MeshBuilder.CreateCylinder('sr',{height:.18,diameter:1.2,tessellation:16},scene));ring.parent=n;ring.position.y=-.55;ring.material=mat('#F4F7FF');n.setEnabled(false);hats.romhjelm=n}
+  {const n=new BABYLON.TransformNode('dinoh',scene);n.parent=headPiv;n.position.y=.78;const gm=mat('#5FB86A');
+    const cap=BABYLON.MeshBuilder.CreateBox('dc',{width:.86,height:.26,depth:.84},scene);cap.parent=n;cap.material=gm;
+    for(let i=0;i<4;i++){const sp=flat(BABYLON.MeshBuilder.CreateCylinder('dsp',{height:.3,diameterTop:0,diameterBottom:.22,tessellation:4},scene));sp.parent=n;sp.position.set(0,.25,.3-i*.22);sp.material=mat('#FF9F45')}
+    for(const sx of [-.2,.2]){const e=BABYLON.MeshBuilder.CreateBox('dey',{width:.14,height:.1,depth:.1},scene);e.parent=n;e.position.set(sx,.08,.43);e.material=mat('#FFFFFF')}
+    n.setEnabled(false);hats.dinohette=n}
   cast(root);
   return {root,body,legL,legR,armL,armR,headPiv,torso,shirtM,hats,hair,drawFace,
     pos:V3(0,0,-4),vel:V3(0,0,0),vy:0,yaw:0,grounded:false,ground:null,coyote:0,jumpBuf:0,phase:0,sq:1,sqv:0,blinkT:2,cp:V3(0,0,-4),lastPad:null};
 })();
-function setKid(k){save.kid=k;player.shirtM.diffuseColor=C(k==='bastian'?'#FF8A3D':'#2F80ED');persist()}
-function wearHat(h){save.hat=h;for(const k in player.hats)player.hats[k].setEnabled(k===h);player.hair.setEnabled(h!=='vikinghjelm');persist()}
-setKid(save.kid);wearHat(save.hat);
+// ---------- utstyr ----------
+if(!Array.isArray(save.owned))save.owned=[];
+for(const k of ['shirt','tool','back','trail'])if(typeof save[k]!=='string')save[k]='';
+if(typeof save.xp!=='number')save.xp=0;
+const ITEMS=[
+  {id:'',slot:'hat',e:'🙂',n:'Ingen hatt',p:0,lv:1},
+  {id:'lue',slot:'hat',e:'🧶',n:'Lue',p:10,lv:1},
+  {id:'caps',slot:'hat',e:'🧢',n:'Caps',p:20,lv:2},
+  {id:'kokkehatt',slot:'hat',e:'🧑‍🍳',n:'Kokkehatt',p:30,lv:3},
+  {id:'cowboyhatt',slot:'hat',e:'🤠',n:'Cowboyhatt',p:45,lv:5},
+  {id:'pirathatt',slot:'hat',e:'🏴‍☠️',n:'Pirathatt',p:60,lv:7},
+  {id:'glorie',slot:'hat',e:'😇',n:'Glorie',p:100,lv:12},
+  {id:'krone',slot:'hat',e:'👑',n:'Lesekrona',chest:'Ordskogen'},
+  {id:'vikinghjelm',slot:'hat',e:'⚔️',n:'Vikinghjelmen',chest:'Vikingbyen'},
+  {id:'tryllehatt',slot:'hat',e:'🧙',n:'Tryllehatten',chest:'Matteslottet'},
+  {id:'romhjelm',slot:'hat',e:'🧑‍🚀',n:'Romhjelmen',chest:'Månebasen'},
+  {id:'dinohette',slot:'hat',e:'🦖',n:'Dinohetta',chest:'Dinodalen'},
+  {id:'',slot:'shirt',e:'👕',n:'Vanlig genser',p:0,lv:1},
+  {id:'rod',slot:'shirt',e:'🟥',n:'Rød genser',p:10,lv:1,col:'#E5484D'},
+  {id:'gronn',slot:'shirt',e:'🟩',n:'Grønn genser',p:10,lv:1,col:'#2BB673'},
+  {id:'lilla',slot:'shirt',e:'🟪',n:'Lilla genser',p:15,lv:2,col:'#8B5CF6'},
+  {id:'stjerner',slot:'shirt',e:'🌟',n:'Stjernegenser',p:35,lv:4},
+  {id:'striper',slot:'shirt',e:'🌈',n:'Regnbuegenser',p:50,lv:6},
+  {id:'helt',slot:'shirt',e:'⚡',n:'Heltedrakt',p:70,lv:8},
+  {id:'gull',slot:'shirt',e:'🥇',n:'Gulldrakt',p:120,lv:11},
+  {id:'',slot:'tool',e:'✋',n:'Ingenting',p:0,lv:1},
+  {id:'ballong',slot:'tool',e:'🎈',n:'Ballong',p:10,lv:1},
+  {id:'sverd',slot:'tool',e:'🗡️',n:'Sverd',p:25,lv:2},
+  {id:'tryllestav',slot:'tool',e:'🪄',n:'Tryllestav',p:40,lv:4},
+  {id:'hammer',slot:'tool',e:'🔨',n:'Hammer',p:50,lv:5},
+  {id:'fakkel',slot:'tool',e:'🔥',n:'Fakkel',p:80,lv:9},
+  {id:'',slot:'back',e:'✋',n:'Ingenting',p:0,lv:1},
+  {id:'sekk',slot:'back',e:'🎒',n:'Ryggsekk',p:20,lv:1},
+  {id:'kappe',slot:'back',e:'🦸',n:'Kappe',p:40,lv:3},
+  {id:'vinger',slot:'back',e:'🕊️',n:'Vinger',p:90,lv:7,perk:'Hold inne hopp for å sveve.'},
+  {id:'jetpakke',slot:'back',e:'🚀',n:'Jetpakke',p:150,lv:10,perk:'Hopp en gang til mens du er i lufta.'},
+  {id:'',slot:'trail',e:'✋',n:'Ingen spor',p:0,lv:1},
+  {id:'stjernespor',slot:'trail',e:'⭐',n:'Stjernespor',p:25,lv:2},
+  {id:'hjertespor',slot:'trail',e:'💖',n:'Hjertespor',p:35,lv:3},
+  {id:'gnistspor',slot:'trail',e:'✨',n:'Gnistspor',p:55,lv:6},
+  {id:'regnbuespor',slot:'trail',e:'🌈',n:'Regnbuespor',p:90,lv:9},
+];
+const SLOTS=[{k:'hat',e:'🎩',n:'Hatter'},{k:'shirt',e:'👕',n:'Klær'},{k:'tool',e:'🔨',n:'Verktøy'},{k:'back',e:'🎒',n:'Rygg'},{k:'trail',e:'✨',n:'Spor'}];
+const findItem=(slot,id)=>ITEMS.find(i=>i.slot===slot&&i.id===id);
+function owns(it){return it.p===0||(it.chest?save.hats.includes(it.id):save.owned.includes(it.slot+':'+it.id))}
+// nivåer
+const LVL_MAX=20,needXP=L=>20*L+20;
+const TITLES=[[1,'Nybegynner'],[3,'Utforsker'],[5,'Eventyrer'],[8,'Blokkhelt'],[12,'Mester'],[16,'Legende']];
+const titleOf=L=>TITLES.filter(t=>L>=t[0]).pop()[1];
+function lvlInfo(xp){let L=1,x=xp;while(L<LVL_MAX&&x>=needXP(L)){x-=needXP(L);L++}return {L,x,n:L<LVL_MAX?needXP(L):1}}
+const gear=(()=>{
+  const P=player,G={tool:{},back:{},trailPS:null,balloon:null,flame:null,jetFlames:[],cape:null,wings:[]};
+  const steel=mat('#C9D2DC',{spec:.9,pow:60}),wood=mat('#8A5A34'),dark=mat('#2B2F3A');
+  const mk=(type,o,m,par,pos,rot)=>{const b=BABYLON.MeshBuilder['Create'+type]('g'+type,o,scene);b.material=m;b.parent=par;if(pos)b.position.copyFrom(pos);if(rot)b.rotation.copyFrom(rot);return b};
+  const node=(name,par,pos,rot)=>{const n=new BABYLON.TransformNode(name,scene);n.parent=par;if(pos)n.position.copyFrom(pos);if(rot)n.rotation.copyFrom(rot);n.setEnabled(false);return n};
+  // nye hatter
+  const H=P.hats,hp=P.headPiv;
+  {const n=node('lue',hp,V3(0,.8,0));const red=mat('#E5484D');
+    const d=mk('Sphere',{diameter:.92,segments:10,slice:.5},red,n);d.scaling.y=.85;
+    mk('Cylinder',{height:.2,diameter:.9,tessellation:16},mat('#FFFFFF'),n,V3(0,.02,0));
+    mk('Sphere',{diameter:.3,segments:8},mat('#FFFFFF'),n,V3(0,.42,0));H.lue=n}
+  {const n=node('caps',hp,V3(0,.88,0));const bl=mat('#2F6FE0');
+    const d=mk('Sphere',{diameter:.9,segments:10,slice:.5},bl,n);d.scaling.y=.5;
+    mk('Box',{width:.78,height:.05,depth:.42},mat('#1F4FB0'),n,V3(0,.01,.5));
+    mk('Sphere',{diameter:.1,segments:6},mat('#FFC83D'),n,V3(0,.23,0));H.caps=n}
+  {const n=node('kokk',hp,V3(0,.88,0));const w=mat('#FFFFFF',{em:'#1a1a1a'});
+    flat(mk('Cylinder',{height:.32,diameter:.82,tessellation:14},w,n,V3(0,.14,0)));
+    const p=mk('Sphere',{diameter:1.05,segments:10},w,n,V3(0,.55,0));p.scaling.y=.62;H.kokkehatt=n}
+  {const n=node('cowboy',hp,V3(0,.9,0));const br=mat('#A0682F');
+    const b=flat(mk('Cylinder',{height:.06,diameter:1.6,tessellation:18},br,n));b.scaling.z=.85;
+    flat(mk('Cylinder',{height:.46,diameterTop:.6,diameterBottom:.76,tessellation:12},br,n,V3(0,.24,0)));
+    flat(mk('Cylinder',{height:.09,diameter:.78,tessellation:12},mat('#4A2E16'),n,V3(0,.08,0)));H.cowboyhatt=n}
+  {const n=node('pirat',hp,V3(0,.9,0));const bk=mat('#23232E');
+    flat(mk('Cylinder',{height:.16,diameter:1.55,tessellation:3},bk,n,V3(0,.05,0),V3(0,Math.PI/2,0)));
+    flat(mk('Cylinder',{height:.36,diameter:.8,tessellation:12},bk,n,V3(0,.2,0)));
+    mk('Sphere',{diameter:.2,segments:6},mat('#FFFFFF'),n,V3(0,.26,.4));H.pirathatt=n}
+  {const n=node('glorie',hp,V3(0,1.05,0));const t=mk('Torus',{diameter:.8,thickness:.09,tessellation:28},mat('#FFE27A',{em:'#FFC400'}),n);glowOnly(t);H.glorie=n;G.halo=n}
+  // verktøy (i høyre hånd)
+  const hand=P.armR;
+  {const n=node('ballong',P.body,V3(.86,.95,.08));
+    mk('Cylinder',{height:2.2,diameter:.025,tessellation:4},mat('#FFFFFF'),n,V3(0,1.1,0));
+    const b=mk('Sphere',{diameter:.85,segments:12},mat('#FF4D6D',{spec:.8,pow:40}),n,V3(0,2.55,0));b.scaling.y=1.15;
+    mk('Cylinder',{height:.12,diameterTop:.04,diameterBottom:.14,tessellation:6},mat('#FF4D6D'),n,V3(0,2.06,0));G.tool.ballong=n;G.balloon=b}
+  const inHand=name=>node(name,hand,V3(0,-.9,.06),V3(.85,0,0));
+  {const n=inHand('sverd');
+    mk('Cylinder',{height:.32,diameter:.1,tessellation:8},wood,n,V3(0,0,0));
+    mk('Box',{width:.42,height:.08,depth:.12},mat('#FFC83D',{spec:.8}),n,V3(0,.18,0));
+    mk('Box',{width:.12,height:1.0,depth:.04},steel,n,V3(0,.7,0));
+    mk('Cylinder',{height:.16,diameterTop:0,diameterBottom:.16,tessellation:4},steel,n,V3(0,1.28,0));G.tool.sverd=n}
+  {const n=inHand('stav');
+    mk('Cylinder',{height:.85,diameter:.07,tessellation:8},dark,n,V3(0,.3,0));
+    const st=mk('IcoSphere',{radius:.14,subdivisions:0},mat('#FFE27A',{em:'#FFB300'}),n,V3(0,.8,0));glowOnly(st);G.wandStar=st;G.tool.tryllestav=n}
+  {const n=inHand('hammer');
+    mk('Cylinder',{height:.95,diameter:.1,tessellation:8},wood,n,V3(0,.35,0));
+    mk('Box',{width:.52,height:.28,depth:.28},mat('#8A96A8',{spec:.6}),n,V3(0,.85,0));G.tool.hammer=n}
+  {const n=inHand('fakkel');
+    flat(mk('Cylinder',{height:.75,diameterTop:.14,diameterBottom:.08,tessellation:8},wood,n,V3(0,.28,0)));
+    const f=mk('Sphere',{diameter:.22,segments:6},mat('#FFB347',{em:'#FF7A00'}),n,V3(0,.72,0));glowOnly(f);
+    const ps=new BABYLON.ParticleSystem('torch',80,scene);ps.particleTexture=DOT;ps.emitter=f;ps.minEmitBox=V3(-.05,0,-.05);ps.maxEmitBox=V3(.05,.05,.05);
+    ps.color1=C4('#FFD27A',1);ps.color2=C4('#FF7A1A',.9);ps.colorDead=C4('#FF3A00',0);ps.minSize=.12;ps.maxSize=.28;ps.minLifeTime=.25;ps.maxLifeTime=.5;ps.emitRate=0;
+    ps.direction1=V3(-.15,1,-.15);ps.direction2=V3(.15,1.6,.15);ps.minEmitPower=.6;ps.maxEmitPower=1.2;ps.gravity=V3(0,1.5,0);ps.blendMode=BABYLON.ParticleSystem.BLENDMODE_ADD;ps.start();
+    G.flame=ps;G.tool.fakkel=n}
+  // rygg
+  {const n=node('sekk',P.body);const g=mat('#2BB673'),gd=mat('#1E8A55');
+    mk('Box',{width:.78,height:.8,depth:.32},g,n,V3(0,1.38,-.42));mk('Box',{width:.82,height:.26,depth:.36},gd,n,V3(0,1.7,-.43));
+    mk('Box',{width:.5,height:.3,depth:.1},gd,n,V3(0,1.18,-.62));G.back.sekk=n}
+  {const n=node('kappe',P.body,V3(0,1.84,-.3));const c=mk('Box',{width:.98,height:1.45,depth:.05},mat('#D7263D'),n,V3(0,-.72,0));
+    mk('Box',{width:1.04,height:.1,depth:.12},mat('#FFC83D'),n,V3(0,0,.02));G.back.kappe=n;G.cape=n}
+  {const n=node('vinger',P.body);const wm=mat('#FFFFFF',{em:'#3a4660'});
+    for(const sd of [-1,1]){const piv=new BABYLON.TransformNode('wpiv',scene);piv.parent=n;piv.position.set(sd*.14,1.55,-.32);
+      for(let i=0;i<3;i++){const f=mk('Box',{width:1.0-i*.2,height:.22,depth:.04},wm,piv,V3(sd*(.5-i*.1),.18-i*.2,-i*.01),V3(0,0,sd*(.35-i*.18)))}
+      G.wings.push({piv,sd})}G.back.vinger=n}
+  {const n=node('jet',P.body);const gm=mat('#9AA6B8',{spec:.7}),rd=mat('#E5484D');
+    mk('Box',{width:.5,height:.5,depth:.16},gm,n,V3(0,1.45,-.36));
+    for(const sd of [-1,1]){mk('Cylinder',{height:.78,diameter:.3,tessellation:12},gm,n,V3(sd*.22,1.35,-.5));
+      mk('Cylinder',{height:.22,diameterTop:0,diameterBottom:.3,tessellation:12},rd,n,V3(sd*.22,1.85,-.5));
+      const fl=mk('Cylinder',{height:.5,diameterTop:.22,diameterBottom:0,tessellation:10},mat('#FFB347',{em:'#FF6A00'}),n,V3(sd*.22,.75,-.5));glowOnly(fl);G.jetFlames.push(fl)}
+    G.back.jetpakke=n}
+  // spor
+  const emojiTex=e=>{const t=dynTex(64,64,false),c=t.getContext();c.clearRect(0,0,64,64);c.font=`48px ${EMOJI}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,32,36);t.update();return t};
+  const ps=new BABYLON.ParticleSystem('trail',160,scene);ps.emitter=V3(0,0,0);ps.minEmitBox=V3(-.3,.1,-.3);ps.maxEmitBox=V3(.3,.6,.3);
+  ps.minLifeTime=.6;ps.maxLifeTime=1.1;ps.direction1=V3(-.3,.6,-.3);ps.direction2=V3(.3,1.2,.3);ps.minEmitPower=.3;ps.maxEmitPower=.8;ps.gravity=V3(0,-.4,0);
+  ps.minAngularSpeed=-2;ps.maxAngularSpeed=2;ps.addSizeGradient(0,1);ps.addSizeGradient(1,.3);ps.emitRate=0;ps.start();G.trailPS=ps;
+  G.trailTex={stjernespor:STAR_T,hjertespor:emojiTex('💖'),gnistspor:STAR_T,regnbuespor:DOT};
+  return G;
+})();
+const shirtTex={};
+function shirtPattern(id){if(shirtTex[id])return shirtTex[id];const t=dynTex(128,128),c=t.getContext();t.hasAlpha=false;
+  if(id==='stjerner'){c.fillStyle='#22306B';c.fillRect(0,0,128,128);c.fillStyle='#FFD84D';
+    for(const [x,y,r] of [[28,30,13],[92,22,9],[70,72,15],[22,96,9],[108,100,11]]){c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr_=i%2?r*.45:r;c.lineTo(x+Math.cos(a)*rr_,y+Math.sin(a)*rr_)}c.fill()}}
+  else if(id==='striper'){['#FF5A5A','#FF9F45','#FFD84D','#5CD65C','#4F8DF7','#A66BFF'].forEach((col,i)=>{c.fillStyle=col;c.fillRect(0,i*128/6,128,128/6+1)})}
+  else if(id==='helt'){c.fillStyle='#D7263D';c.fillRect(0,0,128,128);c.fillStyle='#FFD84D';c.beginPath();c.arc(64,64,40,0,7);c.fill();
+    c.fillStyle='#D7263D';c.beginPath();[[72,26],[44,70],[62,70],[52,104],[86,56],[66,56],[76,26]].forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.fill()}
+  t.update();return shirtTex[id]=t}
+function applyShirt(id){const m=player.shirtM,it=findItem('shirt',id);m.diffuseTexture=null;m.emissiveColor=new BABYLON.Color3(0,0,0);m.specularColor=new BABYLON.Color3(.06,.06,.06);m.specularPower=24;
+  if(!it||!it.id)m.diffuseColor=C(save.kid==='bastian'?'#FF8A3D':'#2F80ED');
+  else if(it.col)m.diffuseColor=C(it.col);
+  else if(id==='gull'){m.diffuseColor=C('#FFC83D');m.specularColor=new BABYLON.Color3(.9,.8,.5);m.specularPower=50;m.emissiveColor=C('#4A3000')}
+  else{m.diffuseColor=C('#FFFFFF');m.diffuseTexture=shirtPattern(id)}}
+function applyGear(){
+  for(const k in gear.tool)gear.tool[k].setEnabled(k===save.tool);
+  for(const k in gear.back)gear.back[k].setEnabled(k===save.back);
+  applyShirt(save.shirt);
+  const ps=gear.trailPS,t=save.trail;if(t){ps.particleTexture=gear.trailTex[t];
+    ps.blendMode=t==='gnistspor'||t==='regnbuespor'?BABYLON.ParticleSystem.BLENDMODE_ADD:BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+    const cs={stjernespor:['#FFE27A','#FFC83D'],hjertespor:['#FFFFFF','#FFFFFF'],gnistspor:['#FFFFFF','#9FE8FF'],regnbuespor:['#FF5A5A','#4F8DF7']}[t];
+    ps.color1=C4(cs[0]);ps.color2=C4(cs[1]);ps.colorDead=C4(cs[1],0);ps.minSize=t==='hjertespor'?.35:.22;ps.maxSize=t==='hjertespor'?.55:.42}
+}
+let jetT=0;
+function updateGear(dt,P,hs){
+  const run=Math.min(1,hs/SPEED);
+  if(gear.balloon){const b=gear.tool.ballong;b.rotation.x=-run*.35+Math.sin(time*1.3)*.05;b.rotation.z=Math.sin(time*1.1)*.08}
+  if(gear.halo)gear.halo.position.y=1.05+Math.sin(time*2.4)*.04;
+  if(gear.wandStar)gear.wandStar.rotation.y=time*3;
+  if(gear.flame)gear.flame.emitRate=save.tool==='fakkel'?40:0;
+  if(gear.cape)gear.cape.rotation.x=.08+run*.75+(P.grounded?0:.35)+Math.sin(time*9)*.04*(.3+run);
+  const glide=!P.grounded&&save.back==='vinger';
+  for(const w of gear.wings){const f=P.grounded?Math.sin(time*2)*.08:Math.sin(time*(glide&&jumpHeld()?14:8))*.45;w.piv.rotation.y=w.sd*(.35+f)}
+  jetT=Math.max(0,jetT-dt);for(const f of gear.jetFlames){f.setEnabled(!P.grounded);const s=(jetT>0?1.6:.7)+Math.sin(time*40)*.12;f.scaling.set(1,s,1);f.position.y=.85-.25*s}
+  const ps=gear.trailPS;if(save.trail){ps.emitter=P.pos.add(V3(0,.2,0));ps.emitRate=hs>1.2||!P.grounded?(save.trail==='gnistspor'?40:22):1;
+    if(save.trail==='regnbuespor'){const h=(time*.6)%1;const c=BABYLON.Color3.FromHSV(h*360,.75,1),c2=BABYLON.Color3.FromHSV(((h+.15)%1)*360,.75,1);ps.color1.set(c.r,c.g,c.b,1);ps.color2.set(c2.r,c2.g,c2.b,1)}}
+  else ps.emitRate=0;
+}
+
+function setKid(k){save.kid=k;applyShirt(save.shirt);persist()}
+function wearHat(h){save.hat=h;for(const k in player.hats)player.hats[k].setEnabled(k===h);player.hair.setEnabled(!['vikinghjelm','romhjelm','lue'].includes(h));persist()}
+setKid(save.kid);wearHat(save.hat);applyGear();
+[...Object.values(gear.tool),...Object.values(gear.back),...Object.values(player.hats)].forEach(n=>cast(n));
 
 // ---------- verden ----------
 // Midtøya
@@ -430,115 +649,185 @@ const hub=island(0,0,0,10.5,{cp:true,cpz:-4,name:'hub'});
   const pad=flat(BABYLON.MeshBuilder.CreateCylinder('spawn',{height:.16,diameter:3.2,tessellation:24},scene));pad.position.set(0,.08,-4);pad.material=mat('#FFFFFF');
   const ring=BABYLON.MeshBuilder.CreateTorus('ring',{diameter:3.1,thickness:.14,tessellation:40},scene);ring.position.set(0,.18,-4);ring.material=mat('#7CE3FF',{em:'#3BB8E8'});glowOnly(ring);
   scene.onBeforeRenderObservable.add(()=>{ring.scaling.setAll(1+Math.sin(performance.now()/500)*.03)});
-  tree(-7,4,0,1.1);tree(7.2,5,0,.95);tree(-3,8,0,.85);tree(4,-8,0,1.0,'pine');tree(-6.5,-6,0,.9);
+  tree(-7,4,0,1.1);tree(7.2,5,0,.95);tree(-3,8,0,.85);tree(4,-8,0,1.0,'pine');tree(6.6,-6.8,0,.9);
   rock(-8.6,-1.5,0,1.4);rock(8.4,-3.5,0,1.0);rock(2.2,8.4,0,.8);
   flowers(0,0,0,9.5,90);
   sign(5.2,0,1.5,0,(c,w,h)=>textLines(c,w,h,[{t:'📖',size:190,emoji:true},{t:'Ordskogen ➜',size:150}]),{w:3.8,h:2.2});
   sign(-5.2,0,1.5,0,(c,w,h)=>textLines(c,w,h,[{t:'⚔️',size:190,emoji:true},{t:'⬅ Vikingbyen',size:150}]),{w:3.8,h:2.2});
-  sign(0,0,6.5,0,(c,w,h)=>textLines(c,w,h,[{t:'🔒',size:170,emoji:true},{t:'Matteslottet',size:150},{t:'kommer snart',size:110,weight:600,color:'#7A5A3A'}]),{w:3.6,h:2.6});
-}
-// Matteslottet (låst, nord)
-{
-  const s=island(0,34,-1,8,{grass:'#8FD6A0',lip:'#6CBF80'});
-  const stoneM=mat('#C9CED8'),roofM=mat('#7B6CF6');
-  [[-4,-3],[4,-3],[-4,3],[4,3]].forEach(([a,b])=>{const t=flat(BABYLON.MeshBuilder.CreateCylinder('tw',{height:6,diameter:2.2,tessellation:8},scene));t.position.set(a,2,34+b);t.material=stoneM;cast(t);
-    const r=flat(BABYLON.MeshBuilder.CreateCylinder('tr',{height:2.4,diameterTop:0,diameterBottom:2.8,tessellation:8},scene));r.position.set(a,6.2,34+b);r.material=roofM;cast(r)});
-  const k=BABYLON.MeshBuilder.CreateBox('keep',{width:6,height:5,depth:5},scene);k.position.set(0,1.5,34);k.material=stoneM;cast(k);
-  const kr=flat(BABYLON.MeshBuilder.CreateCylinder('kr',{height:3,diameterTop:0,diameterBottom:6.5,tessellation:4},scene));kr.position.set(0,5.5,34);kr.rotation.y=Math.PI/4;kr.material=roofM;cast(kr);
 }
 
-// ---------- stasjoner (spørsmål) ----------
+// ---------- spørsmål (tilpasset hvert barn) ----------
+// Benjamin (9, dysleksi): korte lydrette ord først, lengre ord når han mestrer dem. Gangetabell. «Hvilken bokstav mangler».
+// Bastian (6): de korteste ordene, pluss opp til 10, «hvilken bokstav begynner ordet på», enklere historie. Alt leses opp.
 const LES_ORD=[['SOL','☀️'],['BIL','🚗'],['HUS','🏠'],['IS','🍦'],['KU','🐄'],['FISK','🐟'],['BÅT','⛵'],['MUS','🐭'],['ULV','🐺'],['EPLE','🍎'],
   ['BALL','⚽'],['KATT','🐱'],['HEST','🐴'],['MÅNE','🌙'],['TOG','🚂'],['BOK','📖'],['SKO','👟'],['GRIS','🐷'],['OST','🧀'],['EGG','🥚'],['SAU','🐑'],['FOT','🦶'],['NESE','👃'],['ØRE','👂']];
+const LES_LANG=[['BANAN','🍌'],['TIGER','🐯'],['PANDA','🐼'],['SOFA','🛋️'],['LAMPE','💡'],['ROSE','🌹'],['MELK','🥛'],['BUSS','🚌'],['SAKS','✂️'],['GAVE','🎁'],
+  ['ROBOT','🤖'],['RAKETT','🚀'],['BLOMST','🌸'],['DRAGE','🐉'],['TROMME','🥁'],['PINGVIN','🐧'],['ELEFANT','🐘'],['SLANGE','🐍'],['KAMEL','🐫'],['TOMAT','🍅']];
+const ALLE_ORD=LES_ORD.concat(LES_LANG);
 const HIST=[
-  {q:'Hva reiste vikingene med over havet?',o:[['⛵','Skip',1],['🚗','Bil'],['✈️','Fly']],f:'Riktig! Vikingene seilte i lange skip med store seil og årer.'},
-  {q:'Hadde vikingene horn på hjelmen?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Hjelmene var runde, uten horn. Horn finnes bare i filmer og tegneserier.'},
+  {q:'Hva reiste vikingene med over havet?',o:[['⛵','Skip',1],['🚗','Bil'],['✈️','Fly']],f:'Riktig! Vikingene seilte i lange skip med store seil og årer.',e:1},
+  {q:'Hadde vikingene horn på hjelmen?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Hjelmene var runde, uten horn. Horn finnes bare i filmer og tegneserier.',e:1},
   {q:'Hvilken gud hadde en hammer?',o:[['🔨','Tor',1],['👁️','Odin'],['🦊','Loke']],f:'Riktig! Tor hadde hammeren Mjølner. Folk trodde han lagde torden.'},
   {q:'Hva skrev vikingene med?',o:[['🪨','Runer',1],['✏️','Blyant'],['💻','Data']],f:'Riktig! Vikingene risset runer inn i stein og tre.'},
-  {q:'Hva bodde vikingene i?',o:[['🛖','Langhus',1],['🏢','Blokk'],['🏰','Slott']],f:'Riktig! De bodde i langhus. Midt i huset brant et bål som ga varme og lys.'},
+  {q:'Hva bodde vikingene i?',o:[['🛖','Langhus',1],['🏢','Blokk'],['🏰','Slott']],f:'Riktig! De bodde i langhus. Midt i huset brant et bål som ga varme og lys.',e:1},
   {q:'Hvor lenge er det siden vikingtiden?',o:[['⏳','1000 år',1],['📅','10 år'],['🦖','Dinosaur-tid']],f:'Riktig! Vikingtiden var for mer enn tusen år siden.'},
   {q:'Hvilken gud hadde bare ett øye?',o:[['👁️','Odin',1],['🔨','Tor'],['🌞','Balder']],f:'Riktig! Odin ga bort det ene øyet sitt for å bli klok.'},
-  {q:'Hva spiste vikingene mye av?',o:[['🐟','Fisk',1],['🍕','Pizza'],['🍫','Sjokolade']],f:'Riktig! De spiste fisk, kjøtt, grøt og brød. Pizza fantes ikke!'},
+  {q:'Hva spiste vikingene mye av?',o:[['🐟','Fisk',1],['🍕','Pizza'],['🍫','Sjokolade']],f:'Riktig! De spiste fisk, kjøtt, grøt og brød. Pizza fantes ikke!',e:1},
+  {q:'Hva hadde vikingene på armen for å beskytte seg?',o:[['🛡️','Skjold',1],['☂️','Paraply'],['🎒','Sekk']],f:'Riktig! Skjoldet var rundt og laget av tre.',e:1},
 ];
+const DINO=[
+  {q:'Hvilket dyr levde for veldig, veldig lenge siden?',o:[['🦖','Dinosaur',1],['🐶','Hund'],['🐱','Katt']],f:'Riktig! Dinosaurene levde for millioner av år siden.',e:1},
+  {q:'Hva spiste T-rex?',o:[['🍖','Kjøtt',1],['🥕','Gulrot'],['🍦','Is']],f:'Riktig! T-rex var et rovdyr som spiste kjøtt.',e:1},
+  {q:'Hva kommer dinosaurunger ut av?',o:[['🥚','Egg',1],['📦','Eske'],['🌷','Blomst']],f:'Riktig! Dinosaurene la egg, akkurat som fugler gjør.',e:1},
+  {q:'Hva kaller vi gamle bein som er blitt til stein?',o:[['🦴','Fossil',1],['🧸','Bamse'],['🍞','Brød']],f:'Riktig! Fossiler hjelper oss å vite hvordan dinosaurene så ut.'},
+  {q:'Hvilket dyr med lang pels levde i istiden?',o:[['🦣','Mammut',1],['🦒','Sjiraff'],['🐧','Pingvin']],f:'Riktig! Mammuten hadde lang pels og store støttenner.',e:1},
+  {q:'Levde det mennesker samtidig med dinosaurene?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Dinosaurene døde ut lenge før de første menneskene kom.'},
+  {q:'Hva lagde steinalderfolk redskaper av?',o:[['🪨','Stein',1],['🧱','Lego'],['🔌','Plast']],f:'Riktig! De slo stein til økser og kniver. Derfor heter det steinalderen.'},
+  {q:'Hvor bodde mange steinaldermennesker?',o:[['🕳️','Huler',1],['🏢','Blokker'],['🚀','Raketter']],f:'Riktig! Mange bodde i huler og i telt av dyreskinn.'},
+  {q:'Hvilke dyr i dag er i slekt med dinosaurene?',o:[['🐦','Fugler',1],['🐟','Fisker'],['🐌','Snegler']],f:'Riktig! Fuglene er etterkommere av dinosaurene.'},
+  {q:'Hva malte steinaldermenneskene på huleveggene?',o:[['🦌','Dyr',1],['🚗','Biler'],['📺','TV']],f:'Riktig! De malte dyr på veggene i hulene.',e:1},
+];
+const LYD=save.lvl||(save.lvl={});
+function lvlNote(kind,first){const k=kind+'Rek';LYD[k]=first?Math.max(1,(LYD[k]||0)+1):Math.min(-1,(LYD[k]||0)-1);
+  const max=kind==='les'?(KID==='bastian'?1:2):(KID==='bastian'?1:2);
+  if(LYD[k]>=3){LYD[kind]=Math.min(max,(LYD[kind]||0)+1);LYD[k]=0}else if(LYD[k]<=-2){LYD[kind]=Math.max(0,(LYD[kind]||0)-1);LYD[k]=0}persist()}
 const recentWords=[];
+function pickFresh(pool){const p=pool.filter(w=>!recentWords.includes(w[0]));const w=(p.length?p:pool)[Math.floor(Math.random()*(p.length?p:pool).length)];recentWords.push(w[0]);if(recentWords.length>12)recentWords.shift();return w}
+function lesPool(){const l=LYD.les||0;return l===0?LES_ORD.filter(w=>w[0].length<=3):l===1?LES_ORD:LES_ORD.filter(w=>w[0].length>=4).concat(LES_LANG)}
 function makeLesQ(){
-  const pool=LES_ORD.filter(w=>!recentWords.includes(w[0]));const w=pool[Math.floor(Math.random()*pool.length)];
-  recentWords.push(w[0]);if(recentWords.length>10)recentWords.shift();
-  const same=shuffle(LES_ORD.filter(x=>x!==w&&x[0][0]===w[0][0])),other=shuffle(LES_ORD.filter(x=>x!==w&&x[0][0]!==w[0][0]));
+  const w=pickFresh(lesPool());
+  const same=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]===w[0][0])),other=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]!==w[0][0]));
   const d=[...same.slice(0,1),...other].slice(0,2);
   return {word:w[0],opts:shuffle([{e:w[1],ok:true,l:w[0]},...d.map(x=>({e:x[1],l:x[0]}))])};
 }
-function makeHistRound(){return shuffle(HIST).slice(0,3).map(h=>({q:h.q,f:h.f,opts:shuffle(h.o.map(o=>({e:o[0],l:o[1],ok:!!o[2]})))}))}
+function makeHistRound(pool){const p=KID==='bastian'?pool.filter(h=>h.e):pool;return shuffle(p).slice(0,3).map(h=>({q:h.q,f:h.f,opts:shuffle(h.o.map(o=>({e:o[0],l:o[1],ok:!!o[2]})))}))}
+const VOKAL='AEIOUYÆØÅ',KONS='BDFGHJKLMNPRSTV';
+function makeBokQ(){
+  if(KID==='bastian'){ // første bokstav
+    const w=pickFresh(LES_ORD.filter(x=>x[0].length<=4));const r=w[0][0];
+    const others=shuffle([...'ABDEFGHIKLMNOPRSTU'].filter(c=>c!==r)).slice(0,2);
+    return {mode:'first',word:w[0],e:w[1],ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
+  }
+  const w=pickFresh((LYD.les||0)>=2?LES_ORD.concat(LES_LANG.filter(x=>x[0].length<=5)):LES_ORD.filter(x=>x[0].length>=3));
+  const word=w[0];let idx=[...word].findIndex((c,i)=>i>0&&VOKAL.includes(c));if(idx<0||Math.random()<.3)idx=1+Math.floor(Math.random()*(word.length-1));
+  const r=word[idx],set=VOKAL.includes(r)?'AEIOUYØÅ':KONS;
+  const others=shuffle([...set].filter(c=>c!==r)).slice(0,2);
+  return {mode:'miss',word,e:w[1],idx,ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
+}
+function makeMathQ(){
+  const l=LYD.math||0;
+  if(KID==='bastian'){const max=l===0?5:10;const a=1+Math.floor(Math.random()*(max-1)),b=1+Math.floor(Math.random()*(max-a));const ans=a+b;
+    const ds=shuffle([ans-1,ans+1,ans+2,ans-2].filter(x=>x>0&&x<=12&&x!==ans)).slice(0,2);
+    return {op:'+',a,b,ans,opts:shuffle([{l:String(ans),ok:true},...ds.map(x=>({l:String(x)}))])}}
+  const tabs=l===0?[2,5,10]:l===1?[2,3,4,5,10]:[2,3,4,5,6,7,8,9,10];
+  const a=tabs[Math.floor(Math.random()*tabs.length)],b=1+Math.floor(Math.random()*10),ans=a*b;
+  const ds=shuffle([...new Set([a*(b+1),a*(b-1),ans+1,ans-1,ans+10].filter(x=>x>0&&x!==ans))]).slice(0,2);
+  return {op:'·',a,b,ans,opts:shuffle([{l:String(ans),ok:true},...ds.map(x=>({l:String(x)}))])};
+}
+const NUM=['null','én','to','tre','fire','fem','seks','sju','åtte','ni','ti'];
+const sayNum=n=>n<=10?NUM[n]:String(n);
+function mathText(q){return q.op==='+'?`Hva er ${sayNum(q.a)} pluss ${sayNum(q.b)}?`:`Hva er ${sayNum(q.a)} ganger ${sayNum(q.b)}?`}
+function bokText(q){return q.mode==='first'?`Hvilken bokstav begynner ${q.word.toLowerCase()} på?`:`Hvilken bokstav mangler i ${q.word.toLowerCase()}?`}
 
 const stations=[];
+const KIND_INFO={les:{emoji:'📖',idle:'Gå hit og les!',frame:'#4F8DF7',rings:['#4F8DF7','#FF6B6B','#2BB673'],mode:'norsk'},
+  hist:{emoji:'⚔️',idle:'Gå hit!',frame:'#8B5A3C',rings:['#C0392B','#E0A030','#2E86AB'],mode:'historie'},
+  dino:{emoji:'🦕',idle:'Gå hit!',frame:'#5E8C3A',rings:['#E07A2E','#6FBF4A','#3E9FD8'],mode:'historie'},
+  math:{emoji:'✖️',idle:'Gå hit og regn!',frame:'#7B6CF6',rings:['#7B6CF6','#FF8AD8','#FFC83D'],mode:'gange'},
+  bok:{emoji:'🔤',idle:'Gå hit!',frame:'#5B6B9A',rings:['#7CC8FF','#B48CFF','#FF9F45'],mode:'norsk'}};
 function station(cfg){
-  const {cx,cz,top,dir,kind}=cfg;
-  const S={...cfg,pads:[],active:false,started:false,done:false,idx:0,lock:false,tries:0,hint:false,inZone:false,q:null,round:[]};
-  // tavle bak putene
-  const bx=cx+dir*7.6;
-  S.board=sign(bx,top,cz,Math.atan2(dir,0),(c,w,h,mode,hi)=>{
-    if(!S.q){textLines(c,w,h,[{t:kind==='les'?'📖':'⚔️',size:150,emoji:true},{t:kind==='les'?'Gå hit og les!':'Gå hit!',size:90}]);return}
-    if(kind==='les'){const word=S.q.word;c.font=`700 250px ${FONT}`;c.textBaseline='middle';c.textAlign='center';
-      const sp=36,widths=[...word].map(ch=>c.measureText(ch).width);const tot=widths.reduce((a,b)=>a+b,0)+sp*(word.length-1);let x=w/2-tot/2;
-      [...word].forEach((ch,i)=>{c.fillStyle=(hi===i||hi===-2)?'#F59E0B':'#24324F';c.fillText(ch,x+widths[i]/2,h/2+14);x+=widths[i]+sp});}
-    else textLines(c,w,h,[{t:S.q.q,size:74}]);
-  },{w:7.2,h:3.0,ph:1.3,frame:kind==='les'?'#4F8DF7':'#8B5A3C',bg:'#FFFDF7'});
-  solidCyl(bx,cz-3.2,.35,top+5,top-1);solidCyl(bx,cz+3.2,.35,top+5,top-1);
-  // svarputer
-  const ringCols=kind==='les'?['#4F8DF7','#FF6B6B','#2BB673']:['#C0392B','#E0A030','#2E86AB'];
-  [-3.6,0,3.6].forEach((oz,i)=>{
-    const px=cx+dir*1.6,pz=cz+oz,ptop=top+.32;
-    const base=flat(BABYLON.MeshBuilder.CreateCylinder('padB',{height:.34,diameter:3.1,tessellation:20},scene));base.position.set(px,top+.15,pz);base.material=mat(ringCols[i]);
+  const {cx,cz,top,ux,uz,kind}=cfg;const px_=-uz,pz_=ux;const KI=KIND_INFO[kind];const histLike=kind==='hist'||kind==='dino';
+  const S={...cfg,pads:[],started:false,done:false,idx:0,lock:false,tries:0,hint:false,inZone:false,q:null,round:[],r:cfg.r||9.5,helper:false};
+  const bx=cx+ux*7.6,bz=cz+uz*7.6;
+  S.board=sign(bx,top,bz,Math.atan2(ux,uz),(c,w,h,mode,hi)=>{
+    const q=S.q;
+    if(!q){textLines(c,w,h,[{t:KI.emoji,size:150,emoji:true},{t:KI.idle,size:90}]);return}
+    c.textBaseline='middle';c.textAlign='center';
+    const spaced=(word,y,size,hiIdx,blank)=>{c.font=`700 ${size}px ${FONT}`;const sp=size*.15,chars=[...word],ws=chars.map((ch,i)=>i===blank?c.measureText('M').width:c.measureText(ch).width);
+      const tot=ws.reduce((a,b)=>a+b,0)+sp*(chars.length-1);let x=w/2-tot/2;
+      chars.forEach((ch,i)=>{if(i===blank){c.fillStyle='#F59E0B';rrect(c,x+4,y+size*.32,ws[i]-8,14,7);c.fill()}else{c.fillStyle=(hiIdx===i||hiIdx===-2)?'#F59E0B':'#24324F';c.fillText(ch,x+ws[i]/2,y)}x+=ws[i]+sp})};
+    if(kind==='les'){const size=q.word.length>5?190:250;spaced(q.word,h/2+14,size,hi)}
+    else if(kind==='math'){c.font=`700 200px ${FONT}`;c.fillStyle='#24324F';const t=`${q.a} ${q.op} ${q.b} = ?`;
+      if(S.helper){c.fillText(t,w/2,h*.33);c.font=`600 ${q.op==='+'?110:80}px ${q.op==='+'?EMOJI:FONT}`;c.fillStyle='#7B6CF6';
+        c.fillText(q.op==='+'?'🍎'.repeat(q.a)+' + '+'🍎'.repeat(q.b):Array(q.a).fill(q.b).join(' + '),w/2,h*.74)}
+      else c.fillText(t,w/2,h/2+10)}
+    else if(kind==='bok'){c.font=`230px ${EMOJI}`;c.fillText(q.e,w*.24,h/2+10);
+      if(q.mode==='first'){c.font=`700 210px ${FONT}`;c.fillStyle='#24324F';c.fillText(S.helper?q.word:'? '+'_ '.repeat(q.word.length-1).trim(),w*.64,h/2+10)}
+      else{const save_=c.textAlign;c.save();c.translate(w*.14,0);spaced(q.word,h/2+14,q.word.length>4?170:210,hi,S.helper?-1:q.idx);c.restore()}}
+    else textLines(c,w,h,[{t:q.q,size:74}]);
+  },{w:7.2,h:3.0,ph:1.3,frame:KI.frame,bg:'#FFFDF7'});
+  solidCyl(bx+px_*3.2,bz+pz_*3.2,.35,top+5,top-1);solidCyl(bx-px_*3.2,bz-pz_*3.2,.35,top+5,top-1);
+  [-3.6,0,3.6].forEach((o,i)=>{
+    const px=cx+ux*1.6+px_*o,pz=cz+uz*1.6+pz_*o,ptop=top+.32;
+    const base=flat(BABYLON.MeshBuilder.CreateCylinder('padB',{height:.34,diameter:3.1,tessellation:20},scene));base.position.set(px,top+.15,pz);base.material=mat(KI.rings[i]);
     const plate=flat(BABYLON.MeshBuilder.CreateCylinder('padT',{height:.1,diameter:2.5,tessellation:20},scene));plate.position.set(px,ptop+.03,pz);
     const pm=new BABYLON.StandardMaterial('pm',scene);pm.diffuseColor=C('#FFFFFF');pm.specularColor=new BABYLON.Color3(.1,.1,.1);pm.emissiveColor=new BABYLON.Color3(0,0,0);plate.material=pm;
     cast(base);
-    const ct=dynTex(512,512);const card=BABYLON.MeshBuilder.CreatePlane('card',{size:2.5},scene);card.position.set(px+dir*1.3,top+3.0,pz);card.billboardMode=BABYLON.Mesh.BILLBOARDMODE_Y;card.material=unlit(ct);
+    const ct=dynTex(512,512);const card=BABYLON.MeshBuilder.CreatePlane('card',{size:2.5},scene);card.position.set(px+ux*1.3,top+3.0,pz+uz*1.3);card.billboardMode=BABYLON.Mesh.BILLBOARDMODE_Y;card.material=unlit(ct);
     const shadowDisc=BABYLON.MeshBuilder.CreateDisc('sd',{radius:.6,tessellation:20},scene);shadowDisc.rotation.x=Math.PI/2;shadowDisc.position.set(px,ptop+.09,pz);
     const sdm=new BABYLON.StandardMaterial('sdm',scene);sdm.diffuseColor=new BABYLON.Color3(0,0,0);sdm.alpha=.12;sdm.disableLighting=true;shadowDisc.material=sdm;
     const solid=solidCyl(px,pz,1.55,ptop+.08,top-.5);
-    S.pads.push({base,plate,pm,card,ct,solid,px,pz,i,opt:null,dim:false,shadowDisc,col:ringCols[i]});
+    S.pads.push({base,plate,pm,card,ct,solid,px,pz,i,opt:null,dim:false,shadowDisc,col:KI.rings[i]});
   });
   function drawCard(p){const c=p.ct.getContext();c.clearRect(0,0,512,512);if(!p.opt)return p.ct.update();
     c.save();c.globalAlpha=p.dim?.35:1;c.fillStyle='rgba(30,42,74,.18)';rrect(c,28,40,456,456,90);c.fill();
     c.fillStyle='#FFFFFF';rrect(c,28,24,456,456,90);c.fill();c.lineWidth=14;c.strokeStyle=p.col;rrect(c,35,31,442,442,84);c.stroke();
     c.textAlign='center';c.textBaseline='middle';
     if(kind==='les'){c.font=`290px ${EMOJI}`;c.fillText(p.opt.e,256,262)}
+    else if(kind==='math'||kind==='bok'){c.font=`700 ${p.opt.l.length>2?200:280}px ${FONT}`;c.fillStyle='#24324F';c.fillText(p.opt.l,256,272)}
     else{c.font=`220px ${EMOJI}`;c.fillText(p.opt.e,256,205);c.font=`700 ${p.opt.l.length>8?62:80}px ${FONT}`;c.fillStyle='#24324F';c.fillText(p.opt.l,256,400)}
     c.restore();p.ct.update()}
   S.drawCard=drawCard;
+  S.ask=function(){const q=S.q;if(!q)return;if(kind==='les'){S.hint=true;say(q.word.toLowerCase());soundOut(S)}else if(kind==='math')say(mathText(q));else if(kind==='bok')say(bokText(q));else sayQ(S)};
   S.show=function(){
-    S.q=kind==='les'?makeLesQ():S.round[S.idx];
-    S.tries=0;S.hint=false;S.lock=false;
+    S.q=kind==='les'?makeLesQ():kind==='math'?makeMathQ():kind==='bok'?makeBokQ():S.round[S.idx];
+    S.tries=0;S.hint=false;S.lock=false;S.helper=false;
     S.pads.forEach((p,i)=>{p.opt=S.q.opts[i]||null;p.dim=false;const on=!!p.opt;p.solid.off=!on;[p.base,p.plate,p.card,p.shadowDisc].forEach(m=>m.setEnabled(on));p.pm.emissiveColor.set(0,0,0);drawCard(p);
       if(on){p.card.scaling.setAll(.01);tween(.5,k=>p.card.scaling.setAll(easeBack(k)),null,i*.08)}});
     S.board.redraw();updateQuizHud(S);
     if(kind==='les'){if(!S.introSaid){S.introSaid=true;say('Les ordet på tavla. Hopp på bildet som passer!')}}
+    else if(kind==='math')say((S.idx===0&&!S.introSaid?(S.introSaid=true,'Hopp på riktig svar! '):'')+mathText(S.q));
+    else if(kind==='bok')say(bokText(S.q));
     else sayQ(S);
   };
-  S.start=function(){S.started=true;S.done=false;S.needsReset=false;S.idx=0;S.round=kind==='hist'?makeHistRound():[];S.show()};
+  S.start=function(){S.started=true;S.done=false;S.needsReset=false;S.idx=0;S.round=kind==='hist'?makeHistRound(HIST):kind==='dino'?makeHistRound(DINO):[];S.show()};
   S.answer=function(p){
     if(S.lock||!p.opt||p.dim)return;
+    const q=S.q;
     if(p.opt.ok){
-      S.lock=true;const got=(S.tries===0&&!S.hint)?3:1;addStars(got);
+      S.lock=true;const first=S.tries===0&&!S.hint;const got=first?3:1;addStars(got);addXP(first?10:4);
+      if(kind==='les')lvlNote('les',first);if(kind==='math')lvlNote('math',first);
       p.pm.emissiveColor=C('#3BD47A');sfx.right();confetti(V3(p.px,top+1.5,p.pz));
-      const first=got===3,ap=KID==='bastian'?(first?2:1):(first?4:1);const gotApp=appCredit(kind==='les'?'norsk':'historie',ap);
+      const ap=KID==='bastian'?(first?2:1):(kind==='math'?(first?3:1):(first?4:1));const gotApp=appCredit(KI.mode,ap);
       toast(['Riktig!','Kjempebra!','Supert!','Du klarte det!'][Math.floor(Math.random()*4)],'+'+got+' ⭐'+(gotApp?(KID==='bastian'?' · +'+gotApp+' i appen':' · +'+gotApp+' poeng'):''));
       bounceCard(p);
-      if(kind==='les')say('Riktig! '+S.q.word.toLowerCase()+'.');else say(S.q.f);
+      let txt;
+      if(kind==='les')txt='Riktig! '+q.word.toLowerCase()+'.';
+      else if(kind==='math')txt=`Riktig! ${sayNum(q.a)} ${q.op==='+'?'pluss':'ganger'} ${sayNum(q.b)} er ${q.ans}.`;
+      else if(kind==='bok'){txt=q.mode==='first'?`Riktig! ${q.word.toLowerCase()} begynner på ${q.ans}.`:`Riktig! ${q.word.toLowerCase()}.`;S.helper=true;S.board.redraw();updateQuizHud(S)}
+      else txt=q.f;
+      say(txt);
       S.idx++;updateDots(S);
-      setTimeout(()=>{if(S.idx>=3)S.finish();else S.show()},kind==='les'?1900:Math.max(2600,S.q.f.length*70));
+      setTimeout(()=>{if(S.idx>=3)S.finish();else S.show()},histLike?Math.max(2600,txt.length*70):2100);
     }else{
       S.tries++;p.dim=true;drawCard(p);sfx.wrong();shake(p);
-      player.vy=9;player.vel.x=(player.pos.x-p.px)*1.5-dir*4;player.vel.z=(player.pos.z-p.pz)*1.5;
+      player.vy=9;player.vel.x=(player.pos.x-p.px)*1.5-ux*4;player.vel.z=(player.pos.z-p.pz)*1.5-uz*4;
       if(kind==='les'){
         if(S.tries===1){say('Nesten! Se på én bokstav om gangen.');soundOut(S)}
-        else{S.hint=true;say('Ordet er '+S.q.word.toLowerCase()+'.');soundOut(S)}
+        else{S.hint=true;say('Ordet er '+q.word.toLowerCase()+'.');soundOut(S)}
+      }else if(kind==='math'){
+        S.helper=true;S.board.redraw();
+        if(S.tries===1)say(q.op==='+'?`Prøv igjen. Tell eplene: ${sayNum(q.a)} og ${sayNum(q.b)}.`:`Prøv igjen. ${sayNum(q.a)} ganger ${sayNum(q.b)} er ${Array(q.a).fill(sayNum(q.b)).join(' pluss ')}.`);
+        else{S.hint=true;say(`${sayNum(q.a)} ${q.op==='+'?'pluss':'ganger'} ${sayNum(q.b)} er ${q.ans}.`)}
+      }else if(kind==='bok'){
+        if(S.tries===1)say('Prøv igjen. Hør godt: '+q.word.toLowerCase()+'.');
+        else{S.hint=true;say(q.mode==='first'?`${q.word.toLowerCase()} begynner på ${q.ans}.`:`Det mangler en ${q.ans}.`)}
       }else{say('Prøv igjen!');setTimeout(()=>sayQ(S),900)}
     }
   };
   S.finish=function(){
     S.done=true;S.q=null;S.board.redraw();updateQuizHud(S);
-    toast('Broen er klar!','Gå over og finn skatten');sfx.fanfare();
+    toast('Broen er klar!','Gå over og finn skatten');sfx.fanfare();setTimeout(()=>addXP(15),2000);
     say('Kjempebra! Broen er klar. Gå over og finn skatten!');
     buildBridge(S.bridge);
   };
@@ -549,19 +838,24 @@ function soundOut(S){const word=S.q.word;let i=0;const step=()=>{if(S.q?.word!==
 function bounceCard(p){tween(.6,k=>{const s=1+Math.sin(k*Math.PI)*.25;p.card.scaling.setAll(s)})}
 function shake(p){const x0=p.card.position.x,z0=p.card.position.z;tween(.45,k=>{const a=Math.sin(k*Math.PI*6)*(1-k)*.18;p.card.position.x=x0+a;p.card.position.z=z0+a})}
 
-// bro som popper opp
-function makeBridge(x,z0,z1,y0,y1,col){
-  const n=Math.round(Math.abs(z1-z0)/1.25),planks=[];
-  for(let i=0;i<n;i++){const k=(i+.5)/n,z=lerp(z0,z1,k),y=lerp(y0,y1,k);
-    const p=BABYLON.MeshBuilder.CreateBox('plank',{width:3.2,height:.32,depth:1.12},scene);p.position.set(x,y-.16,z);p.rotation.y=(rnd()-.5)*.06;p.material=mat(i%2?col:'#B47B4A');p.scaling.setAll(.001);p.setEnabled(false);cast(p);
-    const s=solidBox(x,z,1.6,.62,y,y-1,{off:true,srf:'wood'});planks.push({p,s,y})}
+// bro som popper opp (vilkårlig retning)
+function makeBridge(x0,z0,x1,z1,y0,y1,col){
+  const L=Math.hypot(x1-x0,z1-z0),n=Math.round(L/1.25),planks=[],ang=Math.atan2(x1-x0,z1-z0);
+  for(let i=0;i<n;i++){const k=(i+.5)/n,x=lerp(x0,x1,k),z=lerp(z0,z1,k),y=lerp(y0,y1,k);
+    const p=BABYLON.MeshBuilder.CreateBox('plank',{width:3.2,height:.32,depth:1.12},scene);p.position.set(x,y-.16,z);p.rotation.y=ang+(rnd()-.5)*.06;p.material=mat(i%2?col:'#B47B4A');p.scaling.setAll(.001);p.setEnabled(false);cast(p);
+    const s=solidCyl(x,z,1.5,y,y-1,{off:true,srf:'wood'});planks.push({p,s,y})}
   return planks;
 }
+const movers=[];
+function addMover(o,vx,vy,vz,amp,sp,ph=0){o.base=o.b.position.clone();o.h=o.s.top-o.b.position.y;movers.push({o,vx,vy,vz,amp,sp,ph})}
+function updateMovers(){for(const m of movers){const off=Math.sin(time*m.sp+m.ph)*m.amp,o=m.o,s=o.s,b=o.b.position;
+  const nx=o.base.x+m.vx*off,ny=o.base.y+m.vy*off,nz=o.base.z+m.vz*off;s.dx=nx-b.x;s.dz=nz-b.z;b.set(nx,ny,nz);s.x=nx;s.z=nz;const hh=s.top-s.bottom;s.top=ny+o.h;s.bottom=s.top-hh;if(o.spin)o.b.rotation.y+=o.spin*.016}}
+const blinkers=[];let dinoNeck=null;
 function buildBridge(b){b.forEach((pl,i)=>{setTimeout(()=>{pl.p.setEnabled(true);pl.s.off=false;sfx.pop(i);const y=pl.y-.16;tween(.45,k=>{pl.p.scaling.setAll(Math.max(.001,easeBack(k)));pl.p.position.y=y-(1-k)*1.2});burst(pl.p.position,{n:8,c1:'#FFFFFF',c2:'#FFE9A8',size:[.15,.3],life:[.3,.6],power:[1,3],grav:-3})},i*110)})}
 
 // skattekiste + portal
 const chests=[],portals=[];
-function chest(x,z,top,hat,label){
+function chest(x,z,top,hat,label,world){
   const n=new BABYLON.TransformNode('chest',scene);n.position.set(x,top,z);n.rotation.y=Math.PI;
   const wood=mat('#9A5B2E'),gold=mat('#FFC83D',{em:'#5A3A00',spec:.9});
   const b=BABYLON.MeshBuilder.CreateBox('cb',{width:2.2,height:1.1,depth:1.4},scene);b.parent=n;b.position.y=.55;b.material=wood;
@@ -574,7 +868,7 @@ function chest(x,z,top,hat,label){
   const lock=BABYLON.MeshBuilder.CreateBox('lock',{width:.34,height:.4,depth:.12},scene);lock.parent=lidPiv;lock.position.set(0,.05,1.48);lock.material=gold;
   cast(n);solidBox(x,z,1.15,.75,top+1.2,top-.5);
   const glowRing=BABYLON.MeshBuilder.CreateTorus('cr',{diameter:3.4,thickness:.1,tessellation:40},scene);glowRing.position.set(x,top+.06,z);glowRing.material=mat('#FFE28A',{em:'#FFB800'});glowOnly(glowRing);
-  const c={n,lidPiv,x,z,top,hat,label,open:false,glowRing};chests.push(c);return c;
+  const c={n,lidPiv,x,z,top,hat,label,world,open:false,glowRing};chests.push(c);return c;
 }
 function portal(x,z,top,to){
   const n=new BABYLON.TransformNode('portal',scene);n.position.set(x,top,z);
@@ -603,14 +897,14 @@ function letterBlock(x,y,z,ch,col){
 const E={x:33,z:0,top:1};
 const les1=letterBlock(13.2,-.7,0,'L','#FF6B6B');
 const les2=letterBlock(17.2,-.3,0,'E','#FFB020');
-const les3=letterBlock(21.2,0,0,'S','#4F8DF7');les3.move={amp:2.2,sp:.9,base:0};
+const les3=letterBlock(21.2,0,0,'S','#4F8DF7');addMover(les3,0,0,1,2.2,.9);
 starRow([[13.2,1.3,0],[17.2,1.7,0],[21.2,2.0,0],[15.2,2.4,0],[19.2,2.8,0]]);
 const islE=island(E.x,E.z,E.top,9.5,{cp:true,cpx:-6,name:'ordskogen',grass:'#86DB5E',lip:'#69C24A'});
-const stE=station({cx:E.x,cz:E.z,top:E.top,dir:1,kind:'les',name:'Ordskogen'});
+const stE=station({cx:E.x,cz:E.z,top:E.top,ux:1,uz:0,kind:'les',name:'Ordskogen'});
 const islE2=island(E.x,27,1.6,6.5,{grass:'#A0E06A',lip:'#7FC651'});
-stE.bridge=makeBridge(E.x,9.2,20.7,E.top,1.6,'#E0A060');
-chest(E.x,27.8,1.6,'krone','Lesekrona');
-portal(E.x+3.6,24.5,1.6,'hub');
+stE.bridge=makeBridge(E.x,9.2,E.x,20.7,E.top,1.6,'#E0A060');
+const chE=chest(E.x,27.8,1.6,'krone','Lesekrona','les');
+const pE=portal(E.x+3.6,24.5,1.6,'hub');
 { // skog-pynt
   [[26,-6],[28,7],[38,-7.5],[40,6],[30,-8.6],[36,8.4],[25.5,3.5]].forEach(([x,z],i)=>tree(x,z,E.top,rr(.85,1.25)));
   [[E.x-4.5,30],[E.x+4.8,29.5],[E.x-2,31.8]].forEach(([x,z])=>tree(x,z,1.6,rr(.8,1.0)));
@@ -634,14 +928,14 @@ function crate(x,y,z){
   return {b,s:solidBox(x,z,1.1,1.1,y+1.1,y-1.1,{srf:'wood'})};
 }
 const W={x:-33,z:0,top:1};
-const v1=crate(-13.2,-.7,0),v2=crate(-17.2,-.3,0),v3=crate(-21.2,0,0);v3.move={amp:2.2,sp:.9,base:0,ph:1.6};
+const v1=crate(-13.2,-.7,0),v2=crate(-17.2,-.3,0),v3=crate(-21.2,0,0);addMover(v3,0,0,1,2.2,.9,1.6);
 starRow([[-13.2,1.3,0],[-17.2,1.7,0],[-21.2,2.0,0],[-15.2,2.4,0],[-19.2,2.8,0]]);
 const islW=island(W.x,W.z,W.top,9.5,{cp:true,cpx:6,name:'viking',grass:'#9CCB6B',lip:'#7DB052',dirt:'#A97B55'});
-const stW=station({cx:W.x,cz:W.z,top:W.top,dir:-1,kind:'hist',name:'Vikingbyen'});
+const stW=station({cx:W.x,cz:W.z,top:W.top,ux:-1,uz:0,kind:'hist',name:'Vikingbyen'});
 const islW2=island(W.x,27,1.6,6.5,{grass:'#A7D27A',lip:'#86B85B',dirt:'#A97B55'});
-stW.bridge=makeBridge(W.x,9.2,20.7,W.top,1.6,'#C48B55');
-chest(W.x,27.8,1.6,'vikinghjelm','Vikinghjelmen');
-portal(W.x-3.6,24.5,1.6,'hub');
+stW.bridge=makeBridge(W.x,9.2,W.x,20.7,W.top,1.6,'#C48B55');
+const chW=chest(W.x,27.8,1.6,'vikinghjelm','Vikinghjelmen','viking');
+const pW=portal(W.x-3.6,24.5,1.6,'hub');
 let fireLight;
 {
   // langhus
@@ -667,6 +961,127 @@ let fireLight;
   flowers(W.x,W.z,W.top,8.8,40);
   starRow([[W.x+3,W.top+1,-1.5],[W.x+5.5,W.top+1,2.5],[W.x,2.4,12],[W.x,2.7,15.5],[W.x,3.0,19]]);
 }
+// ---------- verdener, progresjon ----------
+if(!Array.isArray(save.crystals))save.crystals=[];
+const WORLDS=[];
+const deg=d=>d*Math.PI/180;
+const polar=(x,z,r,d)=>[x+Math.cos(deg(d))*r,z+Math.sin(deg(d))*r];
+function ghost(o,on){o.b.visibility=on?.22:1;o.s.off=on;o.b.getChildMeshes().forEach(m=>m.visibility=on?.22:1)}
+function unlockWorld(w,quiet){w.locked=false;w.stones.forEach((o,i)=>{if(o.b.visibility<1){if(quiet){ghost(o,false);return}
+  setTimeout(()=>{ghost(o,false);o.b.scaling.setAll(.01);tween(.5,k=>o.b.scaling.setAll(Math.max(.01,easeBack(k))));burst(o.b.position,{n:24,c1:'#FFFFFF',c2:'#9FE8FF',add:true,power:[2,5],grav:-2});sfx.pop(i+2)},300+i*250)}});
+  if(w.lockFx){w.lockFx.setEnabled(false)}if(w.sign)w.sign.redraw()}
+function hubSign(w,x,z,face){w.sign=sign(x,0,z,face,(c,W,H)=>{const lk=save.crystals.length<w.need;
+  textLines(c,W,H,lk?[{t:'🔒',size:150,emoji:true},{t:w.name,size:140},{t:`Trenger ${w.need} 💎`,size:100,weight:600,color:'#7A5A3A'}]:[{t:w.emoji,size:170,emoji:true},{t:w.name,size:150}])},{w:3.8,h:2.5})}
+function makeSteps(ux,uz,from,to,topTo,n,make){const a=[];for(let i=0;i<n;i++){const d=lerp(from,to,n===1?.5:i/(n-1)),top=lerp(0,topTo,(i+1)/(n+1))-.2;a.push(make(ux*d,top,uz*d,i))}return a}
+function buildWorld(o){
+  const ax=o.ux*o.dA,az=o.uz*o.dA,[bdx,bdz]=o.bdir;
+  const stones=makeSteps(o.ux,o.uz,12.2,o.dA-o.rA-1.5,o.topA,o.n||3,o.stone);
+  stones.forEach(s=>star(s.b.position.x,s.s.top+1.3,s.b.position.z));
+  const A=island(ax,az,o.topA,o.rA,{cp:true,cpx:-o.ux*(o.rA-3),cpz:-o.uz*(o.rA-3),grass:o.grass,lip:o.lip,dirt:o.dirt,stone:o.stoneCol});
+  const st=station({cx:ax,cz:az,top:o.topA,ux:o.su[0],uz:o.su[1],kind:o.kind,name:o.name,r:o.rA});
+  const D=o.rA+(o.gap||9)+o.rB,bx=ax+bdx*D,bz=az+bdz*D;
+  island(bx,bz,o.topB,o.rB,{grass:o.grassB||o.grass,lip:o.lip,dirt:o.dirt,stone:o.stoneCol});
+  st.bridge=makeBridge(ax+bdx*(o.rA-.3),az+bdz*(o.rA-.3),bx-bdx*(o.rB-.3),bz-bdz*(o.rB-.3),o.topA,o.topB,o.plank||'#E0A060');
+  for(let k=1;k<=3;k++){const t=k/4;star(lerp(ax+bdx*o.rA,bx-bdx*o.rB,t),lerp(o.topA,o.topB,t)+1.4,lerp(az+bdz*o.rA,bz-bdz*o.rB,t))}
+  const ch=chest(bx+bdx*.8,bz+bdz*.8,o.topB,o.hat,o.hatLabel,o.id);
+  const pp=portal(bx-bdz*3.4-bdx*1.4,bz+bdx*3.4-bdz*1.4,o.topB,'hub');
+  const w={id:o.id,name:o.name,emoji:o.emoji,theme:o.theme,need:o.need,ax,az,rA:o.rA,topA:o.topA,bx,bz,rB:o.rB,topB:o.topB,station:st,chest:ch,portal:pp,stones,ux:o.ux,uz:o.uz};
+  WORLDS.push(w);
+  if(o.deco)o.deco(w);
+  // lås: de to første steinene er gjennomsiktige til verdenen er åpnet
+  if(save.crystals.length<o.need){w.locked=true;stones.slice(0,2).forEach(s=>ghost(s,true));
+    const fx=new BABYLON.ParticleSystem('lock',80,scene);fx.particleTexture=DOT;fx.emitter=V3(o.ux*11.5,.5,o.uz*11.5);fx.minEmitBox=V3(-1.2,0,-1.2);fx.maxEmitBox=V3(1.2,0,1.2);
+    fx.color1=C4('#C9B8FF',.8);fx.color2=C4('#9FE8FF',.7);fx.colorDead=C4('#FFFFFF',0);fx.minSize=.1;fx.maxSize=.25;fx.minLifeTime=.8;fx.maxLifeTime=1.5;fx.emitRate=30;fx.direction1=V3(0,1,0);fx.direction2=V3(0,2,0);fx.minEmitPower=.5;fx.maxEmitPower=1;fx.gravity=V3(0,0,0);fx.blendMode=BABYLON.ParticleSystem.BLENDMODE_ADD;fx.start();
+    w.lockFx={setEnabled:v=>{if(!v)fx.stop()}}}
+  return w;
+}
+function numBlock(x,y,z,ch,col){const o=letterBlock(x,y,z,ch,col);return o}
+function stump(x,y,z){const m=flat(BABYLON.MeshBuilder.CreateCylinder('stump',{height:2.2,diameterTop:2.3,diameterBottom:2.6,tessellation:9},scene));m.position.set(x,y,z);m.material=mat('#9B6A3E');
+  const top=BABYLON.MeshBuilder.CreateDisc('rings',{radius:1.12,tessellation:18},scene);top.rotation.x=Math.PI/2;top.position.set(0,1.11,0);top.parent=m;top.material=mat('#E8C48C');
+  const moss=flat(BABYLON.MeshBuilder.CreateCylinder('moss',{height:.25,diameter:2.45,tessellation:9},scene));moss.parent=m;moss.position.y=.95;moss.material=mat('#6FBF4A');cast(m);
+  return {b:m,s:solidCyl(x,z,1.15,y+1.1,y-1.1,{srf:'wood'})}}
+function asteroid(x,y,z){const m=flat(BABYLON.MeshBuilder.CreateCylinder('ast',{height:1.6,diameterTop:2.6,diameterBottom:1.6,tessellation:7},scene));m.position.set(x,y+.3,z);m.material=mat('#8E97AB');
+  const cr=BABYLON.MeshBuilder.CreateDisc('cr',{radius:.35,tessellation:10},scene);cr.parent=m;cr.rotation.x=Math.PI/2;cr.position.set(.3,.81,-.2);cr.material=mat('#6E7891');cast(m);
+  const o={b:m,s:solidCyl(x,z,1.2,y+1.1,y-1.1,{srf:'block'})};o.spin=.4;return o}
+function palm(x,z,base,s=1){const n=new BABYLON.TransformNode('palm',scene);n.position.set(x,base,z);n.scaling.setAll(s);n.rotation.y=rnd()*6;
+  for(let i=0;i<5;i++){const t=flat(BABYLON.MeshBuilder.CreateCylinder('pt',{height:.8,diameterTop:.32-i*.03,diameterBottom:.4-i*.03,tessellation:6},scene));t.parent=n;t.position.set(i*i*.03,.4+i*.75,0);t.rotation.z=-.06*i;t.material=mat(i%2?'#A8794A':'#8B5E36')}
+  for(let i=0;i<6;i++){const piv=new BABYLON.TransformNode('lp',scene);piv.parent=n;piv.position.set(.5,3.8,0);piv.rotation.y=i/6*Math.PI*2;
+    const l=BABYLON.MeshBuilder.CreateBox('leaf',{width:.5,height:.06,depth:2.2},scene);l.parent=piv;l.position.z=1;l.rotation.x=.45;l.material=mat(i%2?'#3FAE4F':'#56C25A');foliage.push({m:piv,ph:x+i,a:.06,b:0})}
+  cast(n);solidCyl(x,z,.35*s,base+4*s,base-.1)}
+function fern(x,z,base){for(let i=0;i<4;i++){const f=flat(BABYLON.MeshBuilder.CreateCylinder('fern',{height:1,diameterTop:0,diameterBottom:.5,tessellation:4},scene));f.position.set(x,base+.4,z);f.rotation.set(.7,i*1.57+rnd(),0);f.material=mat('#4FAF45');cast(f)}}
+
+// Matteslottet (nord)
+const WM=buildWorld({id:'math',name:'Matteslottet',emoji:'🏰',kind:'math',theme:'castle',need:1,ux:0,uz:1,dA:32,rA:9.5,topA:1,su:[1,0],bdir:[0,1],rB:7,topB:2,
+  grass:'#93D69A',lip:'#72BE7C',plank:'#B9A6F0',hat:'tryllehatt',hatLabel:'Tryllehatten',
+  stone:(x,y,z,i)=>{const o=numBlock(x,y-1.1,z,String(i+1),['#7B6CF6','#FF6B9A','#FFB020'][i%3]);if(i===1)addMover(o,0,1,0,.9,1.1);return o},
+  deco:w=>{const sM=mat('#D6DAE4'),rM=mat('#7B6CF6');
+    for(const sx of [-1,1]){const t=flat(BABYLON.MeshBuilder.CreateCylinder('tw',{height:6,diameter:2.2,tessellation:8},scene));t.position.set(w.bx+sx*4.4,w.topB+3,w.bz+3.6);t.material=sM;cast(t);solidCyl(t.position.x,t.position.z,1.1,w.topB+6,w.topB-1);
+      const r=flat(BABYLON.MeshBuilder.CreateCylinder('tr',{height:2.4,diameterTop:0,diameterBottom:2.8,tessellation:8},scene));r.position.set(w.bx+sx*4.4,w.topB+7.2,w.bz+3.6);r.material=rM;cast(r);
+      const fl=BABYLON.MeshBuilder.CreatePlane('flag',{width:1.2,height:.7,sideOrientation:BABYLON.Mesh.DOUBLESIDE},scene);fl.position.set(w.bx+sx*4.4+.6,w.topB+9,w.bz+3.6);fl.material=mat(sx<0?'#FFC83D':'#FF6B9A');foliage.push({m:fl,ph:sx,a:.25,b:0})}
+    const wall=BABYLON.MeshBuilder.CreateBox('wall',{width:7,height:3.6,depth:1},scene);wall.position.set(w.bx,w.topB+1.8,w.bz+4.4);wall.material=sM;cast(wall);solidBox(w.bx,w.bz+4.4,3.5,.5,w.topB+3.6,w.topB-1);
+    for(let i=-3;i<=3;i+=2){const m=BABYLON.MeshBuilder.CreateBox('mer',{width:.8,height:.7,depth:1},scene);m.position.set(w.bx+i,w.topB+3.95,w.bz+4.4);m.material=sM;cast(m)}
+    for(const d of [135,180,225]){const [x,z]=polar(w.ax,w.az,7.4,d);tree(x,z,w.topA,rr(.8,1.1))}
+    for(const d of [40,320]){const [x,z]=polar(w.ax,w.az,7.8,d);const b=BABYLON.MeshBuilder.CreateIcoSphere('cry',{radius:.6,subdivisions:0},scene);b.position.set(x,w.topA+.6,z);b.scaling.y=1.8;b.material=mat('#B9A6F0',{em:'#5B3FD0'});glowOnly(b);cast(b)}
+    flowers(w.ax,w.az,w.topA,8.5,40);flowers(w.bx,w.bz,w.topB,6,25)}});
+// Månebasen (sør)
+const WMo=buildWorld({id:'mane',name:'Månebasen',emoji:'🚀',kind:'bok',theme:'space',need:2,ux:0,uz:-1,dA:32,rA:9.5,topA:0,su:[-1,0],bdir:[0,-1],rB:7,topB:1,
+  grass:'#DCE2EE',lip:'#BAC3D6',dirt:'#8D96AB',stoneCol:'#6E7891',plank:'#9FB4D8',hat:'romhjelm',hatLabel:'Romhjelmen',
+  stone:(x,y,z,i)=>{const o=asteroid(x,y-1.1,z);if(i===1)addMover(o,1,0,0,2,.8);return o},
+  deco:w=>{const crater=(x,z,r,top)=>{const d=BABYLON.MeshBuilder.CreateDisc('crt',{radius:r,tessellation:16},scene);d.rotation.x=Math.PI/2;d.position.set(x,top+.02,z);d.material=mat('#B3BCCF');
+      const t=BABYLON.MeshBuilder.CreateTorus('crr',{diameter:r*2,thickness:.22,tessellation:20},scene);t.position.set(x,top+.05,z);t.material=mat('#C8D0E0')};
+    for(const [d,r] of [[20,7],[60,6.5],[300,6.8],[340,7.5]]){const [x,z]=polar(w.ax,w.az,r,d);crater(x,z,rr(.6,1.1),w.topA)}
+    // romkuppel
+    {const [x,z]=polar(w.ax,w.az,6.6,45);const dome=BABYLON.MeshBuilder.CreateSphere('dome',{diameter:4,segments:12,slice:.5},scene);dome.position.set(x,w.topA,z);dome.material=mat('#F4F7FF',{spec:.6});cast(dome);solidCyl(x,z,2,w.topA+2,w.topA-1);
+      const win=BABYLON.MeshBuilder.CreateSphere('win',{diameter:1,segments:8},scene);win.position.set(x+.9,w.topA+1.2,z-.9);win.scaling.set(1,.6,.2);win.material=mat('#7CC8FF',{em:'#2A6FB0'});glowOnly(win)}
+    // rakett på B
+    {const rx=w.bx-3.6,rz=w.bz+2.4,R=new BABYLON.TransformNode('rocket',scene);R.position.set(rx,w.topB,rz);
+      const body=flat(BABYLON.MeshBuilder.CreateCylinder('rb',{height:4.2,diameter:1.5,tessellation:12},scene));body.parent=R;body.position.y=2.6;body.material=mat('#F6F8FF',{spec:.5});
+      const nose=flat(BABYLON.MeshBuilder.CreateCylinder('rn',{height:1.6,diameterTop:0,diameterBottom:1.5,tessellation:12},scene));nose.parent=R;nose.position.y=5.5;nose.material=mat('#FF5A5A');
+      for(let i=0;i<3;i++){const f=BABYLON.MeshBuilder.CreateBox('fin',{width:.12,height:1.4,depth:1},scene);const p=new BABYLON.TransformNode('fp',scene);p.parent=R;p.rotation.y=i*2.094;f.parent=p;f.position.set(0,.9,.9);f.material=mat('#FF5A5A')}
+      const win=BABYLON.MeshBuilder.CreateCylinder('rw',{height:.1,diameter:.7,tessellation:16},scene);win.parent=R;win.rotation.x=Math.PI/2;win.position.set(0,3.4,.76);win.material=mat('#7CC8FF',{em:'#2A6FB0'});glowOnly(win);
+      cast(R);solidCyl(rx,rz,1,w.topB+6,w.topB-1);
+      const fl=new BABYLON.ParticleSystem('thr',120,scene);fl.particleTexture=DOT;fl.emitter=V3(rx,w.topB+.4,rz);fl.minEmitBox=V3(-.3,0,-.3);fl.maxEmitBox=V3(.3,0,.3);fl.color1=C4('#BFE6FF',.6);fl.color2=C4('#FFFFFF',.5);fl.colorDead=C4('#FFFFFF',0);fl.minSize=.3;fl.maxSize=.7;fl.minLifeTime=.4;fl.maxLifeTime=.9;fl.emitRate=25;fl.direction1=V3(-.5,.2,-.5);fl.direction2=V3(.5,.5,.5);fl.minEmitPower=.5;fl.maxEmitPower=1.2;fl.gravity=V3(0,.3,0);fl.start()}
+    // antenne med blinkende lys
+    {const [x,z]=polar(w.ax,w.az,7.6,330);const p=BABYLON.MeshBuilder.CreateCylinder('ant',{height:3,diameter:.12},scene);p.position.set(x,w.topA+1.5,z);p.material=mat('#C8D0E0');cast(p);
+      const dish=BABYLON.MeshBuilder.CreateSphere('dish',{diameter:1.6,segments:10,slice:.5,sideOrientation:BABYLON.Mesh.DOUBLESIDE},scene);dish.position.set(x,w.topA+3,z);dish.rotation.x=Math.PI*.75;dish.material=mat('#F4F7FF');cast(dish);
+      const l=BABYLON.MeshBuilder.CreateSphere('blink',{diameter:.28,segments:6},scene);l.position.set(x,w.topA+3.2,z);l.material=mat('#FF3B3B',{em:'#FF2020'});glowOnly(l);blinkers.push(l)}
+    for(const [d,r] of [[100,7.8],[250,7]]){const [x,z]=polar(w.ax,w.az,r,d);rock(x,z,w.topA,1.3)}
+    {const fl=BABYLON.MeshBuilder.CreatePlane('mflag',{width:1.4,height:.9,sideOrientation:BABYLON.Mesh.DOUBLESIDE},scene);fl.position.set(w.bx+3.8,w.topB+2.6,w.bz-2.2);fl.material=mat('#4F8DF7');
+      const pole=BABYLON.MeshBuilder.CreateCylinder('mp',{height:3,diameter:.08},scene);pole.position.set(w.bx+3.1,w.topB+1.5,w.bz-2.2);pole.material=mat('#C8D0E0')}}});
+// Dinodalen (sørvest)
+const S2=Math.SQRT1_2;
+const WD=buildWorld({id:'dino',name:'Dinodalen',emoji:'🦕',kind:'dino',theme:'dino',need:3,ux:-S2,uz:-S2,dA:32.5,rA:9,topA:.5,su:[S2,-S2],bdir:[-S2,-S2],rB:7,topB:1.5,
+  grass:'#7FCC55',lip:'#62B23E',dirt:'#B07A4A',plank:'#C9935A',hat:'dinohette',hatLabel:'Dinohetta',
+  stone:(x,y,z,i)=>{const o=stump(x,y-1.1,z);if(i===1)addMover(o,S2,0,-S2,1.8,.9);return o},
+  deco:w=>{for(const d of [95,130,165,200,255]){const [x,z]=polar(w.ax,w.az,rr(6.6,7.8),d);palm(x,z,w.topA,rr(.85,1.15))}
+    for(const d of [110,150,185,270,300]){const [x,z]=polar(w.ax,w.az,rr(5,6),d);fern(x,z,w.topA)}
+    // langhals-dino
+    {const [x,z]=polar(w.ax,w.az,6.4,15),N=new BABYLON.TransformNode('dino',scene);N.position.set(x,w.topA,z);N.rotation.y=deg(200);
+      const g=mat('#5FB86A'),b=mat('#F2E6B8');
+      const body=BABYLON.MeshBuilder.CreateBox('db',{width:1.8,height:1.5,depth:3},scene);body.parent=N;body.position.y=1.9;body.material=g;
+      const belly=BABYLON.MeshBuilder.CreateBox('dbe',{width:1.5,height:.4,depth:2.4},scene);belly.parent=N;belly.position.y=1.15;belly.material=b;
+      for(const [lx,lz] of [[-.6,-1],[.6,-1],[-.6,1],[.6,1]]){const l=BABYLON.MeshBuilder.CreateBox('dl',{width:.55,height:1.2,depth:.55},scene);l.parent=N;l.position.set(lx,.6,lz);l.material=g}
+      const neckP=new BABYLON.TransformNode('dn',scene);neckP.parent=N;neckP.position.set(0,2.4,1.3);
+      const neck=BABYLON.MeshBuilder.CreateBox('dne',{width:.6,height:2.6,depth:.6},scene);neck.parent=neckP;neck.position.set(0,1.2,.3);neck.rotation.x=.25;neck.material=g;
+      const head=BABYLON.MeshBuilder.CreateBox('dh',{width:.8,height:.6,depth:1.1},scene);head.parent=neckP;head.position.set(0,2.6,.75);head.material=g;
+      for(const sx of [-.41,.41]){const e=BABYLON.MeshBuilder.CreateBox('de',{width:.04,height:.16,depth:.16},scene);e.parent=head;e.position.set(sx,.1,.2);e.material=mat('#1E2238')}
+      const tail=BABYLON.MeshBuilder.CreateBox('dt',{width:.6,height:.5,depth:2.4},scene);tail.parent=N;tail.position.set(0,1.7,-2.4);tail.rotation.x=-.25;tail.material=g;
+      for(let i=0;i<4;i++){const s=BABYLON.MeshBuilder.CreateBox('ds',{width:.12,height:.35,depth:.35},scene);s.parent=N;s.position.set(0,2.8,-1+i*.7);s.rotation.x=.78;s.material=mat('#FF9F45')}
+      cast(N);solidCyl(x,z,1.7,w.topA+3,w.topA-1);dinoNeck=neckP}
+    // vulkan på B
+    {const [x,z]=polar(w.bx,w.bz,4.2,225);const v=flat(BABYLON.MeshBuilder.CreateCylinder('volc',{height:5,diameterTop:1.6,diameterBottom:6,tessellation:9},scene));v.position.set(x,w.topB+2.5,z);v.material=mat('#7A5A48');cast(v);solidCyl(x,z,2.6,w.topB+5,w.topB-1);
+      const lava=BABYLON.MeshBuilder.CreateDisc('lava',{radius:.75,tessellation:12},scene);lava.rotation.x=Math.PI/2;lava.position.set(x,w.topB+5.02,z);lava.material=mat('#FF7A1A',{em:'#FF5A00'});glowOnly(lava);
+      const sm=new BABYLON.ParticleSystem('smoke',120,scene);sm.particleTexture=DOT;sm.emitter=V3(x,w.topB+5.2,z);sm.minEmitBox=V3(-.4,0,-.4);sm.maxEmitBox=V3(.4,0,.4);sm.color1=C4('#E8E2DC',.5);sm.color2=C4('#C9C0B8',.4);sm.colorDead=C4('#FFFFFF',0);sm.minSize=.8;sm.maxSize=1.6;sm.minLifeTime=2;sm.maxLifeTime=3.5;sm.emitRate=14;sm.direction1=V3(-.3,1,-.3);sm.direction2=V3(.3,1.5,.3);sm.minEmitPower=.6;sm.maxEmitPower=1.1;sm.gravity=V3(.15,.2,0);sm.addSizeGradient(0,.5);sm.addSizeGradient(1,2.2);sm.start()}
+    // egg
+    for(let i=0;i<3;i++){const [x,z]=polar(w.bx,w.bz,2.6,100+i*25);const e=BABYLON.MeshBuilder.CreateSphere('egg',{diameter:.8,segments:10},scene);e.scaling.y=1.3;e.position.set(x,w.topB+.5,z);e.material=mat(['#F5EBD0','#DCEFD0','#F5D6C8'][i]);cast(e)}
+    palm(w.bx+3.5,w.bz-3.5,w.topB,.9);fern(w.bx-1,w.bz+4,w.topB);flowers(w.ax,w.az,w.topA,8,30)}});
+
+// Ordskogen og Vikingbyen er åpne fra start
+WORLDS.unshift({id:'les',name:'Ordskogen',emoji:'📖',theme:'hub',need:0,ax:E.x,az:E.z,rA:9.5,topA:E.top,bx:E.x,bz:27,rB:6.5,topB:1.6,station:stE,chest:chE,portal:pE,stones:[les1,les2,les3],ux:1,uz:0,dA:33},
+  {id:'viking',name:'Vikingbyen',emoji:'⚔️',theme:'viking',need:0,ax:W.x,az:W.z,rA:9.5,topA:W.top,bx:W.x,bz:27,rB:6.5,topB:1.6,station:stW,chest:chW,portal:pW,stones:[v1,v2,v3],ux:-1,uz:0,dA:33});
+WM.dA=32;WMo.dA=32;WD.dA=32.5;
+hubSign(WM,3.4,8.6,0);hubSign(WMo,3.4,-8.6,Math.PI);hubSign(WD,-3.6,-7.9,Math.atan2(.42,.91)+Math.PI);
+
 // vikingskip på havet
 let ship;
 {
@@ -807,11 +1222,29 @@ const THEMES={
          [[0,7,4],[4,9,2],[6,12,2],[8,7,8]],
          [[0,5,4],[4,7,2],[6,9,2],[8,10,4],[12,12,4]],
          [[0,9,6],[6,7,2],[8,4,4],[12,2,4]]]},
+  castle:{bpm:96,kind:'epic',chords:[[0,4,7],[5,9,12],[7,11,14],[0,4,7]],bass:[0,5,7,0],
+    mel:[[[0,12,4],[4,16,2],[6,19,2],[8,17,4],[12,16,4]],
+         [[0,17,4],[4,21,2],[6,19,2],[8,17,8]],
+         [[0,19,4],[4,23,2],[6,26,2],[8,24,4],[12,23,4]],
+         [[0,24,6],[6,19,2],[8,16,4],[12,12,4]]]},
+  space:{bpm:80,kind:'space',chords:[[-3,0,4],[-7,-3,0],[0,4,7],[-5,-1,2]],bass:[-3,-7,0,-5],
+    mel:[[[0,12,6],[8,16,4],[12,19,4]],
+         [[0,17,8],[8,16,8]],
+         [[0,16,6],[8,19,4],[12,24,4]],
+         [[0,23,8],[8,19,8]]]},
+  dino:{bpm:116,kind:'dino',chords:[[0,4,7],[-3,0,4],[5,9,12],[7,11,14]],bass:[0,-3,5,7],
+    mel:[[[0,12,1],[2,16,1],[4,19,2],[8,16,1],[10,19,1],[12,21,2]],
+         [[0,19,1],[2,16,1],[4,12,2],[8,9,2],[12,12,2]],
+         [[0,17,1],[2,21,1],[4,24,2],[8,21,1],[10,17,1],[12,16,2]],
+         [[0,14,2],[4,19,2],[8,17,1],[10,14,1],[12,12,4]]]},
 };
 let musicTheme='hub',wantTheme='hub';
 function lead(kind,f,at,d){
-  if(kind==='pop'){voice(f,{type:'sine',at,d:d+.35,v:.07,rev:.45,dly:.25});voice(f*2,{type:'sine',at,d:.25,v:.025});voice(f*3.01,{type:'sine',at,d:.12,v:.015})}
-  else{voice(f,{type:'triangle',at,d:d+.15,v:.075,a:.07,vib:true,hold:d*.5,rev:.6,dly:.2,lp:2600});noise(Math.min(d,.25),.012,1800,{at,type:'bandpass',a:.05,bus:musicBus})}
+  const bus=musicBus;
+  if(kind==='pop'){voice(f,{bus,type:'sine',at,d:d+.35,v:.07,rev:.45,dly:.25});voice(f*2,{bus,type:'sine',at,d:.25,v:.025});voice(f*3.01,{bus,type:'sine',at,d:.12,v:.015})}
+  else if(kind==='marimba'){voice(f,{bus,type:'sine',at,d:.45,v:.085,rev:.3});voice(f*4,{bus,type:'sine',at,d:.06,v:.025});voice(f*10,{bus,type:'sine',at,d:.025,v:.01})}
+  else if(kind==='space'){voice(f,{bus,type:'triangle',at,d:d+.7,v:.05,a:.12,vib:true,hold:d*.6,rev:.85,dly:.45,lp:1800})}
+  else{voice(f,{bus,type:'triangle',at,d:d+.15,v:.075,a:.07,vib:true,hold:d*.5,rev:.6,dly:.2,lp:2600});noise(Math.min(d,.25),.012,1800,{at,type:'bandpass',a:.05,bus:musicBus})}
 }
 function startMusic(){
   let next=AC.currentTime+.15,step=0;
@@ -829,6 +1262,18 @@ function startMusic(){
         if(s===0||s===8||(s===10&&bar===3)||(s===7&&bar%2))kick(at,.32);
         if(s===4||s===12)snare(at,.1);
         if(s%2===0)hat(at,s%4===2?.045:.022);else if(loop>0)shaker(at,.012);
+      }else if(th.kind==='space'){
+        if(s===0)voice(hz(th.bass[bar]-24),{...B,type:'sine',at,d:sd*16,a:.3,hold:sd*10,v:.1});
+        if(s%2===0){const ar=[0,1,2,1][(s/2)%4];voice(hz(ch[ar]+12+(s%8>=4?12:0)),{...B,type:'sine',at,d:sd*3,v:.032,dly:.5,rev:.7})}
+        for(const [st,n,l] of th.mel[bar])if(st===s&&loop%2===0)lead('space',hz(n),at,l*sd);
+        if(loop%2===1&&s%4===0)voice(hz(ch[(s/4)%3]+24),{...B,type:'sine',at,d:sd*4,v:.025,rev:.8,dly:.5});
+        if(s===0||s===10)kick(at,.12);if(s%4===2)shaker(at,.008);
+      }else if(th.kind==='dino'){
+        if(s===0||s===6||s===8||s===14)voice(hz(th.bass[bar]-24),{...B,type:'triangle',at,d:sd*2,v:.15});
+        if(s%2===1)lead('marimba',hz(ch[((s-1)/2)%3]+12)*.5,at,sd);
+        if(loop%2===0)for(const [st,n,l] of th.mel[bar])if(st===s)lead('marimba',hz(n),at,l*sd);
+        if(s===0||s===8)tom(at,95,.3);if(s===4||s===12||(s===14&&bar===3))tom(at,140,.2);
+        if(s%2===1)shaker(at,.014);if(s===0)kick(at,.2);
       }else{
         if(s===0)voice(hz(th.bass[bar]-24),{...B,type:'sawtooth',at,d:sd*16,a:.15,hold:sd*8,v:.05,lp:420});
         if(s%4===2)voice(hz(ch[(s>>2)%3]+12),{...B,type:'triangle',at,d:sd*4,v:.03,rev:.5,dly:.35});
@@ -873,34 +1318,105 @@ const toastEl=$('#toast');
 function toast(a,b){toastEl.innerHTML='';toastEl.append(a);if(b){const s=document.createElement('small');s.textContent=b;toastEl.append(s)}toastEl.classList.remove('go');void toastEl.offsetWidth;toastEl.classList.add('go')}
 let hudStation=null;
 function updateQuizHud(S){
-  const el=$('#quiz');if(!S||!S.q){el.classList.remove('show');return}
-  hudStation=S;el.classList.add('show');
-  const les=S.kind==='les';$('#qlabel').textContent=les?'Les ordet':'Vikingbyen';
-  $('#qword').hidden=!les;$('#qtext').hidden=les;
-  if(les){$('#qword').innerHTML='';[...S.q.word].forEach(ch=>{const s=document.createElement('span');s.textContent=ch;$('#qword').append(s)})}
-  else $('#qtext').textContent=S.q.q;
-  $('#sayBtn').textContent=les?'🔊 Hør ordet':'🔊 Les opp';
+  const el=$('#quiz');if(!S||!S.q||shopOpen){el.classList.remove('show');if(!S||!S.q)hudStation=null;return}
+  hudStation=S;el.classList.add('show');const k=S.kind,q=S.q,W=$('#qword'),T=$('#qtext');
+  $('#qlabel').textContent={les:'Les ordet',hist:'Vikingbyen',dino:'Dinodalen',math:q.op==='+'?'Regn ut':'Gangetabellen',bok:q.mode==='first'?'Første bokstav':'Hvilken bokstav mangler?'}[k];
+  const useWord=k!=='hist'&&k!=='dino';W.hidden=!useWord;T.hidden=useWord;W.innerHTML='';W.classList.toggle('math',k==='math');
+  const add=(t,c)=>{const sp=document.createElement('span');sp.textContent=t;if(c)sp.className=c;W.append(sp)};
+  if(k==='les')[...q.word].forEach(ch=>add(ch));
+  else if(k==='math')add(`${q.a} ${q.op} ${q.b} = ?`);
+  else if(k==='bok'){add(q.e+' ');if(q.mode==='first'){add('?','blank');[...q.word].slice(1).forEach(()=>add('_'))}else[...q.word].forEach((ch,i)=>add(i===q.idx&&!S.helper?'_':ch,i===q.idx?'blank':''))}
+  else T.textContent=q.q;
+  $('#sayBtn').textContent=k==='les'?'🔊 Hør ordet':'🔊 Les opp';
   updateDots(S);
 }
 function updateDots(S){[...$('#dots').children].forEach((d,i)=>d.classList.toggle('on',i<S.idx))}
 function hlHud(i){[...$('#qword').children].forEach((s,j)=>s.classList.toggle('hi',i===-2||i===j))}
 $('#sayBtn').addEventListener('click',()=>{const S=hudStation;if(!S||!S.q)return;initAudio();
-  if(S.kind==='les'){S.hint=true;say(S.q.word.toLowerCase());soundOut(S)}else sayQ(S)});
+  S.ask()});
+$('#goal').addEventListener('click',()=>{initAudio();say($('#goal .t').textContent)});
 const musicBtn=$('#musicBtn');musicBtn.classList.toggle('off',!save.music);
 musicBtn.addEventListener('click',()=>{initAudio();save.music=!save.music;persist();musicBtn.classList.toggle('off',!save.music);if(musicBus)musicBus.gain.setTargetAtTime(save.music?.55:0,AC.currentTime,.2)});
 if(KID||EMBED){const bb=$('#backBtn');bb.hidden=false;bb.addEventListener('click',()=>{try{speechSynthesis.cancel()}catch(e){};if(AC)AC.suspend();goBack()})}
-const hatBtn=$('#hatBtn');
-function refreshHatBtn(){hatBtn.hidden=!save.hats.length}
-refreshHatBtn();
-hatBtn.addEventListener('click',()=>{const list=['',...save.hats];const i=(list.indexOf(save.hat)+1)%list.length;wearHat(list[i]);sfx.pop(2);player.sqv=-3});
 
+// ---------- veivisning ----------
+const guide=(()=>{
+  const n=new BABYLON.TransformNode('guide',scene);
+  const gm=mat('#FFD84D',{em:'#FFB300'});
+  const head=flat(BABYLON.MeshBuilder.CreateCylinder('gh',{height:.9,diameterTop:0,diameterBottom:.9,tessellation:4},scene));head.parent=n;head.rotation.x=Math.PI/2;head.position.z=.75;head.material=gm;glowOnly(head);
+  const shaft=BABYLON.MeshBuilder.CreateBox('gs',{width:.3,height:.16,depth:.8},scene);shaft.parent=n;shaft.position.z=0;shaft.material=gm;glowOnly(shaft);
+  const dots=[];for(let i=0;i<14;i++){const d=BABYLON.MeshBuilder.CreateDisc('gd',{radius:.22,tessellation:12},scene);d.rotation.x=Math.PI/2;d.material=gm;glowOnly(d);d.isPickable=false;dots.push(d)}
+  const bt=dynTex(64,256,false),bc=bt.getContext();const g=bc.createLinearGradient(0,0,0,256);g.addColorStop(0,'rgba(255,230,120,0)');g.addColorStop(.6,'rgba(255,230,120,.35)');g.addColorStop(1,'rgba(255,240,170,.75)');bc.fillStyle=g;bc.fillRect(0,0,64,256);bt.update();
+  const beam=BABYLON.MeshBuilder.CreateCylinder('beam',{height:22,diameter:1.6,tessellation:16,cap:BABYLON.Mesh.NO_CAP},scene);const bm=unlit(bt);bm.backFaceCulling=false;bm.fogEnabled=false;beam.material=bm;
+  return {n,dots,beam,target:null};
+})();
+let goalKey='',goalSaidAt=-99,lockWarnAt=-99,moonSaid=false;
+const gemsEl=()=>$('#gems .n');
+function worldAt(p){return WORLDS.find(w=>Math.hypot(p.x-w.ax,p.z-w.az)<w.rA+1.2||Math.hypot(p.x-w.bx,p.z-w.bz)<w.rB+1.2)}
+function onB(w,p){return Math.hypot(p.x-w.bx,p.z-w.bz)<w.rB+1.2}
+function currentGoal(){
+  const P=player.pos,here=worldAt(P);
+  const tw=WORLDS.find(w=>!w.locked&&!save.crystals.includes(w.id));
+  if(here&&here!==tw){
+    if(onB(here,P))return {k:'portal-'+here.id,t:'Gå inn i portalen for å komme hjem',p:V3(here.portal.x,here.portal.top,here.portal.z)};
+    if(!tw)return {k:'free',t:'Du har alle krystallene! Spill igjen så mye du vil',p:null};
+    if(save.crystals.includes(here.id)&&!here.station.done)return {k:'replay-'+here.id,t:'Spill igjen, eller gå tilbake til Midtøya',p:null};
+    return {k:'back',t:'Gå tilbake til Midtøya',p:V3(0,0,0)};
+  }
+  if(!tw)return {k:'free',t:'Du har alle 5 krystallene! Velg en verden og spill igjen',p:null};
+  if(here===tw){
+    const S=tw.station;
+    if(!S.done){if(S.inZone&&S.q)return {k:'quiz-'+tw.id,t:'Hopp på riktig svar',p:null};return {k:'st-'+tw.id,t:'Gå til tavla i '+tw.name,p:V3(S.cx,S.top,S.cz)}}
+    return {k:'chest-'+tw.id,t:'Gå over broen og åpne skattekista',p:V3(tw.chest.x,tw.chest.top,tw.chest.z)};
+  }
+  return {k:'go-'+tw.id,t:`Gå til ${tw.name} ${tw.emoji}`,p:V3(tw.ax,tw.topA,tw.az)};
+}
+function updateGuide(dt){
+  const G=guide,P=player.pos;
+  if(!started){G.n.setEnabled(false);G.beam.setEnabled(false);G.dots.forEach(d=>d.setEnabled(false));return}
+  const g=currentGoal();
+  if(g.k!==goalKey){goalKey=g.k;$('#goal .t').textContent=g.t;const el=$('#goal');el.hidden=false;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+    if(!g.k.startsWith('quiz')&&time-goalSaidAt>2.5){goalSaidAt=time;setTimeout(()=>{if(goalKey===g.k)say(g.t)},700)}}
+  const show=!!g.p&&Math.hypot(g.p.x-P.x,g.p.z-P.z)>2.5;
+  G.n.setEnabled(show);G.beam.setEnabled(!!g.p);
+  if(g.p){G.beam.position.set(g.p.x,g.p.y+11,g.p.z);G.beam.scaling.x=G.beam.scaling.z=1+Math.sin(time*3)*.08}
+  if(!show){G.dots.forEach(d=>d.setEnabled(false));return}
+  const dx=g.p.x-P.x,dz=g.p.z-P.z,L=Math.hypot(dx,dz),ux=dx/L,uz=dz/L;
+  G.n.position.set(P.x+ux*1.6,P.y+4.4+Math.sin(time*4)*.12,P.z+uz*1.6);G.n.rotation.y=Math.atan2(ux,uz);
+  G.dots.forEach((d,i)=>{const s=2.2+i*1.6;if(s>L-1){d.setEnabled(false);return}d.setEnabled(true);const k=s/L;
+    d.position.set(P.x+dx*k,lerp(P.y,g.p.y,k)+.18,P.z+dz*k);const pulse=.55+.45*Math.max(0,Math.sin(time*6-i*.6));d.scaling.setAll(pulse)});
+  // låst vei
+  for(const w of WORLDS)if(w.locked&&Math.hypot(P.x-w.ux*11,P.z-w.uz*11)<3.2&&time-lockWarnAt>8){lockWarnAt=time;const mangler=w.need-save.crystals.length;
+    toast('🔒 '+w.name,`Trenger ${mangler} 💎 til`);say(`${w.name} er låst. Du trenger ${mangler===1?'én krystall':mangler+' krystaller'} til. Finn krystaller i skattekistene.`)}
+  if(!moonSaid&&inMoon(P)){moonSaid=true;say('Her på månen hopper du kjempehøyt!')}
+}
+function inMoon(p){return p.z<-12.5&&Math.abs(p.x)<14}
+function giveCrystal(c){
+  if(!c.world||save.crystals.includes(c.world))return false;
+  save.crystals.push(c.world);persist();
+  const m=BABYLON.MeshBuilder.CreateIcoSphere('gem',{radius:.5,subdivisions:0},scene);m.scaling.y=1.6;m.material=mat('#7CE8FF',{em:'#22B8E8',spec:1});glowOnly(m);
+  m.position.set(c.x,c.top+1.2,c.z);
+  tween(1.4,k=>{m.position.y=c.top+1.2+easeOut(k)*2.4;m.rotation.y=k*12},()=>{const s=m.position.clone();tween(.5,k=>{m.position.copyFrom(BABYLON.Vector3.Lerp(s,player.pos.add(V3(0,1.5,0)),k));m.scaling.setAll(1-k*.8)},()=>{m.dispose();updateGems();sfx.right()})},.4);
+  setTimeout(()=>{const n=save.crystals.length;toast('Du fant en krystall! 💎',`${n} av ${WORLDS.length}`);say(`Du fant en magisk krystall! Nå har du ${n===1?'én':n}.`);
+    const opened=WORLDS.filter(w=>w.locked&&n>=w.need);
+    if(opened.length)setTimeout(()=>{opened.forEach(w=>unlockWorld(w));sfx.fanfare();toast(opened[0].name+' er åpen!','Følg pilen');say(`Nå er ${opened[0].name} åpen! Gå inn i portalen og følg pilen.`)},3600);
+    else if(n>=WORLDS.length)setTimeout(()=>{rainbow();toast('Mester av Blokkøya!','Alle 5 krystaller 🌈');say('Wow! Du har alle krystallene. Du er mester av Blokkøya!')},3600)},2200);
+  return true;
+}
+function updateGems(){const e=gemsEl();if(e)e.textContent=save.crystals.length;const p=$('#gems');p.classList.remove('bump');void p.offsetWidth;p.classList.add('bump')}
+let rainbowMesh=null;
+function rainbow(){if(rainbowMesh)return;const cols=['#FF5A5A','#FF9F45','#FFD84D','#5CD65C','#4F8DF7','#A66BFF'];rainbowMesh=new BABYLON.TransformNode('rb',scene);
+  cols.forEach((c,i)=>{const t=BABYLON.MeshBuilder.CreateTorus('rbt',{diameter:40-i*1.6,thickness:.8,tessellation:64},scene);t.parent=rainbowMesh;t.material=mat(c,{em:c});t.material.alpha=.75;t.rotation.x=Math.PI/2;glowOnly(t)});
+  rainbowMesh.position.set(0,-4,22);rainbowMesh.rotation.y=0;rainbowMesh.scaling.setAll(.01);tween(1.5,k=>rainbowMesh.scaling.setAll(Math.max(.01,easeBack(k))))}
+
+$('#gems .n').textContent=save.crystals.length;$('#gems .of').textContent='/'+WORLDS.length;
 // ---------- input ----------
 const keys={};
-addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(!keys[e.code]&&e.code==='Space')player.jumpBuf=.15;keys[e.code]=true});
+addEventListener('keydown',e=>{if(shopOpen)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(!keys[e.code]&&e.code==='Space')player.jumpBuf=.15;keys[e.code]=true});
 addEventListener('keyup',e=>{keys[e.code]=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 const isTouch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
-const joy={x:0,y:0,id:null};
+const joy={x:0,y:0,id:null};let jbHeld=false;const jumpHeld=()=>!!keys.Space||jbHeld;
 if(isTouch){
   $('#joy').hidden=false;$('#jump').hidden=false;$('#help').hidden=true;
   const base=$('#joy'),knob=$('#knob');
@@ -910,8 +1426,8 @@ if(isTouch){
   base.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)upd(e)});
   const end=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;knob.style.transform=''};
   base.addEventListener('pointerup',end);base.addEventListener('pointercancel',end);
-  const jb=$('#jump');jb.addEventListener('pointerdown',e=>{player.jumpBuf=.15;jb.classList.add('down');e.preventDefault()});
-  ['pointerup','pointercancel','pointerleave'].forEach(t=>jb.addEventListener(t,()=>jb.classList.remove('down')));
+  const jb=$('#jump');jb.addEventListener('pointerdown',e=>{player.jumpBuf=.15;jbHeld=true;jb.classList.add('down');e.preventDefault()});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>jb.addEventListener(t,()=>{jbHeld=false;jb.classList.remove('down')}));
 }else setTimeout(()=>$('#help').style.opacity=0,14000);
 
 // ---------- tweens ----------
@@ -941,8 +1457,9 @@ function openChest(c){
   c.open=true;sfx.creak();setTimeout(()=>sfx.fanfare(),250);tween(.9,k=>{c.lidPiv.rotation.x=-easeBack(k)*1.9});
   setTimeout(()=>{confetti(V3(c.x,c.top+1.6,c.z));burst(V3(c.x,c.top+1.2,c.z),{n:60,c1:'#FFF1A8',c2:'#FFC83D',add:true,up:[4,7],spread:.8,power:[2,5],grav:-4,life:[.8,1.6]})},300);
   const fresh=!save.hats.includes(c.hat);if(fresh){save.hats.push(c.hat);persist();refreshHatBtn()}
-  wearHat(c.hat);addStars(10);
-  setTimeout(()=>{toast(fresh?'Du fant '+c.label+'!':'Skatt!','+10 ⭐');say(fresh?'Wow! Du fant '+c.label.toLowerCase()+'! Nå har du den på deg.':'Du fant skatten igjen! Ti stjerner!')},500);
+  wearHat(c.hat);addStars(10);const gem=giveCrystal(c);setTimeout(()=>addXP(gem?40:15),gem?6500:2600);
+  if(!gem)setTimeout(()=>{toast(fresh?'Du fant '+c.label+'!':'Skatt!','+10 ⭐');say(fresh?'Wow! Du fant '+c.label.toLowerCase()+'! Nå har du den på deg.':'Du fant skatten igjen! Ti stjerner!')},500);
+  else setTimeout(()=>{if(fresh)toast('Du fant '+c.label+'!','+10 ⭐')},300);
   tween(.6,k=>{player.sq=1+Math.sin(k*Math.PI)*.2});
   c.glowRing.setEnabled(false);
 }
@@ -950,7 +1467,7 @@ function openChest(c){
 function update(dt){
   time+=dt;
   // bevegelige blokker
-  for(const b of [les3,v3]){const m=b.move;const nz=Math.sin(time*m.sp+(m.ph||0))*m.amp;b.dz=nz-b.b.position.z;b.b.position.z=nz;b.s.z=nz;b.s.dz=b.dz}
+  updateMovers();
   for(const t of tweens.slice()){t.t+=dt;if(t.t<0)continue;const k=clamp(t.t/t.dur,0,1);t.fn(k);if(k>=1){tweens.splice(tweens.indexOf(t),1);t.done&&t.done()}}
   const P=player;
   if(started&&!fading){
@@ -958,24 +1475,27 @@ function update(dt){
     let ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x;
     let iz=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+joy.y;
     const il=Math.hypot(ix,iz);if(il>1){ix/=il;iz/=il}
+    if(shopOpen){ix=iz=0;P.jumpBuf=0}
     const fx=-Math.cos(cam.alpha),fz=-Math.sin(cam.alpha);const rx=fz,rz=-fx;
     const wx=rx*ix+fx*iz,wz=rz*ix+fz*iz;
     const acc=1-Math.exp(-dt*(P.grounded?14:5));
     P.vel.x=lerp(P.vel.x,wx*SPEED,acc);P.vel.z=lerp(P.vel.z,wz*SPEED,acc);
-    if(P.ground&&P.ground.dz)P.pos.z+=P.ground.dz;
+    if(P.ground){P.pos.x+=P.ground.dx||0;P.pos.z+=P.ground.dz||0}
     P.jumpBuf-=dt;P.coyote-=dt;
     if(P.jumpBuf>0&&P.coyote>0){P.vy=JUMP;P.coyote=0;P.jumpBuf=0;P.grounded=false;P.ground=null;sfx.jump();P.sqv=4;
       burst(P.pos,{n:10,c1:'#FFFFFF',c2:'#E8EEF6',size:[.2,.4],life:[.3,.5],power:[1,2.5],grav:0,up:[.2,.6],spread:1.5})}
+    else if(P.jumpBuf>0&&!P.grounded&&save.back==='jetpakke'&&!P.dbl){P.vy=JUMP*.9;P.dbl=true;P.jumpBuf=0;jetT=.5;P.sqv=3;noise(.5,.2,900,{to:2500,type:'bandpass',a:.03});
+      burst(P.pos.add(V3(0,.9,-.5)),{n:24,c1:'#FFE08A',c2:'#FF6A00',add:true,size:[.2,.4],life:[.3,.6],power:[2,4],grav:-2,up:[-3,-1],spread:.6})}
     P.pos.x+=P.vel.x*dt;P.pos.z+=P.vel.z*dt;
     for(const s of solids){if(s.off||!(s.top>P.pos.y+STEP&&s.bottom<P.pos.y+2.4))continue;
       if(s.type==='cyl'){const dx=P.pos.x-s.x,dz=P.pos.z-s.z,d=Math.hypot(dx,dz),R=s.r+PR;if(d<R){const k=d<1e-4?1:R/d;P.pos.x=s.x+(d<1e-4?R:dx*k);P.pos.z=s.z+(d<1e-4?0:dz*k)}}
       else{const dx=P.pos.x-s.x,dz=P.pos.z-s.z,ox=s.hx+PR-Math.abs(dx),oz=s.hz+PR-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)P.pos.x+=Math.sign(dx||1)*ox;else P.pos.z+=Math.sign(dz||1)*oz}}}
-    P.vy=Math.max(P.vy-G*dt,-34);const prevY=P.pos.y;P.pos.y+=P.vy*dt;
+    P.vy=Math.max(P.vy-(inMoon(P.pos)?G*.42:G)*dt,-34);if(save.back==='vinger'&&!P.grounded&&P.vy<-3.2&&jumpHeld())P.vy=-3.2;const prevY=P.pos.y;P.pos.y+=P.vy*dt;
     let best=-1e9,bs=null;
     for(const s of solids){if(s.off)continue;if(s.top<=prevY+(P.grounded?STEP:.06)&&s.top>best&&under(s,P.pos.x,P.pos.z,.22)){best=s.top;bs=s}}
     const wasG=P.grounded;
     if(bs&&P.pos.y<=best){if(!wasG&&P.vy<-7){sfx.land();P.sqv=-5;burst(V3(P.pos.x,best+.05,P.pos.z),{n:14,c1:'#FFFFFF',c2:'#DDE6F0',size:[.2,.45],life:[.35,.6],power:[1.5,3],grav:0,up:[.1,.3],spread:2})}
-      P.pos.y=best;P.vy=0;P.grounded=true;P.ground=bs;P.coyote=.12;if(bs.cp)P.cp.copyFrom(bs.cp)}
+      P.pos.y=best;P.vy=0;P.grounded=true;P.dbl=false;P.ground=bs;P.coyote=.12;if(bs.cp)P.cp.copyFrom(bs.cp)}
     else{P.grounded=false;P.ground=null}
     if(P.pos.y<-11)respawn();
     // svarputer
@@ -984,14 +1504,14 @@ function update(dt){
     if(onPad&&P.lastPad!==onPad.p){P.lastPad=onPad.p;if(onPad.S.q)onPad.S.answer(onPad.p)}
     if(!onPad)P.lastPad=null;
     // soner
-    for(const S of stations){const d=Math.hypot(P.pos.x-S.cx,P.pos.z-S.cz);const inZ=d<9.8&&P.pos.y>S.top-1.5;
+    for(const S of stations){const d=Math.hypot(P.pos.x-S.cx,P.pos.z-S.cz);const inZ=d<S.r+.3&&P.pos.y>S.top-1.5;
       if(inZ&&!S.inZone){S.inZone=true;if(!S.started||S.needsReset)S.start();else updateQuizHud(S)}
       else if(!inZ&&S.inZone){S.inZone=false;if(hudStation===S)updateQuizHud(null)}}
     // stjerner
     for(const c of coins){if(c.taken)continue;const dx=P.pos.x-c.m.position.x,dy=P.pos.y+1-c.m.position.y,dz=P.pos.z-c.m.position.z;
-      if(dx*dx+dy*dy+dz*dz<1.7){c.taken=true;combo=(time-lastPick<1.6)?Math.min(combo+1,12):0;lastPick=time;sfx.star(combo);flyStar(c.m.position);burst(c.m.position,{n:18,tex:STAR_T,c1:'#FFF6C2',c2:'#FFC83D',add:true,size:[.15,.3],life:[.4,.8],power:[2,4],grav:-3});
+      if(dx*dx+dy*dy+dz*dz<1.7){c.taken=true;addXP(1);combo=(time-lastPick<1.6)?Math.min(combo+1,12):0;lastPick=time;sfx.star(combo);flyStar(c.m.position);burst(c.m.position,{n:18,tex:STAR_T,c1:'#FFF6C2',c2:'#FFC83D',add:true,size:[.15,.3],life:[.4,.8],power:[2,4],grav:-3});
         const m=c.m;tween(.25,k=>{m.scaling.setAll(1+k*.6);m.position.y+=dt*6},()=>m.setEnabled(false))}}
-    for(const c of chests)if(!c.open&&Math.hypot(P.pos.x-c.x,P.pos.z-(c.z-0))<2.9&&Math.abs(P.pos.y-c.top)<1.5)openChest(c);
+    if(!shopOpen)for(const c of chests)if(!c.open&&Math.hypot(P.pos.x-c.x,P.pos.z-(c.z-0))<2.9&&Math.abs(P.pos.y-c.top)<1.5)openChest(c);
     for(const p of portals)if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<1.3&&Math.abs(P.pos.y-p.top-.3)<1.2)teleportHome();
     for(const c of chests)if(c.open&&Math.hypot(P.pos.x-c.x,P.pos.z-c.z)>12)c.open=false,c.lidPiv.rotation.x=0,c.glowRing.setEnabled(true);
   }
@@ -1012,7 +1532,9 @@ function update(dt){
   P.blinkT-=dt;if(P.blinkT<0){P.drawFace(true);setTimeout(()=>P.drawFace(false),120);P.blinkT=rr(2.5,5)}
   if(P.grounded&&hs>2){stepT-=dt*hs;if(stepT<0){stepT=2.2;sfx.step(P.ground&&P.ground.srf)}}
   dust.emitter.copyFrom(P.pos);dust.emitRate=(P.grounded&&hs>5.5)?22:0;
-  updateAmbience(dt,P);wantTheme=P.pos.x<-17?'viking':'hub';
+  updateAmbience(dt,P);updateGear(dt,P,hs);
+  {const p=P.pos,w=worldAt(p)||WORLDS.find(w=>{const t=p.x*w.ux+p.z*w.uz,q=Math.abs(-p.x*w.uz+p.z*w.ux);return t>10.5&&t<w.dA&&q<4});wantTheme=w?w.theme:'hub'}
+  updateGuide(dt);for(const b of blinkers)b.setEnabled(Math.sin(time*5)>0);if(dinoNeck)dinoNeck.rotation.x=Math.sin(time*.9)*.18;
   for(const f of foliage)f.m.rotation.z=(f.b||0)+Math.sin(time*1.4+f.ph)*f.a;
   for(const f of flies){f.ph+=dt*f.sp;const a=f.ph;f.n.position.set(f.cx+Math.cos(a)*f.r+Math.sin(a*2.3)*.7,f.base+f.h+Math.sin(a*3.1)*.35,f.cz+Math.sin(a)*f.r);f.n.rotation.y=-a+(f.sp>0?0:Math.PI);const fl=Math.sin(time*f.fl+f.ph)*1.1;f.wings[0].rotation.z=-fl;f.wings[1].rotation.z=fl}
   // kamera
@@ -1029,6 +1551,85 @@ function update(dt){
   if(fireLight)fireLight.intensity=.7+Math.sin(time*13)*.12+Math.sin(time*7.3)*.1;
   for(const c of chests)if(!c.open)c.glowRing.scaling.setAll(1+Math.sin(time*3)*.05);
 }
+// ---------- nivå og garderobe ----------
+// Tale som venter til det er stille, så den ikke avbryter et spørsmål.
+const sayQueue=[];let quietFor=0;
+function sayWhenQuiet(t){sayQueue.push(t)}
+setInterval(()=>{let busy=false;try{busy=speechSynthesis.speaking||speechSynthesis.pending}catch(e){}
+  quietFor=busy?0:quietFor+.25;if(sayQueue.length&&quietFor>=.75&&!shopOpen){say(sayQueue.shift());quietFor=0}},250);
+let toastBusyUntil=0;
+const _toast=toast;toast=function(a,b){toastBusyUntil=performance.now()+1900;_toast(a,b)};
+function toastWhenFree(a,b,cb){const w=Math.max(0,toastBusyUntil-performance.now())+150;toastBusyUntil=performance.now()+w+1900;setTimeout(()=>{_toast(a,b);cb&&cb()},w)}
+const lvlEl=$('#lvl'),lvlN=$('#lvl b'),lvlBar=$('#lvl .bar i');
+let curLvl=lvlInfo(save.xp).L;
+function renderLvl(){const i=lvlInfo(save.xp);lvlN.textContent=i.L;lvlBar.style.width=(i.L>=LVL_MAX?100:Math.round(i.x/i.n*100))+'%';
+  lvlEl.setAttribute('aria-label','Nivå '+i.L);if(shopOpen)renderShopHead()}
+renderLvl();
+function addXP(n){if(!n)return;save.xp+=n;persist();renderLvl();const i=lvlInfo(save.xp);
+  if(i.L>curLvl){const from=curLvl;curLvl=i.L;levelUp(i.L,from)}}
+function levelUp(L,from){
+  const fresh=ITEMS.filter(it=>it.p&&it.lv>from&&it.lv<=L);
+  lvlEl.classList.remove('lvup');void lvlEl.offsetWidth;lvlEl.classList.add('lvup');
+  toastWhenFree('Nivå '+L+'! 🎉',fresh.length?'Nytt i garderoben: '+fresh.map(f=>f.e).join(' '):titleOf(L),()=>{
+    sfx.fanfare();burst(player.pos.add(V3(0,1.5,0)),{n:50,tex:STAR_T,c1:'#FFF1A8',c2:'#FFC83D',add:true,up:[3,6],spread:1,power:[2,5],grav:-3,life:[.8,1.4]});
+    tween(.6,k=>{player.sq=1+Math.sin(k*Math.PI)*.25});addStars(5)});
+  const tt=TITLES.find(t=>t[0]===L);
+  sayWhenQuiet(`Nytt nivå! Du er nivå ${sayNum(L)}${tt?', og nå er du '+tt[1].toLowerCase():''}. Du fikk fem stjerner.`+(fresh.length?` Nytt utstyr i garderoben: ${fresh.map(f=>f.n.toLowerCase()).join(', ')}.`:''));
+  refreshShopBadge();
+}
+lvlEl.addEventListener('click',()=>{initAudio();const i=lvlInfo(save.xp);say(`Du er nivå ${sayNum(i.L)}, ${titleOf(i.L).toLowerCase()}.`+(i.L<LVL_MAX?' Svar riktig og samle stjerner for å nå neste nivå.':' Det er høyeste nivå!'))});
+
+const shopBtn=$('#shopBtn'),shopEl=$('#shop'),grid=$('#shop .grid'),tabsEl=$('#shop .tabs');
+let shopSlot='hat',confirmId=null,camSave=null;
+const canBuy=it=>it.p>0&&!it.chest&&!owns(it)&&curLvl>=it.lv&&save.stars>=it.p;
+function refreshShopBadge(){const any=ITEMS.some(canBuy);shopBtn.classList.toggle('new',any);
+  if(any&&!save.shopHint&&started){save.shopHint=1;persist();setTimeout(()=>{toastWhenFree('Du kan kjøpe utstyr! 👕','Trykk på genseren oppe til høyre');sayWhenQuiet('Du har nok stjerner til å kjøpe noe! Trykk på genseren oppe til høyre for å åpne garderoben.')},1200)}}
+const refreshHatBtn=refreshShopBadge;
+SLOTS.forEach(s=>{const b=document.createElement('button');b.className='tab';b.dataset.slot=s.k;b.setAttribute('role','tab');b.innerHTML=`<span aria-hidden="true">${s.e}</span>${s.n}`;
+  b.addEventListener('click',()=>{shopSlot=s.k;confirmId=null;renderShop();sfx.click();say(s.n)});tabsEl.append(b)});
+function renderShopHead(){const i=lvlInfo(save.xp);$('#shop .sstars .n').textContent=save.stars;
+  $('#shop .slvl .lv').textContent='Nivå '+i.L;$('#shop .slvl .tt').textContent=titleOf(i.L);
+  $('#shop .slvl .bar i').style.width=(i.L>=LVL_MAX?100:Math.round(i.x/i.n*100))+'%'}
+function renderShop(){
+  renderShopHead();
+  [...tabsEl.children].forEach(b=>b.setAttribute('aria-selected',b.dataset.slot===shopSlot));
+  grid.innerHTML='';
+  for(const it of ITEMS.filter(i=>i.slot===shopSlot)){
+    const on=save[shopSlot]===it.id,have=owns(it),key=it.slot+':'+it.id;
+    const st=on?'on':have?'owned':it.chest?'chest':curLvl<it.lv?'locked':save.stars<it.p?'poor':confirmId===key?'confirm':'buy';
+    const b=document.createElement('button');b.className='item '+st;
+    const lab={on:'På deg ✓',owned:'Ta på',chest:'🎁 I kiste',locked:'🔒 Nivå '+it.lv,poor:'⭐ '+it.p,buy:'⭐ '+it.p,confirm:'Kjøp? ⭐ '+it.p}[st];
+    b.innerHTML=`<span class="ic" aria-hidden="true">${it.e}</span><span class="nm"></span><span class="st">${lab}</span>`;b.querySelector('.nm').textContent=it.n;
+    b.addEventListener('click',()=>tapItem(it,st,b));grid.append(b);
+  }
+}
+function tapItem(it,st,b){
+  const key=it.slot+':'+it.id;
+  if(st==='on'){if(it.id&&it.slot!=='shirt'){equip(it.slot,'');say('Du tok av '+it.n.toLowerCase()+'.')}else say(it.n+'. Den har du på deg.');return}
+  if(st==='owned'){equip(it.slot,it.id);say(it.n+'!'+(it.perk?' '+it.perk:''));return}
+  if(st==='chest'){wiggle(b);say(`${it.n}. Den finner du i skattekista i ${it.chest}.`);return}
+  if(st==='locked'){wiggle(b);say(`${it.n}. Den får du på nivå ${sayNum(it.lv)}.`);return}
+  if(st==='poor'){wiggle(b);const m=it.p-save.stars;say(`${it.n} koster ${it.p} stjerner. Du trenger ${m===1?'én':m} til.`);return}
+  if(st==='buy'){confirmId=key;renderShop();sfx.click();say(`${it.n} koster ${it.p} stjerner. Trykk en gang til for å kjøpe.`+(it.perk?' '+it.perk:''));return}
+  if(st==='confirm'){confirmId=null;save.stars-=it.p;save.owned.push(key);starsN.textContent=save.stars;persist();
+    equip(it.slot,it.id);sfx.fanfare();confetti(player.pos.add(V3(0,2.2,0)));tween(.6,k=>{player.sq=1+Math.sin(k*Math.PI)*.2});
+    say(`Du kjøpte ${it.n.toLowerCase()}!`+(it.perk?' '+it.perk:''));refreshShopBadge()}
+}
+function wiggle(b){b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');sfx.wrong&&tone(220,{d:.12,v:.05})}
+function equip(slot,id){if(slot==='hat')wearHat(id);else{save[slot]=id;persist();applyGear()}player.sqv=-3;sfx.pop(3);renderShop()}
+function openShop(){if(shopOpen)return;initAudio();shopOpen=true;confirmId=null;shopEl.hidden=false;renderShop();sfx.pop(2);updateQuizHud(null);
+  camSave={beta:cam.beta,radius:cam.radius};const P=player,ta=Math.atan2(Math.cos(P.yaw),Math.sin(P.yaw));let da=ta-cam.alpha;da=Math.atan2(Math.sin(da),Math.cos(da));
+  const a0=cam.alpha,b0=cam.beta,r0=cam.radius,wide=innerWidth>=700;tween(.6,k=>{const e=easeOut(k);cam.alpha=a0+da*e;cam.beta=lerp(b0,1.38,e);cam.radius=lerp(r0,wide?7:8.5,e);
+    cam.targetScreenOffset.x=lerp(0,wide?-2.6:0,e);cam.targetScreenOffset.y=lerp(0,wide?0:-1.6,e)});
+  say('Garderoben. Trykk på noe for å høre hva det er.')}
+function closeShop(){if(!shopOpen)return;shopOpen=false;shopEl.hidden=true;sfx.pop(1);const b0=cam.beta,r0=cam.radius,ox=cam.targetScreenOffset.x,oy=cam.targetScreenOffset.y;
+  tween(.5,k=>{const e=easeOut(k);cam.beta=lerp(b0,camSave?camSave.beta:1.1,e);cam.radius=lerp(r0,camSave?camSave.radius:14,e);cam.targetScreenOffset.x=ox*(1-e);cam.targetScreenOffset.y=oy*(1-e)});
+  for(const S of stations)if(S.inZone&&S.q)updateQuizHud(S);canvas.focus()}
+shopBtn.addEventListener('click',()=>shopOpen?closeShop():openShop());
+$('#shop .sclose').addEventListener('click',closeShop);
+addEventListener('keydown',e=>{if(e.code==='Escape'&&shopOpen)closeShop()});
+refreshShopBadge();
+
 player.pos.set(0,0,-4);snapCam();
 engine.runRenderLoop(()=>{const dt=Math.min(engine.getDeltaTime()/1000,DT_MAX);update(dt);scene.render()});
 addEventListener('resize',()=>engine.resize());
@@ -1039,7 +1640,7 @@ document.querySelectorAll('.kid').forEach(b=>{b.setAttribute('aria-pressed',b.da
 $('#goBtn').addEventListener('click',()=>{initAudio();try{speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch(e){}
   $('#start').hidden=true;started=true;cam.alpha=-Math.PI/2;cam.beta=1.1;cam.radius=14;canvas.focus();
   toast('Blokkøya!','Velg en vei');sfx.fanfare();say('Hei '+(save.kid==='bastian'?'Bastian':'Benjamin')+'! Velkommen til Blokkøya. Gå til Ordskogen eller Vikingbyen.')});
-window.__blokk={dtMax:v=>DT_MAX=v,player,stations,chests,coins,setStarted:v=>started=v,teleport:(x,y,z)=>{player.pos.set(x,y,z);player.vel.set(0,0,0);player.vy=0;snapCam()},cam};
+window.__blokk={dtMax:v=>DT_MAX=v,player,stations,chests,coins,setStarted:v=>started=v,teleport:(x,y,z)=>{player.pos.set(x,y,z);player.vel.set(0,0,0);player.vy=0;snapCam()},cam,save,openShop,closeShop,addXP,WORLDS,equip,giveCrystal,openChest,unlockWorld};
 })();
 </script>
 

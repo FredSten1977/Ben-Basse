@@ -336,7 +336,7 @@ function markSeen(it){ SEEN[it.word] = Date.now(); try{ localStorage.setItem(SEE
 const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[x.word]||0)-(SEEN[y.word]||0));
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-23-1";
+const APP_VERSION = "2026-11-23-2";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -398,7 +398,7 @@ async function save(which){
 }
 function addStars(n){ PROG.stars += n; PROG.best = Math.max(PROG.best, PROG.stars); save("prog"); }
 let screen = "start";
-function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); }
+function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes') && !document.getElementById('blokkYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); }
 (async()=>{
   try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db=null; }
   if(!db) return;
@@ -1068,7 +1068,12 @@ function parentScreen(confirmReset){
     ${FQ.family ? '' : `<form id="famf" class="form add"><label class="grow">Familiekode<input id="famkode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label><button class="next" type="submit">Koble til</button></form><p class="err" id="famErr"></p>`}
     <h3>Stjerner</h3>
     <p class="note">Nå: ${PROG.stars}. Riktige: ${PROG.right}. Feil: ${PROG.wrong}. Runder: ${PROG.rounds}.</p>
-    ${confirmReset ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>` : `<div class="acts"><button id="reset">Nullstill stjernene</button></div>`}
+    ${confirmReset===true ? `<div class="acts"><button id="resetYes" class="danger">Ja, nullstill alt</button><button id="resetNo">Avbryt</button></div>` : `<div class="acts"><button id="reset">Nullstill stjernene</button></div>`}
+    <h3>Blokkøya</h3>
+    <p class="note">Tømmer Blokkøya for Bastian på denne enheten: stjerner, nivå, utstyr, krystaller og hvilke verdener som er åpne. Stjernene i appen blir som de er.</p>
+    ${confirmReset==='blokk'
+      ? `<div class="acts"><button id="blokkYes" class="danger">Ja, nullstill Blokkøya</button><button id="resetNo">Avbryt</button></div>`
+      : `<div class="acts"><button id="blokkReset">${window.__blokkNullstilt?'Blokkøya er nullstilt ✓':'Nullstill Blokkøya'}</button></div>`}
   </div>`;
   document.getElementById('back').onclick = startScreen;
   document.getElementById('addf').onsubmit = async e => {
@@ -1098,6 +1103,8 @@ function parentScreen(confirmReset){
     }catch(err){ document.getElementById('lekseErr').textContent = 'Koden ble ikke forstått. Kopier hele koden fra Claude og prøv igjen.'; }
   };
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
+  const bR=document.getElementById('blokkReset'); if(bR) bR.onclick=()=>{ window.__blokkNullstilt=false; parentScreen('blokk'); };
+  const bY=document.getElementById('blokkYes'); if(bY) bY.onclick=()=>{ try{ localStorage.removeItem('blokkoya-v1-bastian'); localStorage.removeItem('blokkoya-credit-bastian'); }catch(e){} window.__blokkNullstilt=true; parentScreen(); };
   const y=document.getElementById('resetYes'); if(y) y.onclick=()=>{ PROG={stars:0,best:0,right:0,wrong:0,rounds:0,claims:[]}; PRIZES.list=PRIZES.list.map(p=>({...p,given:false})); save("prog"); save("prizes"); parentScreen(); };
   const famf = document.getElementById('famf');
   if(famf) famf.onsubmit = e => {
