@@ -1499,7 +1499,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-23-2";
+const APP_VERSION = "2026-11-23-3";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -1512,7 +1512,7 @@ function sjekkNyVersjon(){
 }
 setTimeout(sjekkNyVersjon, 1500);
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) sjekkNyVersjon(); });
-function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); else if(screen==="progress") progressScreen(); }
+function refreshIdle(){ if(screen==="parent" && document.getElementById('addf') && !document.getElementById('resetYes') && !document.getElementById('blokkYes')){ if(!(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) parentScreen(); return; } if(screen==="start") startScreen(); else if(screen==="progress") progressScreen(); }
 
 const SPEAKER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
@@ -2026,6 +2026,11 @@ function parentScreen(confirmReset){
     ${confirmReset==='nye'
       ? `<div class="acts"><button id="nyeYes" class="danger">Ja, nullstill de nye øvelsene</button><button id="resetNo">Avbryt</button></div>`
       : `<div class="acts"><button id="nye">Nullstill de nye øvelsene</button></div>`}
+    <h3>Blokkøya</h3>
+    <p class="note">Tømmer Blokkøya for Benjamin på denne enheten: stjerner, nivå, utstyr, krystaller og hvilke verdener som er åpne. Poengene i appen blir som de er.</p>
+    ${confirmReset==='blokk'
+      ? `<div class="acts"><button id="blokkYes" class="danger">Ja, nullstill Blokkøya</button><button id="resetNo">Avbryt</button></div>`
+      : `<div class="acts"><button id="blokkReset">${window.__blokkNullstilt?'Blokkøya er nullstilt ✓':'Nullstill Blokkøya'}</button></div>`}
   </div>`;
   document.getElementById('back').onclick = progressScreen;
   const lSe = document.getElementById('lekseSe'); if(lSe) lSe.onclick = ()=>lekseScreen(true);
@@ -2074,6 +2079,8 @@ function parentScreen(confirmReset){
   };
   const r=document.getElementById('reset'); if(r) r.onclick=()=>parentScreen(true);
   const ny=document.getElementById('nye'); if(ny) ny.onclick=()=>parentScreen('nye');
+  const bR=document.getElementById('blokkReset'); if(bR) bR.onclick=()=>{ window.__blokkNullstilt=false; parentScreen('blokk'); };
+  const bY=document.getElementById('blokkYes'); if(bY) bY.onclick=()=>{ try{ localStorage.removeItem('blokkoya-v1-benjamin'); localStorage.removeItem('blokkoya-credit-benjamin'); }catch(e){} window.__blokkNullstilt=true; parentScreen(); };
   const nyY=document.getElementById('nyeYes'); if(nyY) nyY.onclick=()=>{
     // Rekorden kan ikke gå ned ellers, men her trekkes testpoengene fra igjen.
     const fjernet = (PROG.lesing||0) + (PROG.pts.lydlek||0) + (PROG.pts.lesespm||0) + (PROG.pts.silhuett||0) + (PROG.pts.fyllinn||0) + (PROG.pts.gange||0);
