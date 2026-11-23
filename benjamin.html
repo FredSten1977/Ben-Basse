@@ -376,10 +376,6 @@ body.big .lestekst{line-height:1.7}
 @keyframes stSmell{0%{transform:scale(.2) rotate(-8deg);opacity:0}60%{transform:scale(1.15) rotate(2deg);opacity:1}100%{transform:scale(1)}}
 .st-flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.55),rgba(255,210,63,0) 60%);opacity:0}
 .st-flash.vis{animation:stBlink .5s ease}
-.st-reprise{position:absolute;left:16px;top:calc(env(safe-area-inset-top,0px) + 96px);display:none;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:10px;background:rgba(10,14,28,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-family:var(--font-display);font-size:18px;letter-spacing:.06em;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
-.st-reprise i{width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 10px #ef4444;animation:stRec 1s infinite}
-.st-reprise.vis{display:flex}
-@keyframes stRec{50%{opacity:.25}}
 @keyframes stBlink{20%{opacity:1}}
 .st-laster{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--font-display);font-size:28px;padding:16px;
   background:radial-gradient(ellipse at 50% 30%,#16305a,#060b14 70%)}
@@ -1503,7 +1499,7 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-22-6";
+const APP_VERSION = "2026-11-23-1";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
@@ -3422,7 +3418,6 @@ async function byggStraffe(div, kind, arg, avslutt){
   /* ----- Skjermelementer ----- */
   div.insertAdjacentHTML('beforeend', `
     <div class="st-flash" id="st-flash"></div>
-    <div class="st-reprise" id="st-reprise"><i></i>REPRISE</div>
     <div class="st-hud" id="st-hud">
       <div class="st-top">
         <div class="st-toprow">
@@ -3502,25 +3497,6 @@ async function byggStraffe(div, kind, arg, avslutt){
   const malJubel = async (x, y) => {
     netHit(x, y); swish(); shake.amp = .22; timeScale = 1; blink(); feiring(); jubel = 1; roar(1); sfxRight(false);
   };
-  // Reprise av målet i sakte film, filmet bak nettet
-  async function reprise(side, target, keeperSide){
-    if(reduce || !document.body.contains(div)) return;
-    const tag = $('st-reprise'); tag.classList.add('vis'); blink();
-    stopTrail(); ball.position.copyFrom(SPOT); ball.scaling.set(1,1,1); showPlates(false); resetKeeper(); idleMode.keeper = 'ready';
-    helt.root.position.y = 0; helt.w = 0; idleMode.helt = 'kick';
-    const sx = side>0 ? -1 : 1; // kamera på motsatt side av skuddet, i gresshøyde
-    camBase.set(sx*6.5, 1.15, -9.5); camLook.set(0, .95, -11.5);
-    await wait(500);
-    timeScale = .5;
-    moveCam(V(sx*5.2, 1.3, -4.5), V(side*1.2, 1.0, -1), 2.2);
-    await helt.kickAnim(side, .5);
-    kick(); squash(1.35,.7,.15); startTrail();
-    await Promise.all([flyBall(SPOT, target, .6, .45, false), wait(280).then(()=>dive(keeperSide, 1.1))]);
-    netHit(target.x, target.y); swish(); shake.amp = .12;
-    await flyBall(ball.position.clone(), V(target.x*.92, Math.max(.3,target.y-.5), 1.75), .22, .02);
-    stopTrail(); flyBall(ball.position.clone(), V(target.x*.9,.12,1.6), .35, 0);
-    await wait(1100); timeScale = 1; tag.classList.remove('vis');
-  }
   async function answer(i){
     if(G.busy) return; G.busy = true;
     const riktig = G.cur.opts[i]===G.cur.a, ri = G.cur.opts.indexOf(G.cur.a);
@@ -3543,7 +3519,6 @@ async function byggStraffe(div, kind, arg, avslutt){
         G.us.push(true); renderBoard(true);
         idleMode.helt = 'jubel'; helt.etter(()=>tween(1.2, k=>{ helt.cheer(k); if(helt.figur) helt.root.position.y = Math.abs(Math.sin(k*Math.PI*3))*.16; }));
         await toast('MÅÅÅL!', `+${POENG} poeng`, 1700);
-        if(helt.hasKick) await reprise(side, target, keeperSide);
       } else {
         const save = V(side*1.75, side===0?1.9:1.02, keeper.hasDive && side ? -.1 : .2);
         await Promise.all([flyBall(SPOT, save, .58, .4), wait(90).then(()=>dive(keeperSide,.5))]);
