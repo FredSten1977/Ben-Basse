@@ -281,6 +281,7 @@ h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,64p
 .kb.num .key.check{width:auto;flex:1 1 0;max-width:120px}
 .mode.locked{filter:grayscale(1);opacity:.55}
 .lekse-btn{width:100%;max-width:520px;font-size:30px;animation:pulse 2.2s infinite}
+.blokk-btn{width:100%;max-width:520px;font-size:30px;background:linear-gradient(180deg,#8fd8ff,#5fb8f0)}
 .beskjed{background:rgba(255,210,63,.15);border-left:5px solid var(--led);border-radius:8px;padding:10px 14px;font-size:20px;margin:0 0 6px}
 .lasrad{grid-template-columns:1fr auto}
 .lasrad select{font:inherit;font-size:18px;padding:6px 10px;border-radius:8px;background:#050d09;color:var(--chalk);border:2px solid #24392e}
@@ -1502,13 +1503,13 @@ function changePts(mode, d){
 let screen = "start";
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-22-5";
+const APP_VERSION = "2026-11-22-6";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
     const m = t.match(/const APP_VERSION = "([^"]+)"/);
     if(!m || m[1] === APP_VERSION) return;
-    if(screen === "match") return; // Ikke avbryt midt i en kamp. Neste gang appen åpnes, oppdateres den.
+    if(screen === "match" || document.getElementById("blokkoyaFrame")) return; // Ikke avbryt midt i en kamp. Neste gang appen åpnes, oppdateres den.
     try{ if(sessionStorage.getItem("lastetVersjon") === m[1]) return; sessionStorage.setItem("lastetVersjon", m[1]); }catch(e){}
     location.replace(location.pathname + "?v=" + encodeURIComponent(m[1]) + location.hash);
   }).catch(()=>{});
@@ -1870,6 +1871,7 @@ function startScreen(){
       <div class="pts-next">${np ? `Neste premie: <b>${esc(np.text)}</b> om ${np.at-PROG.best} poeng` : PRIZES.list.length ? 'Alle premiene er låst opp!' : 'Se fremgangen din'}</div>
     </button>
     ${L ? `<button class="mode lekse-btn" id="lekseBtn" style="--c:#ffd23f">📚 Ukens lekse<small>${esc(L.tittel || 'Fra skolen')}</small></button>` : ''}
+    <button class="mode blokk-btn" id="blokkBtn" style="--c:#8fd8ff">🏝️ Blokkøya<small>3D-spill · les ord og lær om vikinger · +4 per riktig</small></button>
     <div class="modes">
       ${Object.entries(MODES).filter(([k,m])=>!m.skjult).map(([k,m])=>`<button class="mode ${erLast(k)?'locked':''}" data-m="${k}" style="--c:${m.color}">${m.name}<small>${erLast(k) ? lasTekst(k) : k==='norsk' ? `Nivå ${norskNiva()+1} · +${m.right} per riktig` : k==='gange' ? `Steg ${gangeSteg()+1} · +${m.right} per riktig` : `+${m.right} per riktig`}</small></button>`).join('')}
       <button class="mode ${erLast('rekord')?'locked':''}" id="rekord" style="--c:#f4f7ef">Lesetekster<small>${erLast('rekord') ? lasTekst('rekord') : 'Fotball · les uten feil'}</small></button>
@@ -1893,6 +1895,7 @@ function startScreen(){
   app.querySelectorAll('.mode[data-m]').forEach(b=>b.onclick=()=> erLast(b.dataset.m) ? sperret(b.dataset.m) : b.dataset.m==='norsk' ? norskScreen() : b.dataset.m==='gange' ? gangeScreen() : newMatch(b.dataset.m));
   document.getElementById('rekord').onclick = ()=> erLast('rekord') ? sperret('rekord') : lesListe();
   if(L) document.getElementById('lekseBtn').onclick = ()=>lekseScreen();
+  document.getElementById('blokkBtn').onclick = ()=>blokkoya();
   document.getElementById('prog').onclick = progressScreen;
   checkCelebrate();
   app.querySelectorAll('.task[data-t]').forEach(b=>b.onclick=()=>{ claimTask(b.dataset.t); speak('Sendt til pappa for godkjenning'); startScreen(); });
@@ -3610,6 +3613,30 @@ async function byggStraffe(div, kind, arg, avslutt){
   startAmb(); whistle(false);
   nextKick();
 }
+
+/* ---------- Blokkøya (3D-spill i egen fil, åpnes i en ramme over appen) ----------
+   Spillet legger poeng i localStorage "blokkoya-credit-benjamin" og sier fra med postMessage. Appen henter og nullstiller. */
+const BLOKK_KEY = "blokkoya-credit-benjamin";
+function blokkoyaInnlos(){
+  let c=null; try{ c=JSON.parse(localStorage.getItem(BLOKK_KEY)||"null"); localStorage.removeItem(BLOKK_KEY); }catch(e){ return; }
+  if(!c) return;
+  let n=0; for(const m of ["norsk","historie"]) if(c[m]>0){ PROG.pts[m]=(PROG.pts[m]||0)+c[m]; n+=c[m]; }
+  if(n>0){ PROG.best=Math.max(PROG.best, total(PROG)); save("prog"); }
+}
+function blokkoya(){
+  if(document.getElementById('blokkoyaFrame')) return;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const f=document.createElement('iframe'); f.id='blokkoyaFrame'; f.title='Blokkøya'; f.allow='autoplay; fullscreen';
+  f.src='blokkoya.html?kid=benjamin&embed=1&v='+encodeURIComponent(APP_VERSION);
+  f.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#9FD3FF';
+  document.body.appendChild(f); document.body.style.overflow='hidden';
+}
+window.addEventListener('message', e=>{
+  if(e.origin!==location.origin || !e.data) return;
+  if(e.data.type==='blokkoya-credit') blokkoyaInnlos();
+  if(e.data.type==='blokkoya-close'){ blokkoyaInnlos(); const f=document.getElementById('blokkoyaFrame'); if(f) f.remove(); document.body.style.overflow=''; startScreen(); }
+});
+blokkoyaInnlos();
 
 startScreen();
 </script>
