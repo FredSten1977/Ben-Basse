@@ -126,7 +126,7 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 .item.nope{animation:nope .35s}@keyframes nope{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @media (max-width:699px){#shop{top:auto;width:100%;height:62%}.spanel{animation-name:slideup}}
 @keyframes slideup{from{transform:translateY(40px);opacity:0}}
-.qword .blank{color:var(--sun-deep)}.qword.math{letter-spacing:.04em}
+.qword .blank{color:var(--sun-deep)}.qword.sent{font-size:clamp(20px,4.4vw,30px);letter-spacing:.03em;flex-wrap:wrap;justify-content:center;gap:0 .35em;padding-left:0}.qword.math{letter-spacing:.04em}
 .ib.back{width:auto;border-radius:26px;padding:0 18px;font-size:18px;font-weight:700;display:flex;gap:6px;align-items:center}
 .sback{border:0;background:#F1F4FA;border-radius:16px;margin-top:12px;padding:10px 18px;font-size:18px;font-weight:600;color:var(--ink)}
 .fly{position:fixed;left:0;top:0;z-index:6;font-size:34px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(30,42,74,.35));will-change:transform}
@@ -679,14 +679,22 @@ const LES_LANG=[['BANAN','🍌'],['TIGER','🐯'],['PANDA','🐼'],['SOFA','🛋
 const LES_MER=[['FOTBALL','⚽'],['SNØMANN','⛄'],['REGNBUE','🌈'],['JORDBÆR','🍓'],['MARIHØNE','🐞'],['BLEKKSPRUT','🐙'],['TELEFON','📱'],['PAPEGØYE','🦜'],
   ['SKILPADDE','🐢'],['KROKODILLE','🐊'],['SOLSIKKE','🌻'],['VULKAN','🌋'],['HELIKOPTER','🚁'],['TRAKTOR','🚜'],['PIRAT','🏴‍☠️'],['KAKTUS','🌵']];
 const ALLE_ORD=LES_ORD.concat(LES_LANG,LES_MER);
+// Korte setninger for Benjamin: svarbildene skiller seg på ett ord, så hele setningen må leses.
+const SETN=[['HUNDEN SPISER IS','🐶🍦',['🐱🍦','🐶🦴']],['KATTEN SOVER PÅ SOFAEN','🐱💤🛋️',['🐶💤🛋️','🐱🍽️🛋️']],['GUTTEN SPARKER BALLEN','👦⚽',['👧⚽','👦🎈']],
+  ['JENTA LESER EN BOK','👧📖',['👦📖','👧🎨']],['FUGLEN SITTER I TREET','🐦🌳',['🐦🏠','🐱🌳']],['MAMMA KJØRER BIL','👩🚗',['👨🚗','👩🚲']],
+  ['PAPPA SYKLER TIL BUTIKKEN','👨🚲🏪',['👨🚗🏪','👩🚲🏪']],['FISKEN SVØMMER I HAVET','🐟🌊',['🐢🌊','🐟🌳']],['TO EPLER OG EN BANAN','🍎🍎🍌',['🍎🍌🍌','🍎🍎🍐']],
+  ['TRE RØDE BILER','🚗🚗🚗',['🚗🚗','🚙🚙🚙']],['HESTEN SPISER EN GULROT','🐴🥕',['🐷🥕','🐴🍎']],['ROBOTEN DANSER','🤖💃',['🤖😴','👽💃']],
+  ['DRAGEN SPRUTER ILD','🐉🔥',['🦖🔥','🐉💧']],['VI SPISER PIZZA I KVELD','🍕🌙',['🍔🌙','🍕☀️']],['BESTEMOR BAKER KAKER','👵🍪',['👴🍪','👵🧶']],
+  ['PINGVINEN STÅR PÅ ISEN','🐧🧊',['🐻‍❄️🧊','🐧🏖️']],['DET REGNER OG BLÅSER','🌧️💨',['❄️💨','☀️💨']],['APEN KLATRER I TREET','🐒🌳',['🐒🏠','🐻🌳']],
+  ['SNØMANNEN HAR EN GULROT','⛄🥕',['⛄🎩','🐰🥕']],['RAKETTEN FLYR TIL MÅNEN','🚀🌙',['✈️🌙','🚀☀️']]];
 const isBastian=()=>(KID||save.kid)==='bastian';
 const HIST=[
   {q:'Hva reiste vikingene med over havet?',o:[['⛵','Skip',1],['🚗','Bil'],['✈️','Fly']],f:'Riktig! Vikingene seilte i lange skip med store seil og årer.',e:1},
   {q:'Hadde vikingene horn på hjelmen?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Hjelmene var runde, uten horn. Horn finnes bare i filmer og tegneserier.',e:1},
   {q:'Hvilken gud hadde en hammer?',o:[['🔨','Tor',1],['👁️','Odin'],['🦊','Loke']],f:'Riktig! Tor hadde hammeren Mjølner. Folk trodde han lagde torden.'},
-  {q:'Hva skrev vikingene med?',o:[['🪨','Runer',1],['✏️','Blyant'],['💻','Data']],f:'Riktig! Vikingene risset runer inn i stein og tre.'},
+  {q:'Hva skrev vikingene med?',o:[['🪨','Runer',1],['🔤','Vanlige bokstaver'],['🖼️','Bare bilder']],f:'Riktig! Vikingene risset runer inn i stein og tre.'},
   {q:'Hva bodde vikingene i?',o:[['🛖','Langhus',1],['🏢','Blokk'],['🏰','Slott']],f:'Riktig! De bodde i langhus. Midt i huset brant et bål som ga varme og lys.',e:1},
-  {q:'Hvor lenge er det siden vikingtiden?',o:[['⏳','1000 år',1],['📅','10 år'],['🦖','Dinosaur-tid']],f:'Riktig! Vikingtiden var for mer enn tusen år siden.'},
+  {q:'Hvor lenge er det siden vikingtiden?',o:[['⏳','Over 1000 år',1],['📅','100 år'],['🦖','10 000 år']],f:'Riktig! Vikingtiden var for mer enn tusen år siden, fra rundt år 800 til 1066.'},
   {q:'Hvilken gud hadde bare ett øye?',o:[['👁️','Odin',1],['🔨','Tor'],['🌞','Balder']],f:'Riktig! Odin ga bort det ene øyet sitt for å bli klok.'},
   {q:'Hva spiste vikingene mye av?',o:[['🐟','Fisk',1],['🍕','Pizza'],['🍫','Sjokolade']],f:'Riktig! De spiste fisk, kjøtt, grøt og brød. Pizza fantes ikke!',e:1},
   {q:'Hva hadde vikingene på armen for å beskytte seg?',o:[['🛡️','Skjold',1],['☂️','Paraply'],['🎒','Sekk']],f:'Riktig! Skjoldet var rundt og laget av tre.',e:1},
@@ -708,29 +716,35 @@ const DINO=[
   {q:'Hvilket dyr levde for veldig, veldig lenge siden?',o:[['🦖','Dinosaur',1],['🐶','Hund'],['🐱','Katt']],f:'Riktig! Dinosaurene levde for millioner av år siden.',e:1},
   {q:'Hva spiste T-rex?',o:[['🍖','Kjøtt',1],['🥕','Gulrot'],['🍦','Is']],f:'Riktig! T-rex var et rovdyr som spiste kjøtt.',e:1},
   {q:'Hva kommer dinosaurunger ut av?',o:[['🥚','Egg',1],['📦','Eske'],['🌷','Blomst']],f:'Riktig! Dinosaurene la egg, akkurat som fugler gjør.',e:1},
-  {q:'Hva kaller vi gamle bein som er blitt til stein?',o:[['🦴','Fossil',1],['🧸','Bamse'],['🍞','Brød']],f:'Riktig! Fossiler hjelper oss å vite hvordan dinosaurene så ut.'},
+  {q:'Hva kaller vi gamle bein som er blitt til stein?',o:[['🦴','Fossil',1],['💎','Krystall'],['🧟','Mumie']],f:'Riktig! Fossiler hjelper oss å vite hvordan dinosaurene så ut.'},
   {q:'Hvilket dyr med lang pels levde i istiden?',o:[['🦣','Mammut',1],['🦒','Sjiraff'],['🐧','Pingvin']],f:'Riktig! Mammuten hadde lang pels og store støttenner.',e:1},
   {q:'Levde det mennesker samtidig med dinosaurene?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Dinosaurene døde ut lenge før de første menneskene kom.'},
-  {q:'Hva lagde steinalderfolk redskaper av?',o:[['🪨','Stein',1],['🧱','Lego'],['🔌','Plast']],f:'Riktig! De slo stein til økser og kniver. Derfor heter det steinalderen.'},
-  {q:'Hvor bodde mange steinaldermennesker?',o:[['🕳️','Huler',1],['🏢','Blokker'],['🚀','Raketter']],f:'Riktig! Mange bodde i huler og i telt av dyreskinn.'},
-  {q:'Hvilke dyr i dag er i slekt med dinosaurene?',o:[['🐦','Fugler',1],['🐟','Fisker'],['🐌','Snegler']],f:'Riktig! Fuglene er etterkommere av dinosaurene.'},
+  {q:'Hva lagde steinalderfolk redskaper av?',o:[['🪨','Stein',1],['⚙️','Jern'],['🧴','Plast']],f:'Riktig! De slo stein til økser og kniver. Derfor heter det steinalderen.'},
+  {q:'Hvor bodde mange steinaldermennesker?',o:[['🕳️','I huler',1],['🏰','I slott'],['🏢','I blokker']],f:'Riktig! Mange bodde i huler og i telt av dyreskinn.'},
+  {q:'Hvilke dyr i dag er i slekt med dinosaurene?',o:[['🐦','Fugler',1],['🐕','Hunder'],['🐟','Fisker']],f:'Riktig! Fuglene er etterkommere av dinosaurene.'},
   {q:'Hva malte steinaldermenneskene på huleveggene?',o:[['🦌','Dyr',1],['🚗','Biler'],['📺','TV']],f:'Riktig! De malte dyr på veggene i hulene.',e:1},
 ];
 const LYD=save.lvl||(save.lvl={});
 // Benjamin (9 år) starter ett nivå over Bastian og kan gå høyere.
-const lvlMin=kind=>isBastian()?0:1, lvlMax=kind=>isBastian()?1:(kind==='les'?3:2);
-const lvlOf=kind=>clamp(LYD[kind]||0,lvlMin(kind),lvlMax(kind));
+const lvlMin=kind=>isBastian()?0:1, lvlMax=kind=>isBastian()?1:(kind==='les'||kind==='math'?3:2);
+if(!isBastian()&&KID&&save.lvlV!==2){save.lvlV=2;LYD.les=Math.max(LYD.les||0,1);LYD.math=Math.max(LYD.math||0,2);persist()}
+if(!KID&&LYD.math==null)LYD.math=2;
+const lvlOf=kind=>clamp(LYD[kind]??(isBastian()?0:kind==='math'?2:1),lvlMin(kind),lvlMax(kind));
 function lvlNote(kind,first){const k=kind+'Rek';LYD[k]=first?Math.max(1,(LYD[k]||0)+1):Math.min(-1,(LYD[k]||0)-1);
   if(LYD[k]>=3){LYD[kind]=Math.min(lvlMax(kind),lvlOf(kind)+1);LYD[k]=0}else if(LYD[k]<=-2){LYD[kind]=Math.max(lvlMin(kind),lvlOf(kind)-1);LYD[k]=0}persist()}
 const recentWords=[];
 function pickFresh(pool){const p=pool.filter(w=>!recentWords.includes(w[0]));const w=(p.length?p:pool)[Math.floor(Math.random()*(p.length?p:pool).length)];recentWords.push(w[0]);if(recentWords.length>12)recentWords.shift();return w}
 function lesPool(){const l=lvlOf('les');
   if(isBastian())return l===0?LES_ORD.filter(w=>w[0].length<=3):LES_ORD;
-  return l===1?LES_ORD.filter(w=>w[0].length>=4).concat(LES_LANG.filter(w=>w[0].length<=5)):l===2?LES_LANG:LES_LANG.filter(w=>w[0].length>=6).concat(LES_MER)}
+  return l===1?LES_LANG.concat(LES_MER):LES_LANG.filter(w=>w[0].length>=6).concat(LES_MER)}
+const likeness=(a,b)=>(a[0]===b[0]?2:0)+(a[a.length-1]===b[b.length-1]?1:0)+(Math.abs(a.length-b.length)<=1?1:0);
+function makeSentQ(){const l=lvlOf('les');const pool=l>=3?SETN.filter(x=>x[0].split(' ').length>=4):SETN;const w=pickFresh(pool);
+  return {word:w[0],sent:true,opts:shuffle([{e:w[1],ok:true,l:w[0]},...w[2].map(e=>({e,l:''}))])}}
 function makeLesQ(){
+  if(!isBastian()){const l=lvlOf('les');if(l>=2&&Math.random()<(l===2?.75:.6)||l===1&&Math.random()<.35)return makeSentQ()}
   const w=pickFresh(lesPool());
-  const same=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]===w[0][0])),other=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]!==w[0][0]));
-  const d=[...same.slice(0,1),...other].slice(0,2);
+  let d;if(isBastian()){const same=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]===w[0][0])),other=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]!==w[0][0]));d=[...same.slice(0,1),...other].slice(0,2)}
+  else d=shuffle(ALLE_ORD.filter(x=>x!==w)).sort((x,y)=>likeness(w[0],y[0])-likeness(w[0],x[0])).slice(0,2);
   return {word:w[0],opts:shuffle([{e:w[1],ok:true,l:w[0]},...d.map(x=>({e:x[1],l:x[0]}))])};
 }
 function makeHistRound(pool){const p=isBastian()?pool.filter(h=>h.e):pool.filter(h=>!h.e);return shuffle(p).slice(0,3).map(h=>({q:h.q,f:h.f,opts:shuffle(h.o.map(o=>({e:o[0],l:o[1],ok:!!o[2]})))}))}
@@ -741,9 +755,13 @@ function makeBokQ(){
     const others=shuffle([...'ABDEFGHIKLMNOPRSTU'].filter(c=>c!==r)).slice(0,2);
     return {mode:'first',word:w[0],e:w[1],ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
   }
-  const w=pickFresh(lvlOf('les')>=2?LES_LANG.concat(LES_MER.filter(x=>x[0].length<=8)):LES_ORD.filter(x=>x[0].length>=4).concat(LES_LANG.filter(x=>x[0].length<=5)));
+  const w=pickFresh(lvlOf('les')>=2?LES_LANG.filter(x=>x[0].length>=6).concat(LES_MER):LES_LANG.concat(LES_MER.filter(x=>x[0].length<=7)));
   const word=w[0];let idx=[...word].findIndex((c,i)=>i>0&&VOKAL.includes(c));if(idx<0||Math.random()<.3)idx=1+Math.floor(Math.random()*(word.length-1));
-  const r=word[idx],set=VOKAL.includes(r)?'AEIOUYØÅ':KONS;
+  const r=word[idx];
+  // Bokstaver som er lette å blande (b/d/p, e/æ/ø, o/å/u ...)
+  const CONF={B:'DPG',D:'BPT',P:'BDF',G:'KJ',K:'GH',T:'DS',M:'NB',N:'MR',F:'VH',V:'FB',S:'TF',L:'RN',R:'LN',H:'KF',J:'GI',
+    A:'ÆÅ',E:'ÆIØ',I:'EY',O:'ÅU',U:'OY',Y:'UI',Æ:'EA',Ø:'EÆ',Å:'OA'};
+  const set=CONF[r]||(VOKAL.includes(r)?'AEIOUYØÅ':KONS);
   const others=shuffle([...set].filter(c=>c!==r)).slice(0,2);
   return {mode:'miss',word,e:w[1],idx,ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
 }
@@ -752,14 +770,16 @@ function makeMathQ(){
   if(isBastian()){const max=l===0?5:10;const a=1+Math.floor(Math.random()*(max-1)),b=1+Math.floor(Math.random()*(max-a));const ans=a+b;
     const ds=shuffle([ans-1,ans+1,ans+2,ans-2].filter(x=>x>0&&x<=12&&x!==ans)).slice(0,2);
     return {op:'+',a,b,ans,opts:shuffle([{l:String(ans),ok:true},...ds.map(x=>({l:String(x)}))])}}
-  const tabs=l===0?[2,5,10]:l===1?[2,3,4,5,10]:[2,3,4,5,6,7,8,9,10];
-  const a=tabs[Math.floor(Math.random()*tabs.length)],b=1+Math.floor(Math.random()*10),ans=a*b;
-  const ds=shuffle([...new Set([a*(b+1),a*(b-1),ans+1,ans-1,ans+10].filter(x=>x>0&&x!==ans))]).slice(0,2);
+  const tabs=l<=1?[2,3,4,5,10]:[3,4,6,7,8,9];
+  const a=tabs[Math.floor(Math.random()*tabs.length)],b=(l>=2?3:1)+Math.floor(Math.random()*(l>=2?8:10)),ans=a*b;
+  if(l>=3&&Math.random()<.5){const ds=shuffle([b+1,b-1,b+2].filter(x=>x>0&&x!==b)).slice(0,2); // hvilket tall mangler?
+    return {op:'·',a,b,ans,miss:true,disp:`${a} · ? = ${ans}`,opts:shuffle([{l:String(b),ok:true},...ds.map(x=>({l:String(x)}))])}}
+  const ds=shuffle([...new Set([a*(b+1),a*(b-1),(a+1)*b,(a-1)*b].filter(x=>x>0&&x!==ans))]).slice(0,2);
   return {op:'·',a,b,ans,opts:shuffle([{l:String(ans),ok:true},...ds.map(x=>({l:String(x)}))])};
 }
 const NUM=['null','én','to','tre','fire','fem','seks','sju','åtte','ni','ti'];
 const sayNum=n=>n<=10?NUM[n]:String(n);
-function mathText(q){return q.op==='+'?`Hva er ${sayNum(q.a)} pluss ${sayNum(q.b)}?`:`Hva er ${sayNum(q.a)} ganger ${sayNum(q.b)}?`}
+function mathText(q){return q.miss?`${sayNum(q.a)} ganger hvilket tall blir ${q.ans}?`:q.op==='+'?`Hva er ${sayNum(q.a)} pluss ${sayNum(q.b)}?`:`Hva er ${sayNum(q.a)} ganger ${sayNum(q.b)}?`}
 function bokText(q){return q.mode==='first'?`Hvilken bokstav begynner ${q.word.toLowerCase()} på?`:`Hvilken bokstav mangler i ${q.word.toLowerCase()}?`}
 
 const stations=[];
@@ -779,8 +799,12 @@ function station(cfg){
     const spaced=(word,y,size,hiIdx,blank)=>{c.font=`700 ${size}px ${FONT}`;const sp=size*.15,chars=[...word],ws=chars.map((ch,i)=>i===blank?c.measureText('M').width:c.measureText(ch).width);
       const tot=ws.reduce((a,b)=>a+b,0)+sp*(chars.length-1);let x=w/2-tot/2;
       chars.forEach((ch,i)=>{if(i===blank){c.fillStyle='#F59E0B';rrect(c,x+4,y+size*.32,ws[i]-8,14,7);c.fill()}else{c.fillStyle=(hiIdx===i||hiIdx===-2)?'#F59E0B':'#24324F';c.fillText(ch,x+ws[i]/2,y)}x+=ws[i]+sp})};
-    if(kind==='les'){const size=Math.min(250,Math.floor(w*.88/(q.word.length*.82)));spaced(q.word,h/2+14,size,hi)}
-    else if(kind==='math'){c.font=`700 200px ${FONT}`;c.fillStyle='#24324F';const t=`${q.a} ${q.op} ${q.b} = ?`;
+    if(kind==='les'&&q.sent){const ws=q.word.split(' ');const half=ws.length>3?Math.ceil(ws.length/2):ws.length;const lines=[ws.slice(0,half),ws.slice(half)].filter(x=>x.length);
+      let size=150;c.font=`700 ${size}px ${FONT}`;const lw=L=>c.measureText(L.join(' ')).width;while(size>60&&Math.max(...lines.map(lw))>w*.9){size-=6;c.font=`700 ${size}px ${FONT}`}
+      let k=0;lines.forEach((L,li)=>{const y=h/2+(li-(lines.length-1)/2)*size*1.15+10;let x=w/2-lw(L)/2;c.textAlign='left';
+        L.forEach(word=>{c.fillStyle=(hi===k||hi===-2)?'#F59E0B':'#24324F';c.fillText(word,x,y);x+=c.measureText(word+' ').width;k++})});c.textAlign='center'}
+    else if(kind==='les'){const size=Math.min(250,Math.floor(w*.88/(q.word.length*.82)));spaced(q.word,h/2+14,size,hi)}
+    else if(kind==='math'){c.font=`700 200px ${FONT}`;c.fillStyle='#24324F';const t=q.disp||`${q.a} ${q.op} ${q.b} = ?`;
       if(S.helper){c.fillText(t,w/2,h*.33);c.font=`600 ${q.op==='+'?110:80}px ${q.op==='+'?EMOJI:FONT}`;c.fillStyle='#7B6CF6';
         c.fillText(q.op==='+'?'🍎'.repeat(q.a)+' + '+'🍎'.repeat(q.b):Array(q.a).fill(q.b).join(' + '),w/2,h*.74)}
       else c.fillText(t,w/2,h/2+10)}
@@ -806,7 +830,7 @@ function station(cfg){
     c.save();c.globalAlpha=p.dim?.35:1;c.fillStyle='rgba(30,42,74,.18)';rrect(c,28,40,456,456,90);c.fill();
     c.fillStyle='#FFFFFF';rrect(c,28,24,456,456,90);c.fill();c.lineWidth=14;c.strokeStyle=p.col;rrect(c,35,31,442,442,84);c.stroke();
     c.textAlign='center';c.textBaseline='middle';
-    if(kind==='les'){c.font=`290px ${EMOJI}`;c.fillText(p.opt.e,256,262)}
+    if(kind==='les'){let fs=290;c.font=`${fs}px ${EMOJI}`;while(fs>90&&c.measureText(p.opt.e).width>410){fs-=10;c.font=`${fs}px ${FONT===''?'':EMOJI}`}c.fillText(p.opt.e,256,262)}
     else if(kind==='math'||kind==='bok'){c.font=`700 ${p.opt.l.length>2?200:280}px ${FONT}`;c.fillStyle='#24324F';c.fillText(p.opt.l,256,272)}
     else{c.font=`220px ${EMOJI}`;c.fillText(p.opt.e,256,205);let fs=80;c.font=`700 ${fs}px ${FONT}`;while(fs>40&&c.measureText(p.opt.l).width>420){fs-=4;c.font=`700 ${fs}px ${FONT}`}c.fillStyle='#24324F';c.fillText(p.opt.l,256,400)}
     c.restore();p.ct.update()}
@@ -818,7 +842,7 @@ function station(cfg){
     S.pads.forEach((p,i)=>{p.opt=S.q.opts[i]||null;p.dim=false;const on=!!p.opt;p.solid.off=!on;[p.base,p.plate,p.card,p.shadowDisc].forEach(m=>m.setEnabled(on));p.pm.emissiveColor.set(0,0,0);drawCard(p);
       if(on){p.card.scaling.setAll(.01);tween(.5,k=>p.card.scaling.setAll(easeBack(k)),null,i*.08)}});
     S.board.redraw();updateQuizHud(S);
-    if(kind==='les'){if(!S.introSaid){S.introSaid=true;say('Les ordet på tavla. Hopp på bildet som passer!')}}
+    if(kind==='les'){if(S.q.sent&&!S.sentSaid){S.sentSaid=true;say('Les setningen på tavla. Hopp på bildet som passer!')}else if(!S.introSaid){S.introSaid=true;say('Les ordet på tavla. Hopp på bildet som passer!')}}
     else if(kind==='math')say((S.idx===0&&!S.introSaid?(S.introSaid=true,'Hopp på riktig svar! '):'')+mathText(S.q));
     else if(kind==='bok')say(bokText(S.q));
     else sayQ(S);
@@ -836,7 +860,7 @@ function station(cfg){
       bounceCard(p);
       let txt;
       if(kind==='les')txt='Riktig! '+q.word.toLowerCase()+'.';
-      else if(kind==='math')txt=`Riktig! ${sayNum(q.a)} ${q.op==='+'?'pluss':'ganger'} ${sayNum(q.b)} er ${q.ans}.`;
+      else if(kind==='math')txt=`Riktig! ${sayNum(q.a)} ${q.op==='+'?'pluss':'ganger'} ${sayNum(q.b)} er ${q.ans}.`+(q.miss?'':'');
       else if(kind==='bok'){txt=q.mode==='first'?`Riktig! ${q.word.toLowerCase()} begynner på ${q.ans}.`:`Riktig! ${q.word.toLowerCase()}.`;S.helper=true;S.board.redraw();updateQuizHud(S)}
       else txt=q.f;
       say(txt);
@@ -846,8 +870,8 @@ function station(cfg){
       S.tries++;p.dim=true;drawCard(p);sfx.wrong();shake(p);
       player.vy=9;player.vel.x=(player.pos.x-p.px)*1.5-ux*4;player.vel.z=(player.pos.z-p.pz)*1.5-uz*4;
       if(kind==='les'){
-        if(S.tries===1){say('Nesten! Se på én bokstav om gangen.');soundOut(S)}
-        else{S.hint=true;say('Ordet er '+q.word.toLowerCase()+'.');soundOut(S)}
+        if(S.tries===1){say(q.sent?'Nesten! Les ett ord om gangen.':'Nesten! Se på én bokstav om gangen.');soundOut(S)}
+        else{S.hint=true;say((q.sent?'Det står: ':'Ordet er ')+q.word.toLowerCase()+'.');soundOut(S)}
       }else if(kind==='math'){
         S.helper=true;S.board.redraw();
         if(S.tries===1)say(q.op==='+'?`Prøv igjen. Tell eplene: ${sayNum(q.a)} og ${sayNum(q.b)}.`:`Prøv igjen. ${sayNum(q.a)} ganger ${sayNum(q.b)} er ${Array(q.a).fill(sayNum(q.b)).join(' pluss ')}.`);
@@ -867,7 +891,7 @@ function station(cfg){
   stations.push(S);return S;
 }
 function sayQ(S){const o=S.q.opts.map(x=>x.l);say(S.q.q+' '+o.slice(0,-1).join(', ')+' eller '+o[o.length-1]+'?')}
-function soundOut(S){const word=S.q.word;let i=0;const step=()=>{if(S.q?.word!==word)return;if(i<word.length){S.board.redraw(null,i);hlHud(i);i++;setTimeout(step,520)}else{S.board.redraw(null,-2);hlHud(-2);setTimeout(()=>{if(S.q?.word===word){S.board.redraw();hlHud(-1)}},1200)}};setTimeout(step,500)}
+function soundOut(S){const word=S.q.word,n=S.q.sent?word.split(' ').length:word.length,dt=S.q.sent?750:520;let i=0;const step=()=>{if(S.q?.word!==word)return;if(i<n){S.board.redraw(null,i);hlHud(i);i++;setTimeout(step,dt)}else{S.board.redraw(null,-2);hlHud(-2);setTimeout(()=>{if(S.q?.word===word){S.board.redraw();hlHud(-1)}},1200)}};setTimeout(step,500)}
 function bounceCard(p){tween(.6,k=>{const s=1+Math.sin(k*Math.PI)*.25;p.card.scaling.setAll(s)})}
 function shake(p){const x0=p.card.position.x,z0=p.card.position.z;tween(.45,k=>{const a=Math.sin(k*Math.PI*6)*(1-k)*.18;p.card.position.x=x0+a;p.card.position.z=z0+a})}
 
@@ -1353,14 +1377,14 @@ let hudStation=null;
 function updateQuizHud(S){
   const el=$('#quiz');if(!S||!S.q||shopOpen){el.classList.remove('show');if(!S||!S.q)hudStation=null;return}
   hudStation=S;el.classList.add('show');const k=S.kind,q=S.q,W=$('#qword'),T=$('#qtext');
-  $('#qlabel').textContent={les:'Les ordet',hist:'Vikingbyen',dino:'Dinodalen',math:q.op==='+'?'Regn ut':'Gangetabellen',bok:q.mode==='first'?'Første bokstav':'Hvilken bokstav mangler?'}[k];
+  $('#qlabel').textContent={les:q.sent?'Les setningen':'Les ordet',hist:'Vikingbyen',dino:'Dinodalen',math:q.op==='+'?'Regn ut':'Gangetabellen',bok:q.mode==='first'?'Første bokstav':'Hvilken bokstav mangler?'}[k];
   const useWord=k!=='hist'&&k!=='dino';W.hidden=!useWord;T.hidden=useWord;W.innerHTML='';W.classList.toggle('math',k==='math');
   const add=(t,c)=>{const sp=document.createElement('span');sp.textContent=t;if(c)sp.className=c;W.append(sp)};
-  if(k==='les')[...q.word].forEach(ch=>add(ch));
-  else if(k==='math')add(`${q.a} ${q.op} ${q.b} = ?`);
+  W.classList.toggle('sent',!!q.sent);if(k==='les'){if(q.sent)q.word.split(' ').forEach(x=>add(x));else[...q.word].forEach(ch=>add(ch))}
+  else if(k==='math')add(q.disp||`${q.a} ${q.op} ${q.b} = ?`);
   else if(k==='bok'){add(q.e+' ');if(q.mode==='first'){add('?','blank');[...q.word].slice(1).forEach(()=>add('_'))}else[...q.word].forEach((ch,i)=>add(i===q.idx&&!S.helper?'_':ch,i===q.idx?'blank':''))}
   else T.textContent=q.q;
-  $('#sayBtn').textContent=k==='les'?'🔊 Hør ordet':'🔊 Les opp';
+  $('#sayBtn').textContent=k==='les'?(q.sent?'🔊 Hør setningen':'🔊 Hør ordet'):'🔊 Les opp';
   updateDots(S);
 }
 function updateDots(S){[...$('#dots').children].forEach((d,i)=>d.classList.toggle('on',i<S.idx))}
