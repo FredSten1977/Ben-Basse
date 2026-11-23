@@ -336,7 +336,7 @@ function markSeen(it){ SEEN[it.word] = Date.now(); try{ localStorage.setItem(SEE
 const freshFirst = list => shuffle(list).sort((x,y)=>(SEEN[x.word]||0)-(SEEN[y.word]||0));
 /* Ny versjon: telefonen og hjemskjerm-appen kan holde på en gammel kopi av siden.
    Ved oppstart og når appen åpnes igjen, henter vi siden uten cache. Har den et annet versjonsnummer, lastes den nye inn. */
-const APP_VERSION = "2026-11-23-5";
+const APP_VERSION = "2026-11-23-6";
 function sjekkNyVersjon(){
   if(location.protocol === "file:") return;
   fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"}).then(r=>r.ok ? r.text() : "").then(t=>{
