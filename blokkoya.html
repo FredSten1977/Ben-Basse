@@ -62,6 +62,7 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
 
 #help{bottom:calc(env(safe-area-inset-bottom,0px) + 16px);left:50%;transform:translateX(-50%);font-size:16px;font-weight:600;transition:opacity .6s;white-space:nowrap}
+#joy,#jump{pointer-events:auto}
 #joy{left:max(24px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:140px;height:140px;border-radius:50%;
   background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.7);touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 4px 12px rgba(30,42,74,.25);pointer-events:none}
