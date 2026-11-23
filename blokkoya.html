@@ -127,6 +127,8 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 @media (max-width:699px){#shop{top:auto;width:100%;height:62%}.spanel{animation-name:slideup}}
 @keyframes slideup{from{transform:translateY(40px);opacity:0}}
 .qword .blank{color:var(--sun-deep)}.qword.math{letter-spacing:.04em}
+.ib.back{width:auto;border-radius:26px;padding:0 18px;font-size:18px;font-weight:700;display:flex;gap:6px;align-items:center}
+.sback{border:0;background:#F1F4FA;border-radius:16px;margin-top:12px;padding:10px 18px;font-size:18px;font-weight:600;color:var(--ink)}
 .fly{position:fixed;left:0;top:0;z-index:6;font-size:34px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(30,42,74,.35));will-change:transform}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -142,7 +144,7 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
     <button id="goal" class="pill goal" hidden><span aria-hidden="true">🎯</span><span class="t"></span><span aria-hidden="true" class="spk">🔊</span></button></div>
   <div class="btns">
     <button id="shopBtn" class="ib" aria-label="Garderobe">👕</button>
-    <button id="backBtn" class="ib" aria-label="Tilbake til appen" hidden>✕</button>
+    <button id="backBtn" class="ib back" aria-label="Tilbake til appen" hidden><span aria-hidden="true">←</span> Tilbake</button>
     <button id="musicBtn" class="ib" aria-label="Musikk av/på">🎵</button>
   </div>
 </div>
@@ -178,10 +180,20 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
       <button class="kid" data-kid="bastian" style="--shirt:#FF8A3D" aria-pressed="false"><span class="av"></span>Bastian</button>
     </div>
     <button class="go" id="goBtn">Spill!</button>
+    <button class="sback" id="startBack" hidden>← Tilbake til appen</button>
     <div class="how"><span>🏝️ 5 verdener</span><span>👕 Utstyr</span><span>🏅 Nivåer</span></div>
   </div>
 </div>
 
+<script>
+// Tilbake til appen kobles til før alt annet, så knappen virker selv om 3D-motoren ikke laster.
+(function(){var q=new URLSearchParams(location.search),kid=q.get('kid');if(!(kid==='benjamin'||kid==='bastian'||q.get('embed')==='1'))return;
+  function back(){try{speechSynthesis.cancel()}catch(e){}try{if(window.__blokkAC)window.__blokkAC.suspend()}catch(e){}
+    try{if(window.parent!==window){window.parent.postMessage({type:'blokkoya-close'},location.origin);return}}catch(e){}location.href=(kid==='bastian'?'bastian':'benjamin')+'.html'}
+  ['backBtn','startBack'].forEach(function(id){var b=document.getElementById(id);b.hidden=false;b.addEventListener('click',back)});
+  addEventListener('keydown',function(e){if(e.code==='Escape'&&document.getElementById('shop').hidden)back()});
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/babylonjs@7.31.0/babylon.js"></script>
 <script>
 (async function(){
@@ -1153,7 +1165,7 @@ let AC=null,master,sfxBus,musicBus,ambBus,revIn,dlyIn,noiseBuf=null;
 function getNoise(){if(!noiseBuf){noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const ch=noiseBuf.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1}return noiseBuf}
 function initAudio(){
   if(AC){if(AC.state==='suspended')AC.resume();return}
-  try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();window.__blokkAC=AC}catch(e){return}
   const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=3;comp.connect(AC.destination);
   master=AC.createGain();master.gain.value=.9;master.connect(comp);
   // romklang
@@ -1337,7 +1349,7 @@ $('#sayBtn').addEventListener('click',()=>{const S=hudStation;if(!S||!S.q)return
 $('#goal').addEventListener('click',()=>{initAudio();say($('#goal .t').textContent)});
 const musicBtn=$('#musicBtn');musicBtn.classList.toggle('off',!save.music);
 musicBtn.addEventListener('click',()=>{initAudio();save.music=!save.music;persist();musicBtn.classList.toggle('off',!save.music);if(musicBus)musicBus.gain.setTargetAtTime(save.music?.55:0,AC.currentTime,.2)});
-if(KID||EMBED){const bb=$('#backBtn');bb.hidden=false;bb.addEventListener('click',()=>{try{speechSynthesis.cancel()}catch(e){};if(AC)AC.suspend();goBack()})}
+
 
 // ---------- veivisning ----------
 const guide=(()=>{
