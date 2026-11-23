@@ -48,7 +48,7 @@ button:focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}
 .qcard{background:var(--paper);border-radius:22px;padding:10px 16px;box-shadow:0 6px 0 rgba(30,42,74,.16),0 18px 40px rgba(30,42,74,.18);
   display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
 .qlabel{font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
-.qword{font-size:clamp(36px,8vw,56px);font-weight:700;letter-spacing:.14em;line-height:1;padding-left:.14em;display:flex}
+.qword{font-size:clamp(30px,7vw,52px);font-weight:700;letter-spacing:.14em;line-height:1;padding-left:.14em;display:flex}
 .qword span{display:inline-block;transition:color .15s,transform .2s}
 .qword span.hi{color:var(--sun-deep);transform:translateY(-6px) scale(1.15)}
 .qtext{font-size:clamp(17px,3.8vw,21px);font-weight:600;line-height:1.25;text-wrap:balance}
@@ -675,7 +675,11 @@ const LES_ORD=[['SOL','☀️'],['BIL','🚗'],['HUS','🏠'],['IS','🍦'],['KU
   ['BALL','⚽'],['KATT','🐱'],['HEST','🐴'],['MÅNE','🌙'],['TOG','🚂'],['BOK','📖'],['SKO','👟'],['GRIS','🐷'],['OST','🧀'],['EGG','🥚'],['SAU','🐑'],['FOT','🦶'],['NESE','👃'],['ØRE','👂']];
 const LES_LANG=[['BANAN','🍌'],['TIGER','🐯'],['PANDA','🐼'],['SOFA','🛋️'],['LAMPE','💡'],['ROSE','🌹'],['MELK','🥛'],['BUSS','🚌'],['SAKS','✂️'],['GAVE','🎁'],
   ['ROBOT','🤖'],['RAKETT','🚀'],['BLOMST','🌸'],['DRAGE','🐉'],['TROMME','🥁'],['PINGVIN','🐧'],['ELEFANT','🐘'],['SLANGE','🐍'],['KAMEL','🐫'],['TOMAT','🍅']];
-const ALLE_ORD=LES_ORD.concat(LES_LANG);
+// Lengre, lydrette ord for Benjamin når han mestrer de andre
+const LES_MER=[['FOTBALL','⚽'],['SNØMANN','⛄'],['REGNBUE','🌈'],['JORDBÆR','🍓'],['MARIHØNE','🐞'],['BLEKKSPRUT','🐙'],['TELEFON','📱'],['PAPEGØYE','🦜'],
+  ['SKILPADDE','🐢'],['KROKODILLE','🐊'],['SOLSIKKE','🌻'],['VULKAN','🌋'],['HELIKOPTER','🚁'],['TRAKTOR','🚜'],['PIRAT','🏴‍☠️'],['KAKTUS','🌵']];
+const ALLE_ORD=LES_ORD.concat(LES_LANG,LES_MER);
+const isBastian=()=>(KID||save.kid)==='bastian';
 const HIST=[
   {q:'Hva reiste vikingene med over havet?',o:[['⛵','Skip',1],['🚗','Bil'],['✈️','Fly']],f:'Riktig! Vikingene seilte i lange skip med store seil og årer.',e:1},
   {q:'Hadde vikingene horn på hjelmen?',o:[['👍','Ja'],['👎','Nei',1]],f:'Riktig! Hjelmene var runde, uten horn. Horn finnes bare i filmer og tegneserier.',e:1},
@@ -686,6 +690,19 @@ const HIST=[
   {q:'Hvilken gud hadde bare ett øye?',o:[['👁️','Odin',1],['🔨','Tor'],['🌞','Balder']],f:'Riktig! Odin ga bort det ene øyet sitt for å bli klok.'},
   {q:'Hva spiste vikingene mye av?',o:[['🐟','Fisk',1],['🍕','Pizza'],['🍫','Sjokolade']],f:'Riktig! De spiste fisk, kjøtt, grøt og brød. Pizza fantes ikke!',e:1},
   {q:'Hva hadde vikingene på armen for å beskytte seg?',o:[['🛡️','Skjold',1],['☂️','Paraply'],['🎒','Sekk']],f:'Riktig! Skjoldet var rundt og laget av tre.',e:1},
+  {q:'Hvilken ukedag har fått navnet sitt etter Tor?',o:[['⚡','Torsdag',1],['🌙','Mandag'],['☀️','Søndag']],f:'Riktig! Torsdag betyr Tors dag.'},
+  {q:'Hva het stedet der vikingene trodde de modige krigerne kom etter døden?',o:[['🏛️','Valhall',1],['🏝️','Syden'],['🌋','Vulkanen']],f:'Riktig! I Valhall festet krigerne sammen med Odin.'},
+  {q:'Hvem seilte til Amerika lenge før Columbus?',o:[['⛵','Leiv Eiriksson',1],['👑','Harald Hårfagre'],['🔨','Tor']],f:'Riktig! Leiv Eiriksson kom til Amerika for rundt tusen år siden. Han kalte det Vinland.'},
+  {q:'Hvilken konge samlet Norge til ett rike?',o:[['👑','Harald Hårfagre',1],['🧙','Odin'],['⛵','Leiv Eiriksson']],f:'Riktig! Harald Hårfagre samlet Norge for over tusen år siden.'},
+  {q:'Hva kalte vikingene møtet der de bestemte lover og løste krangler?',o:[['🗣️','Tinget',1],['🎪','Sirkus'],['🏫','Skolen']],f:'Riktig! På tinget møttes de frie mennene og bestemte lovene.'},
+  {q:'Hva var en jarl?',o:[['🧔','En høvding',1],['🐕','En hund'],['🍲','En suppe']],f:'Riktig! En jarl var en mektig høvding, nesten som en konge.'},
+  {q:'Hva gjorde vikingene oftest hjemme når de ikke var på tokt?',o:[['🌾','Var bønder',1],['🎮','Spilte data'],['✈️','Fløy fly']],f:'Riktig! De fleste vikinger var bønder med dyr og åker.'},
+];
+const DINO_MER=[
+  {q:'Hva kaller vi en som forsker på dinosaurer og fossiler?',o:[['🔬','Paleontolog',1],['🚒','Brannmann'],['🍞','Baker']],f:'Riktig! En paleontolog graver fram fossiler og finner ut hvordan dyrene levde.'},
+  {q:'Hvilken dinosaur hadde tre horn i ansiktet?',o:[['🦏','Triceratops',1],['🦖','T-rex'],['🦕','Langhals']],f:'Riktig! Triceratops betyr ansikt med tre horn.'},
+  {q:'Hva tror forskerne gjorde at dinosaurene døde ut?',o:[['☄️','Stein fra rommet',1],['🥶','For mye snø'],['🍔','For mye mat']],f:'Riktig! En stor asteroide traff jorda for 66 millioner år siden.'},
+  {q:'Hvor mange år er det siden de siste dinosaurene levde?',o:[['⏳','66 millioner år',1],['📅','100 år'],['🗓️','5000 år']],f:'Riktig! Det er 66 millioner år siden.'},
 ];
 const DINO=[
   {q:'Hvilket dyr levde for veldig, veldig lenge siden?',o:[['🦖','Dinosaur',1],['🐶','Hund'],['🐱','Katt']],f:'Riktig! Dinosaurene levde for millioner av år siden.',e:1},
@@ -700,35 +717,39 @@ const DINO=[
   {q:'Hva malte steinaldermenneskene på huleveggene?',o:[['🦌','Dyr',1],['🚗','Biler'],['📺','TV']],f:'Riktig! De malte dyr på veggene i hulene.',e:1},
 ];
 const LYD=save.lvl||(save.lvl={});
+// Benjamin (9 år) starter ett nivå over Bastian og kan gå høyere.
+const lvlMin=kind=>isBastian()?0:1, lvlMax=kind=>isBastian()?1:(kind==='les'?3:2);
+const lvlOf=kind=>clamp(LYD[kind]||0,lvlMin(kind),lvlMax(kind));
 function lvlNote(kind,first){const k=kind+'Rek';LYD[k]=first?Math.max(1,(LYD[k]||0)+1):Math.min(-1,(LYD[k]||0)-1);
-  const max=kind==='les'?(KID==='bastian'?1:2):(KID==='bastian'?1:2);
-  if(LYD[k]>=3){LYD[kind]=Math.min(max,(LYD[kind]||0)+1);LYD[k]=0}else if(LYD[k]<=-2){LYD[kind]=Math.max(0,(LYD[kind]||0)-1);LYD[k]=0}persist()}
+  if(LYD[k]>=3){LYD[kind]=Math.min(lvlMax(kind),lvlOf(kind)+1);LYD[k]=0}else if(LYD[k]<=-2){LYD[kind]=Math.max(lvlMin(kind),lvlOf(kind)-1);LYD[k]=0}persist()}
 const recentWords=[];
 function pickFresh(pool){const p=pool.filter(w=>!recentWords.includes(w[0]));const w=(p.length?p:pool)[Math.floor(Math.random()*(p.length?p:pool).length)];recentWords.push(w[0]);if(recentWords.length>12)recentWords.shift();return w}
-function lesPool(){const l=LYD.les||0;return l===0?LES_ORD.filter(w=>w[0].length<=3):l===1?LES_ORD:LES_ORD.filter(w=>w[0].length>=4).concat(LES_LANG)}
+function lesPool(){const l=lvlOf('les');
+  if(isBastian())return l===0?LES_ORD.filter(w=>w[0].length<=3):LES_ORD;
+  return l===1?LES_ORD.filter(w=>w[0].length>=4).concat(LES_LANG.filter(w=>w[0].length<=5)):l===2?LES_LANG:LES_LANG.filter(w=>w[0].length>=6).concat(LES_MER)}
 function makeLesQ(){
   const w=pickFresh(lesPool());
   const same=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]===w[0][0])),other=shuffle(ALLE_ORD.filter(x=>x!==w&&x[0][0]!==w[0][0]));
   const d=[...same.slice(0,1),...other].slice(0,2);
   return {word:w[0],opts:shuffle([{e:w[1],ok:true,l:w[0]},...d.map(x=>({e:x[1],l:x[0]}))])};
 }
-function makeHistRound(pool){const p=KID==='bastian'?pool.filter(h=>h.e):pool;return shuffle(p).slice(0,3).map(h=>({q:h.q,f:h.f,opts:shuffle(h.o.map(o=>({e:o[0],l:o[1],ok:!!o[2]})))}))}
+function makeHistRound(pool){const p=isBastian()?pool.filter(h=>h.e):pool.filter(h=>!h.e);return shuffle(p).slice(0,3).map(h=>({q:h.q,f:h.f,opts:shuffle(h.o.map(o=>({e:o[0],l:o[1],ok:!!o[2]})))}))}
 const VOKAL='AEIOUYÆØÅ',KONS='BDFGHJKLMNPRSTV';
 function makeBokQ(){
-  if(KID==='bastian'){ // første bokstav
+  if(isBastian()){ // første bokstav
     const w=pickFresh(LES_ORD.filter(x=>x[0].length<=4));const r=w[0][0];
     const others=shuffle([...'ABDEFGHIKLMNOPRSTU'].filter(c=>c!==r)).slice(0,2);
     return {mode:'first',word:w[0],e:w[1],ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
   }
-  const w=pickFresh((LYD.les||0)>=2?LES_ORD.concat(LES_LANG.filter(x=>x[0].length<=5)):LES_ORD.filter(x=>x[0].length>=3));
+  const w=pickFresh(lvlOf('les')>=2?LES_LANG.concat(LES_MER.filter(x=>x[0].length<=8)):LES_ORD.filter(x=>x[0].length>=4).concat(LES_LANG.filter(x=>x[0].length<=5)));
   const word=w[0];let idx=[...word].findIndex((c,i)=>i>0&&VOKAL.includes(c));if(idx<0||Math.random()<.3)idx=1+Math.floor(Math.random()*(word.length-1));
   const r=word[idx],set=VOKAL.includes(r)?'AEIOUYØÅ':KONS;
   const others=shuffle([...set].filter(c=>c!==r)).slice(0,2);
   return {mode:'miss',word,e:w[1],idx,ans:r,opts:shuffle([{l:r,ok:true},...others.map(l=>({l}))])};
 }
 function makeMathQ(){
-  const l=LYD.math||0;
-  if(KID==='bastian'){const max=l===0?5:10;const a=1+Math.floor(Math.random()*(max-1)),b=1+Math.floor(Math.random()*(max-a));const ans=a+b;
+  const l=lvlOf('math');
+  if(isBastian()){const max=l===0?5:10;const a=1+Math.floor(Math.random()*(max-1)),b=1+Math.floor(Math.random()*(max-a));const ans=a+b;
     const ds=shuffle([ans-1,ans+1,ans+2,ans-2].filter(x=>x>0&&x<=12&&x!==ans)).slice(0,2);
     return {op:'+',a,b,ans,opts:shuffle([{l:String(ans),ok:true},...ds.map(x=>({l:String(x)}))])}}
   const tabs=l===0?[2,5,10]:l===1?[2,3,4,5,10]:[2,3,4,5,6,7,8,9,10];
@@ -758,14 +779,14 @@ function station(cfg){
     const spaced=(word,y,size,hiIdx,blank)=>{c.font=`700 ${size}px ${FONT}`;const sp=size*.15,chars=[...word],ws=chars.map((ch,i)=>i===blank?c.measureText('M').width:c.measureText(ch).width);
       const tot=ws.reduce((a,b)=>a+b,0)+sp*(chars.length-1);let x=w/2-tot/2;
       chars.forEach((ch,i)=>{if(i===blank){c.fillStyle='#F59E0B';rrect(c,x+4,y+size*.32,ws[i]-8,14,7);c.fill()}else{c.fillStyle=(hiIdx===i||hiIdx===-2)?'#F59E0B':'#24324F';c.fillText(ch,x+ws[i]/2,y)}x+=ws[i]+sp})};
-    if(kind==='les'){const size=q.word.length>5?190:250;spaced(q.word,h/2+14,size,hi)}
+    if(kind==='les'){const size=Math.min(250,Math.floor(w*.88/(q.word.length*.82)));spaced(q.word,h/2+14,size,hi)}
     else if(kind==='math'){c.font=`700 200px ${FONT}`;c.fillStyle='#24324F';const t=`${q.a} ${q.op} ${q.b} = ?`;
       if(S.helper){c.fillText(t,w/2,h*.33);c.font=`600 ${q.op==='+'?110:80}px ${q.op==='+'?EMOJI:FONT}`;c.fillStyle='#7B6CF6';
         c.fillText(q.op==='+'?'🍎'.repeat(q.a)+' + '+'🍎'.repeat(q.b):Array(q.a).fill(q.b).join(' + '),w/2,h*.74)}
       else c.fillText(t,w/2,h/2+10)}
     else if(kind==='bok'){c.font=`230px ${EMOJI}`;c.fillText(q.e,w*.24,h/2+10);
       if(q.mode==='first'){c.font=`700 210px ${FONT}`;c.fillStyle='#24324F';c.fillText(S.helper?q.word:'? '+'_ '.repeat(q.word.length-1).trim(),w*.64,h/2+10)}
-      else{const save_=c.textAlign;c.save();c.translate(w*.14,0);spaced(q.word,h/2+14,q.word.length>4?170:210,hi,S.helper?-1:q.idx);c.restore()}}
+      else{c.save();c.translate(w*.14,0);spaced(q.word,h/2+14,Math.min(210,Math.floor(w*.62/(q.word.length*.82))),hi,S.helper?-1:q.idx);c.restore()}}
     else textLines(c,w,h,[{t:q.q,size:74}]);
   },{w:7.2,h:3.0,ph:1.3,frame:KI.frame,bg:'#FFFDF7'});
   solidCyl(bx+px_*3.2,bz+pz_*3.2,.35,top+5,top-1);solidCyl(bx-px_*3.2,bz-pz_*3.2,.35,top+5,top-1);
@@ -787,7 +808,7 @@ function station(cfg){
     c.textAlign='center';c.textBaseline='middle';
     if(kind==='les'){c.font=`290px ${EMOJI}`;c.fillText(p.opt.e,256,262)}
     else if(kind==='math'||kind==='bok'){c.font=`700 ${p.opt.l.length>2?200:280}px ${FONT}`;c.fillStyle='#24324F';c.fillText(p.opt.l,256,272)}
-    else{c.font=`220px ${EMOJI}`;c.fillText(p.opt.e,256,205);c.font=`700 ${p.opt.l.length>8?62:80}px ${FONT}`;c.fillStyle='#24324F';c.fillText(p.opt.l,256,400)}
+    else{c.font=`220px ${EMOJI}`;c.fillText(p.opt.e,256,205);let fs=80;c.font=`700 ${fs}px ${FONT}`;while(fs>40&&c.measureText(p.opt.l).width>420){fs-=4;c.font=`700 ${fs}px ${FONT}`}c.fillStyle='#24324F';c.fillText(p.opt.l,256,400)}
     c.restore();p.ct.update()}
   S.drawCard=drawCard;
   S.ask=function(){const q=S.q;if(!q)return;if(kind==='les'){S.hint=true;say(q.word.toLowerCase());soundOut(S)}else if(kind==='math')say(mathText(q));else if(kind==='bok')say(bokText(q));else sayQ(S)};
@@ -802,7 +823,7 @@ function station(cfg){
     else if(kind==='bok')say(bokText(S.q));
     else sayQ(S);
   };
-  S.start=function(){S.started=true;S.done=false;S.needsReset=false;S.idx=0;S.round=kind==='hist'?makeHistRound(HIST):kind==='dino'?makeHistRound(DINO):[];S.show()};
+  S.start=function(){S.started=true;S.done=false;S.needsReset=false;S.idx=0;S.round=kind==='hist'?makeHistRound(HIST):kind==='dino'?makeHistRound(DINO.concat(DINO_MER)):[];S.show()};
   S.answer=function(p){
     if(S.lock||!p.opt||p.dim)return;
     const q=S.q;
